@@ -27,3 +27,14 @@ class DataController:
             selected_rows.append(2)
 
         return self.get_filtered_data_by_indices(selected_rows)
+    def update_data(self, new_dataframe):
+        # Perform any necessary preprocessing or validation here
+        # For example, you might want to check if the new_dataframe is valid
+        # or if it needs any cleaning or transformation.
+
+        # Assuming new_dataframe is a pandas DataFrame and is ready to be used:
+        self.dataframe = new_dataframe
+
+        # If you have any observers or listeners that need to be notified
+        # about the data update, notify them here.
+        # For example, you might have a method to refresh the UI or a specific widget.
