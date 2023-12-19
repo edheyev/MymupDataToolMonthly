@@ -5,6 +5,7 @@ from data_utils import filter_by_indices, filter_by_isin
 class DataController:
     def __init__(self, dataframe):
         self.df = dataframe
+        
 
     def get_filtered_data_by_indices(self, indices):
         return filter_by_indices(self.df, indices)
@@ -27,6 +28,8 @@ class DataController:
             selected_rows.append(2)
 
         return self.get_filtered_data_by_indices(selected_rows)
+    
+    
     def update_data(self, new_dataframe):
         # Perform any necessary preprocessing or validation here
         # For example, you might want to check if the new_dataframe is valid
