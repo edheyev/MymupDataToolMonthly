@@ -26,3 +26,26 @@ def filter_by_isin(df, column_name, values):
     if column_name not in df.columns:
         raise ValueError(f"Column '{column_name}' not found in DataFrame.")
     return df[df[column_name].isin(values)]
+
+
+
+
+
+def clean_data(df):
+    try:
+        # Data cleaning steps
+        cleaned_df = df.dropna()
+        return cleaned_df
+    except Exception as e:
+        # You can log the error or handle it as needed
+        raise ValueError("Required column is missing")
+
+def aggregate_data(df, group_by_columns):
+    # Data aggregation steps
+    aggregated_df = df.groupby(group_by_columns).sum()
+    return aggregated_df
+
+def filter_data(df, filter_conditions):
+    # Data filtering steps
+    filtered_df = df.query(filter_conditions)
+    return filtered_df

@@ -11,7 +11,7 @@ class DataProcessingToolGUI:
         self.master = master
         self.master.title("Data Processing Tool")
         self.df = pd.DataFrame()
-        self.controller = DataController(self.df)
+        self.controller = DataController(self.df, self.refresh_ui)
 
         self.setup_layout()
         self.create_button_frame()
@@ -27,40 +27,59 @@ class DataProcessingToolGUI:
         self.main_frame.grid(sticky='nsew', padx=5, pady=5)
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
+        self.main_frame.columnconfigure(0, weight=1)  # Changed columnconfigure to 0
         self.main_frame.columnconfigure(1, weight=1)
         self.main_frame.rowconfigure(1, weight=1)
 
     def create_button_frame(self):
         self.button_frame = ttk.Frame(self.main_frame)
-        self.button_frame.grid(row=0, column=1, sticky='ew', padx=5, pady=5)
+        self.button_frame.grid(row=0, column=0, sticky='ew', padx=5, pady=5) 
 
         self.load_csv_btn = ttk.Button(self.button_frame, text="Load CSV", command=self.load_csv)
-        self.load_csv_btn.grid(row=0, column=0, sticky='ew', padx=5, pady=5)
+        self.load_csv_btn.grid(row=0, column=0, sticky='e', padx=5, pady=5)
 
         self.file_name_entry = ttk.Entry(self.button_frame, state='readonly')
-        self.file_name_entry.grid(row=0, column=1, sticky='ew', padx=5, pady=5)
+        self.file_name_entry.grid(row=0, column=1, sticky='e', padx=5, pady=5)
 
         self.button_frame.columnconfigure(1, weight=1)
 
     
     def create_filter_frame(self):
         self.filter_frame = ttk.Frame(self.main_frame)
-        self.filter_frame.grid(row=1, column=0, sticky='ns', padx=5, pady=5)
+        self.filter_frame.grid(row=1, column=0, sticky='ns', padx=5, pady=5)  
 
-        self.filter_vars = []  # This will store the BooleanVars for the filters
+        self.filter_vars = []
+        self.filter_buttons = []  
+        # Create filters 1 to 3
         for i in range(1, 4):
             filter_var = tk.BooleanVar()
-            # Command now calls the toggle_row_display method and passes the filter index
             filter_check = ttk.Checkbutton(
-                self.filter_frame, text=f'Filter {i}', variable=filter_var,
+                self.filter_frame, text=f'Filter {i}', variable=filter_var, state='disabled',
                 command=lambda i=i: self.toggle_row_display(i-1)
             )
             filter_check.grid(row=i-1, column=0, sticky='w', padx=5, pady=2)
             self.filter_vars.append(filter_var)
+            self.filter_buttons.append(filter_check)  # Store the widget
+
+        # Adding the fourth filter for even IDs
+        filter_var = tk.BooleanVar()
+        filter_check = ttk.Checkbutton(
+            self.filter_frame, text="Even ID Filter", variable=filter_var, state='disabled',
+            command=lambda: self.toggle_row_display(3)  # Assuming this is the fourth filter
+        )
+        filter_check.grid(row=3, column=0, sticky='w', padx=5, pady=2)
+        self.filter_vars.append(filter_var)
+        self.filter_buttons.append(filter_check)  # Store the widget
+        
+    
+
+        
+
+
 
     def create_table_frame(self):
         self.table_frame = ttk.Frame(self.main_frame)
-        self.table_frame.grid(row=1, column=1, sticky='nsew', padx=5, pady=5)
+        self.table_frame.grid(row=0, column=1, rowspan=2, sticky='nsew', padx=5, pady=5)  # Changed row to 0 and added rowspan
         self.table_frame.columnconfigure(0, weight=1)
         self.table_frame.rowconfigure(0, weight=1)
         self.table = Table(self.table_frame, dataframe=self.df, showtoolbar=True, showstatusbar=True)
@@ -85,12 +104,14 @@ class DataProcessingToolGUI:
                 self.file_name_entry.insert(0, file_path.split('/')[-1])
                 self.file_name_entry.config(state='readonly')
                 
-                # Log message about the CSV load
-                self.log_message(f"CSV loaded: {file_path.split('/')[-1]}")
-                
+                # Enable the Checkbuttons
+                for button in self.filter_buttons:
+                    button.config(state='normal')
+
+            self.log_message(f"CSV loaded: {file_path.split('/')[-1]}")
         except Exception as e:
             self.log_message(f"Error loading CSV: {e}")
-
+            
     def log_message(self, message):
         self.log_window.config(state='normal')
         self.log_window.insert('end', message + '\n')
@@ -114,27 +135,33 @@ class DataProcessingToolGUI:
                 if i != toggle_index:
                     var.set(False)
 
-            # Now, get the state of all filters
-            toggle_states = [var.get() for var in self.filter_vars]
+            # Find which filter is active
+            active_filter_index = next((i for i, var in enumerate(self.filter_vars) if var.get()), None)
             
-            # Log the action and the current state of all filters
-            self.log_message(f"Filter {toggle_index + 1} toggled. Current states: {toggle_states}")
+            # Log the action
+            if active_filter_index is not None:
+                self.log_message(f"Filter {active_filter_index + 1} applied.")
+            else:
+                self.log_message("All filters cleared.")
 
-            # Assuming 'self.controller.get_filtered_data_based_on_toggle' is your method to filter the dataframe
-            # based on the selected filter, and it returns a new filtered dataframe.
-            if any(toggle_states):  # Check if any filter is applied
-                filtered_df = self.controller.get_filtered_data_based_on_toggle(toggle_states, toggle_index)
-            else:  # If no filters are applied, use the original dataframe
-                filtered_df = self.df
-            
+            # Filter the dataframe based on the active filter
+            filtered_df = self.controller.get_filtered_data_based_on_toggle(active_filter_index)
             self.update_table_with_rows(filtered_df)
 
         except Exception as e:
             self.log_message(f"Error in toggle display: {e}")
 
 
+    def refresh_ui(self):
+        # Update the table with the new data
+        self.update_table_with_rows(self.controller.df)
 
+        # Disable all Checkbutton widgets
+        for button in self.filter_buttons:
+            button.config(state='disabled')
+
+                
 if __name__ == '__main__':
-    root = ThemedTk(theme="clam")
+    root = ThemedTk(theme="arc")
     app = DataProcessingToolGUI(root)
     root.mainloop()
