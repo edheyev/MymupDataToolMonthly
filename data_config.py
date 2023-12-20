@@ -39,6 +39,10 @@ file_info = {
         "filename": "mib_contacts_after_referrals.csv",
         "columns": ['client_id']
     },
+    "MIB_Referrals_Within_Reporting_Period": {
+        "filename": "mib_referrals_within_reporting_period.csv",
+        "columns": ['client_id']
+    },
     # Add more file information as needed
 }
 

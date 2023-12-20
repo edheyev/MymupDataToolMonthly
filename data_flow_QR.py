@@ -5,7 +5,7 @@ from QR_filters import column_filter, row_filter
 def main():
     print("Begin Processing files")
     
-    directory = "./quarterly_data_dump"
+    directory = "../../../quarterly_data_dump"
     raw_data = load_data_files(directory, file_info)
         
     # Define reporting period parameters
@@ -23,7 +23,7 @@ def main():
     output_df = produce_tables(validated_data)
     
     # Write output to file
-    # output_df[0].to_csv("output_report.csv", index=False)
+    output_df[0].to_csv("output_report.csv", index=False)
     
     print("Report generated and saved as output_report.csv")
 
@@ -72,36 +72,56 @@ def filter_service_information(dataframes):
 
     # Create an empty DataFrame with the specified rows and columns
     result_df = pd.DataFrame(index=row_names, columns=column_headings)
+    
+    mymuprow = [row_names[0], row_names[2], row_names[3]]  # Array of specific row names
 
-    # Fill in the DataFrame by applying filters and calculations for each cell
+
     for row in row_names:
         for column in column_headings:
-            
-            # select df based on row and column
+            if row in mymuprow:
+                dataframe_key = None
+                print("Error: No dataframe key for row:", row, "and column:", column)
+                result_df.loc[row, column] = "MYMUP"  # Assign an error message or a default value
+                continue  # Skip to the next iteration
+                
             if row == row_names[0]:
-                if column.startswith('mib'):
-                    this_row_dataframe = dataframes.get('Contacts_Or_Indirects_Within_Reporting_Period')
+            
+                if column.startswith('MIB'):
+                    dataframe_key = 'MIB_Referrals_Within_Reporting_Period'
                 else: 
-                    this_row_dataframe = dataframes.get('Contacts_within_Twenty_One_Days')
+                    dataframe_key = 'Contacts_Or_Indirects_Within_Reporting_Period'
+            elif row == row_names[1]:
+            
+                if column.startswith('MIB'):
+                    dataframe_key = 'MIB_Referrals_Within_Reporting_Period'
+                else: 
+                    dataframe_key = 'Contacts_Or_Indirects_Within_Reporting_Period'
+            elif  row == row_names[4]:
+             
+                if column.startswith('MIB'):
+                    dataframe_key = 'MIB_file_closures_within_reporting_period'
+                else: 
+                    dataframe_key = 'file_closures_within_reporting_period'
+            
             else:
-                #error 
-                print("row not found: filtering empty df")
-                this_row_dataframe = pd.DataFrame()
+                dataframe_key = None
+                print("Error: No dataframe key for row:", row, "and column:", column)
+                result_df.loc[row, column] = "error"  # Assign an error message or a default value
+                continue  # Skip to the next iteration
                 
-                
-            # Apply column and row filters
+            this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
             col_filtered_data = column_filter(this_row_dataframe, column)
             
-            cellOutput = row_filter(col_filtered_data, row)
-    
-            # Combine or process the filtered data for the cell
-            result_df.loc[row, column] = None
-                
-            
-            # Apply your filter logic here. This is a placeholder.
-            # Example: result_df.loc[row, column] = dataframe[dataframe['column_filter'] == column]['row_filter'].count()
-            # Replace 'column_filter' and 'row_filter' with actual column names and filtering logic
- 
+            # Check if an error occurred in column_filter
+            if 'error' in col_filtered_data.columns and col_filtered_data['error'].iloc[0]:
+                result_df.loc[row, column] = "error"
+                continue
+
+            cell_output = row_filter(col_filtered_data, row)
+
+            # Directly assign the result of row_filter to the cell
+            result_df.loc[row, column] = cell_output
+
 
     return result_df
 
@@ -132,7 +152,7 @@ def clean_data(dataframes, start_date, end_date, date_column):
     print("Cleaning dataframes...")
     cleaned_dataframes = clean_column_names(dataframes)
     cleaned_dataframes = remove_duplicates(cleaned_dataframes)
-    cleaned_dataframes = isolate_reporting_period(cleaned_dataframes, start_date, end_date, date_column)
+    #cleaned_dataframes = isolate_reporting_period(cleaned_dataframes, start_date, end_date, date_column)
     return cleaned_dataframes
     
 
