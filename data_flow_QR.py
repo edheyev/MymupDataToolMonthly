@@ -52,6 +52,8 @@ def clean_data(dataframes, start_date, end_date, date_column):
     # cleaned_dataframes = isolate_reporting_period(
         # cleaned_dataframes, start_date, end_date, date_column
     # )
+    cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes)
+
     return cleaned_dataframes
 
 
@@ -59,7 +61,13 @@ def clean_column_names(dataframes):
     print("Standardizing column names...")
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
-        df.columns = [col.replace(" ", "_").lower() for col in df.columns]
+        new_columns = []
+        for col in df.columns:
+            col = col.replace(" ", "_").lower()
+            if col == "service_type":
+                col = "contact_service_type"
+            new_columns.append(col)
+        df.columns = new_columns
         cleaned_dataframes[df_name] = df
     return cleaned_dataframes
 
@@ -86,6 +94,24 @@ def isolate_reporting_period(dataframes, start_date, end_date, date_column):
             )
             isolated_dataframes[df_name] = df
     return isolated_dataframes
+
+def remove_trailing_spaces_from_values(dataframes_dict):
+    """
+    Removes trailing spaces from the values of all columns in each dataframe stored in a dictionary.
+
+    :param dataframes_dict: A dictionary of pandas DataFrames.
+    :return: A dictionary of pandas DataFrames with trailing spaces removed from the values of each column.
+    """
+    cleaned_dfs_dict = {}
+    for key, df in dataframes_dict.items():
+        for col in df.columns:
+            if df[col].dtype == 'object':  # Check if the column is of object type (usually strings)
+                # Use .loc to specify the rows and columns you're modifying
+                df.loc[:, col] = df[col].apply(lambda x: x.rstrip() if isinstance(x, str) else x)
+        cleaned_dfs_dict[key] = df
+    return cleaned_dfs_dict
+
+
 
 
 def validate_data_files(dataframes, file_info):
@@ -135,7 +161,6 @@ def filter_service_information(dataframes):
         "How many young people disengaged, couldn’t be contacted or rejected a referral?",
         "Active cases",
         "How many people have moved on",
-        "% clients with initial contact 5 days after referral (new rule)",
         "% clients with initial contact within 7 days of referral (old rule not including admin contacts)",
         "% clients who had the first support session offered within 21 days of referral",
         "% clients attended the first contact by video/face to face/telephone within 21 days of referral",
@@ -197,11 +222,11 @@ def get_dataframe_key(row, column):
         "How many people have moved on"
         ]:
         return (
-            "file_closures_within_reporting_period"
+            "File_Closures_Within_Reporting_Period"
         )
     elif row == "Active cases":
         return (
-            "referrals_before_end_reporting_period"
+            "Referrals_Within_Reporting_Period"
         )
     else:
         return None
