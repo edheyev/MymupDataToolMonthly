@@ -3,6 +3,10 @@ file_info = {
         "filename": "contacts_or_indirects_within_reporting_period.csv",
         "columns": ['client_id']
     },
+    "MIB_Contacts_Or_Indirects_Within_Reporting_Period": {
+        "filename": "mib_contacts_or_indirects_within_reporting_period.csv",
+        "columns": ['client_id']
+    },
     "MIB_Contacts_Within_Twenty_One_Days": {
         "filename": "mib_contacts_within_twenty_one_days.csv",
         "columns": ['client_id']

@@ -1,6 +1,6 @@
 import pandas as pd
 from data_config import file_info
-from QR_filters import column_filter, row_filter
+from QR_filters import column_filter, SI_row_filter
 import os
 
 
@@ -8,7 +8,12 @@ def main():
     print("Begin Processing files")
 
     # Load and process data
-    directory = "./quarterly_data_dump"
+    # directory = r"../quarterly_data_dump"
+    def main():
+        print("Begin Processing files")
+
+    # Load and process data
+    directory = r"D:/OneDrive/Documents/src/python_testing/MyMupDataTool/quarterly_data_dump"
     raw_data = load_data_files(directory, file_info)
 
     # Define reporting period parameters
@@ -30,6 +35,7 @@ def load_data_files(directory, file_info):
     dataframes = {}
     for key, info in file_info.items():
         full_path = os.path.join(directory, info["filename"])
+        print(f"Attempting to load: {full_path}")  # Print the full path
         try:
             dataframes[key] = pd.read_csv(full_path)
             print(f'> Loaded {key} from {info["filename"]}')
@@ -38,13 +44,14 @@ def load_data_files(directory, file_info):
     return dataframes
 
 
+
 def clean_data(dataframes, start_date, end_date, date_column):
     print("Cleaning dataframes...")
     cleaned_dataframes = clean_column_names(dataframes)
     cleaned_dataframes = remove_duplicates(cleaned_dataframes)
-    cleaned_dataframes = isolate_reporting_period(
-        cleaned_dataframes, start_date, end_date, date_column
-    )
+    # cleaned_dataframes = isolate_reporting_period(
+        # cleaned_dataframes, start_date, end_date, date_column
+    # )
     return cleaned_dataframes
 
 
@@ -139,6 +146,10 @@ def filter_service_information(dataframes):
         "Number of unique people supported (old rule)": "MYMUP_URL",
         "How many unique referrals": "MYMUP_URL",
         "How many new people referred": "MYMUP_URL",
+        "% clients with initial contact 5 days after referral (new rule)": "MYMUP_URL",
+        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)": "MYMUP_URL",
+        "% clients who had the first support session offered within 21 days of referral": "MYMUP_URL",
+        "% clients attended the first contact by video/face to face/telephone within 21 days of referral": "MYMUP_URL",
         # Add other rows and their respective placeholders here
     }
 
@@ -159,13 +170,13 @@ def filter_service_information(dataframes):
                 continue
 
             this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-            col_filtered_data = column_filter(this_row_dataframe, column)
+            col_filtered_data = column_filter(this_row_dataframe, column, dfname=dataframe_key)
 
             if is_error_in_filter(col_filtered_data):
                 result_df.loc[row, column] = "error"
                 continue
 
-            cell_output = row_filter(col_filtered_data, row)
+            cell_output = SI_row_filter(col_filtered_data, row, dfname=dataframe_key)
             result_df.loc[row, column] = cell_output
 
     return result_df
@@ -173,19 +184,24 @@ def filter_service_information(dataframes):
 
 def get_dataframe_key(row, column):
     if row in [
-        "Number of unique people supported (old rule)",
         "Number of unique people supported",
     ]:
         return (
-            "MIB_Referrals_Within_Reporting_Period"
+            "MIB_Contacts_Or_Indirects_Within_Reporting_Period"
             if column.startswith("MIB")
             else "Contacts_Or_Indirects_Within_Reporting_Period"
         )
-    elif row == "How many were declined by the service?":
+    elif row in [
+        "How many young people disengaged, couldn’t be contacted or rejected a referral?", 
+        "How many were declined by the service?",
+        "How many people have moved on"
+        ]:
         return (
-            "MIB_file_closures_within_reporting_period"
-            if column.startswith("MIB")
-            else "file_closures_within_reporting_period"
+            "file_closures_within_reporting_period"
+        )
+    elif row == "Active cases":
+        return (
+            "referrals_before_end_reporting_period"
         )
     else:
         return None
