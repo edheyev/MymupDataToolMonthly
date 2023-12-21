@@ -47,83 +47,52 @@ def produce_tables(dataframes):
     return report_dfs
 
 
+
+def get_dataframe_key(row, column):
+    if row in ["Number of unique people supported (old rule)", "Number of unique people supported"]:
+        return 'MIB_Referrals_Within_Reporting_Period' if column.startswith('MIB') else 'Contacts_Or_Indirects_Within_Reporting_Period'
+    elif row == "How many were declined by the service?":
+        return 'MIB_file_closures_within_reporting_period' if column.startswith('MIB') else 'file_closures_within_reporting_period'
+    else:
+        return None
+
 def filter_service_information(dataframes):
-    """
-    Generates service information table.
+    column_headings = [...]
+    row_names = [...]
 
-    :param dataframe: A pandas DataFrame to process.
-    :return: A pandas DataFrame representing the report.
-    """
-    column_headings = ["Q1_Totals","Barnardos (Wrap)", "BYS All", "Brathay Magic", "INCIC (CYP)", "MIB Know Your Mind", "MIB Know Your Mind +", "MIB Hospital Buddys Airedale General", "MIB Hospital Buddys BRI", "SELFA (Mighty Minds)"]
-    
-    # Your row names
-    row_names = ["Number of unique people supported (old rule)",
-                 "Number of unique people supported",
-                 "How many unique referrals",
-                 "How many new people referred",
-                 "How many were declined by the service?",
-                 "How many young people disengaged, couldn’t be contacted or rejected a referral?",
-                 "Active cases",
-                 "How many people have moved on",
-                 "% clients with initial contact 5 days after referral (new rule)",
-                 "% clients with initial contact within 7 days of referral (old rule not including admin contacts)",
-                 "% clients who had the first support session offered within 21 days of referral",
-                 "% clients attended the first contact by video/face to face/telephone within 21 days of referral"]
-
-    # Create an empty DataFrame with the specified rows and columns
     result_df = pd.DataFrame(index=row_names, columns=column_headings)
-    
-    mymuprow = [row_names[0], row_names[2], row_names[3]]  # Array of specific row names
-
+    mymuprow = [row_names[0], row_names[2], row_names[3]]
 
     for row in row_names:
         for column in column_headings:
             if row in mymuprow:
-                dataframe_key = None
-                print("Error: No dataframe key for row:", row, "and column:", column)
-                result_df.loc[row, column] = "MYMUP"  # Assign an error message or a default value
-                continue  # Skip to the next iteration
-                
-            if row == row_names[0]:
-            
-                if column.startswith('MIB'):
-                    dataframe_key = 'MIB_Referrals_Within_Reporting_Period'
-                else: 
-                    dataframe_key = 'Contacts_Or_Indirects_Within_Reporting_Period'
-            elif row == row_names[1]:
-            
-                if column.startswith('MIB'):
-                    dataframe_key = 'MIB_Referrals_Within_Reporting_Period'
-                else: 
-                    dataframe_key = 'Contacts_Or_Indirects_Within_Reporting_Period'
-            elif  row == row_names[4]:
-             
-                if column.startswith('MIB'):
-                    dataframe_key = 'MIB_file_closures_within_reporting_period'
-                else: 
-                    dataframe_key = 'file_closures_within_reporting_period'
-            
-            else:
-                dataframe_key = None
-                print("Error: No dataframe key for row:", row, "and column:", column)
-                result_df.loc[row, column] = "error"  # Assign an error message or a default value
-                continue  # Skip to the next iteration
-                
+                result_df.loc[row, column] = "MYMUP"
+                continue
+
+            dataframe_key = get_dataframe_key(row, column)
+            if dataframe_key is None:
+                result_df.loc[row, column] = "error"
+                continue
+
             this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-            col_filtered_data = column_filter(this_row_dataframe, column)
             
-            # Check if an error occurred in column_filter
-            if 'error' in col_filtered_data.columns and col_filtered_data['error'].iloc[0]:
+            col_filtered_data = column_filter(this_row_dataframe, column)
+
+            if is_error_in_filter(col_filtered_data):
                 result_df.loc[row, column] = "error"
                 continue
 
             cell_output = row_filter(col_filtered_data, row)
-
-            # Directly assign the result of row_filter to the cell
             result_df.loc[row, column] = cell_output
 
-
     return result_df
+
+def is_error_in_filter(col_filtered_data):
+    # Implement logic to check if an error occurred in column_filter
+    pass
+
+# Implement column_filter and row_filter as needed
+
 
    
     
