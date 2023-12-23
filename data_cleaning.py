@@ -1,51 +1,72 @@
-import tkinter as tk
-import pandas as pd
-import data_utils as dp
+def clean_column_names(dataframes):
+    print("Standardizing column names...")
+    cleaned_dataframes = {}
+    for df_name, df in dataframes.items():
+        new_columns = []
+        for col in df.columns:
+            col = col.replace(" ", "_").lower()
+            if col == "service_type":
+                col = "contact_service_type"
+            new_columns.append(col)
+        df.columns = new_columns
+        cleaned_dataframes[df_name] = df
+    return cleaned_dataframes
 
-def setup_window():
-    window = tk.Tk()
-    window.title("Data Cleaning Pipeline")
 
-    # Create a scrollable Text widget
-    text_widget = tk.Text(window, height=10, width=50)
-    scrollbar = tk.Scrollbar(window, command=text_widget.yview)
-    text_widget.configure(yscrollcommand=scrollbar.set)
+def remove_duplicates(dataframes):
+    print("Removing duplicates...")
+    cleaned_dataframes = {}
+    for df_name, df in dataframes.items():
+        cleaned_dataframes[df_name] = df.drop_duplicates()
+    return cleaned_dataframes
 
-    # Layout the Text widget and the Scrollbar in the window
-    text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-    return window, text_widget
+def isolate_reporting_period(dataframes, start_date, end_date, date_column):
+    print("Isolating data within the reporting period...")
+    isolated_dataframes = {}
+    for df_name, df in dataframes.items():
+        if date_column in df.columns:
+            isolated_dataframes[df_name] = df[
+                df[date_column].between(start_date, end_date)
+            ]
+        else:
+            print(
+                f"Warning: '{date_column}' column not found in '{df_name}' dataframe."
+            )
+            isolated_dataframes[df_name] = df
+    return isolated_dataframes
 
-def update_status(text_widget, status):
-    text_widget.insert(tk.END, status + "\n")
-    text_widget.see(tk.END)  # Auto-scrolls to the bottom
 
-def main():
-    window, text_widget = setup_window()
+def remove_trailing_spaces_from_values(dataframes_dict):
+    """
+    Removes trailing spaces from the values of all columns in each dataframe stored in a dictionary.
 
-    file_names = ['MOCK_1.csv', 'MOCK_2.csv']
-    for file_name in file_names:
-        try:
-            update_status(text_widget, f"Processing started for {file_name}")
-           
-            
-            # Read the file
-            df = pd.read_csv(f'./data/{file_name}')
-            
-            # Clean data
-            cleaned_df = dp.clean_data(df)
+    :param dataframes_dict: A dictionary of pandas DataFrames.
+    :return: A dictionary of pandas DataFrames with trailing spaces removed from the values of each column.
+    """
+    cleaned_dfs_dict = {}
+    for key, df in dataframes_dict.items():
+        for col in df.columns:
+            if (
+                df[col].dtype == "object"
+            ):  # Check if the column is of object type (usually strings)
+                # Use .loc to specify the rows and columns you're modifying
+                df.loc[:, col] = df[col].apply(
+                    lambda x: x.rstrip() if isinstance(x, str) else x
+                )
+        cleaned_dfs_dict[key] = df
+    return cleaned_dfs_dict
 
-            # Additional processing steps...
-            # [Aggregation, Filtering, etc.]
 
-            update_status(text_widget, f"Processing finished for {file_name}")
-
-        except Exception as e:
-            # Handle the error
-            update_status(text_widget, f"Error in processing {file_name}: {e}")
-
-    window.mainloop()
-
-if __name__ == "__main__":
-    main()
+def validate_data_files(dataframes, file_info):
+    print("Validating data files...")
+    for df_name, df in dataframes.items():
+        if df_name in file_info:
+            correct_columns = file_info[df_name]["columns"]
+            print(f'> Checking {df_name} for {", ".join(correct_columns)}')
+            if not set(correct_columns).issubset(df.columns):
+                raise ValueError(
+                    f"DataFrame {df_name} is missing one or more of the correct columns."
+                )
+            print("...ok")
+    return dataframes

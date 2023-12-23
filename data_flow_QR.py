@@ -1,19 +1,24 @@
-import pandas as pd
-from data_config import file_info
-from QR_filters import column_filter, SI_row_filter
 import os
+import pandas as pd
+from data_config import file_info, service_info_config
+from data_cleaning import (
+    clean_column_names,
+    remove_duplicates,
+    remove_trailing_spaces_from_values,
+    validate_data_files,
+    isolate_reporting_period,
+)
+from QR_filters import column_filter, SI_row_filter
 
 
 def main():
     print("Begin Processing files")
 
     # Load and process data
-    # directory = r"../quarterly_data_dump"
-    def main():
-        print("Begin Processing files")
-
-    # Load and process data
-    directory = r"D:/OneDrive/Documents/src/python_testing/MyMupDataTool/quarterly_data_dump"
+    directory = (
+        # r"D:/OneDrive/Documents/src/python_testing/MyMupDataTool/quarterly_data_dump"
+        r"./quarterly_data_dump"
+    )
     raw_data = load_data_files(directory, file_info)
 
     # Define reporting period parameters
@@ -44,88 +49,16 @@ def load_data_files(directory, file_info):
     return dataframes
 
 
-
 def clean_data(dataframes, start_date, end_date, date_column):
     print("Cleaning dataframes...")
     cleaned_dataframes = clean_column_names(dataframes)
     cleaned_dataframes = remove_duplicates(cleaned_dataframes)
     # cleaned_dataframes = isolate_reporting_period(
-        # cleaned_dataframes, start_date, end_date, date_column
+    # cleaned_dataframes, start_date, end_date, date_column
     # )
     cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes)
 
     return cleaned_dataframes
-
-
-def clean_column_names(dataframes):
-    print("Standardizing column names...")
-    cleaned_dataframes = {}
-    for df_name, df in dataframes.items():
-        new_columns = []
-        for col in df.columns:
-            col = col.replace(" ", "_").lower()
-            if col == "service_type":
-                col = "contact_service_type"
-            new_columns.append(col)
-        df.columns = new_columns
-        cleaned_dataframes[df_name] = df
-    return cleaned_dataframes
-
-
-def remove_duplicates(dataframes):
-    print("Removing duplicates...")
-    cleaned_dataframes = {}
-    for df_name, df in dataframes.items():
-        cleaned_dataframes[df_name] = df.drop_duplicates()
-    return cleaned_dataframes
-
-
-def isolate_reporting_period(dataframes, start_date, end_date, date_column):
-    print("Isolating data within the reporting period...")
-    isolated_dataframes = {}
-    for df_name, df in dataframes.items():
-        if date_column in df.columns:
-            isolated_dataframes[df_name] = df[
-                df[date_column].between(start_date, end_date)
-            ]
-        else:
-            print(
-                f"Warning: '{date_column}' column not found in '{df_name}' dataframe."
-            )
-            isolated_dataframes[df_name] = df
-    return isolated_dataframes
-
-def remove_trailing_spaces_from_values(dataframes_dict):
-    """
-    Removes trailing spaces from the values of all columns in each dataframe stored in a dictionary.
-
-    :param dataframes_dict: A dictionary of pandas DataFrames.
-    :return: A dictionary of pandas DataFrames with trailing spaces removed from the values of each column.
-    """
-    cleaned_dfs_dict = {}
-    for key, df in dataframes_dict.items():
-        for col in df.columns:
-            if df[col].dtype == 'object':  # Check if the column is of object type (usually strings)
-                # Use .loc to specify the rows and columns you're modifying
-                df.loc[:, col] = df[col].apply(lambda x: x.rstrip() if isinstance(x, str) else x)
-        cleaned_dfs_dict[key] = df
-    return cleaned_dfs_dict
-
-
-
-
-def validate_data_files(dataframes, file_info):
-    print("Validating data files...")
-    for df_name, df in dataframes.items():
-        if df_name in file_info:
-            correct_columns = file_info[df_name]["columns"]
-            print(f'> Checking {df_name} for {", ".join(correct_columns)}')
-            if not set(correct_columns).issubset(df.columns):
-                raise ValueError(
-                    f"DataFrame {df_name} is missing one or more of the correct columns."
-                )
-            print("...ok")
-    return dataframes
 
 
 def produce_tables(dataframes):
@@ -138,45 +71,14 @@ def produce_tables(dataframes):
 
 def filter_service_information(dataframes):
     print("Generating service information table...")
+    config = service_info_config
 
     # Define your column headings and row names
-    column_headings = [
-        "Q1_Totals",
-        "Barnardos (Wrap)",
-        "BYS All",
-        "Brathay Magic",
-        "INCIC (CYP)",
-        "MIB Know Your Mind",
-        "MIB Know Your Mind +",
-        "MIB Hospital Buddys Airedale General",
-        "MIB Hospital Buddys BRI",
-        "SELFA (Mighty Minds)",
-    ]
-    row_names = [
-        "Number of unique people supported (old rule)",
-        "Number of unique people supported",
-        "How many unique referrals",
-        "How many new people referred",
-        "How many were declined by the service?",
-        "How many young people disengaged, couldn’t be contacted or rejected a referral?",
-        "Active cases",
-        "How many people have moved on",
-        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)",
-        "% clients who had the first support session offered within 21 days of referral",
-        "% clients attended the first contact by video/face to face/telephone within 21 days of referral",
-    ]
-
-    # Define rows that need placeholder text
-    placeholder_rows = {
-        "Number of unique people supported (old rule)": "MYMUP_URL",
-        "How many unique referrals": "MYMUP_URL",
-        "How many new people referred": "MYMUP_URL",
-        "% clients with initial contact 5 days after referral (new rule)": "MYMUP_URL",
-        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)": "MYMUP_URL",
-        "% clients who had the first support session offered within 21 days of referral": "MYMUP_URL",
-        "% clients attended the first contact by video/face to face/telephone within 21 days of referral": "MYMUP_URL",
-        # Add other rows and their respective placeholders here
-    }
+    row_names = config["row_names"]
+    column_headings = config["column_headings"]
+    placeholder_rows = config[
+        "placeholder_rows"
+    ]  # Rows that require a placeholder value
 
     # Create an empty DataFrame
     result_df = pd.DataFrame(index=row_names, columns=column_headings)
@@ -189,13 +91,22 @@ def filter_service_information(dataframes):
                 result_df.loc[row, column] = placeholder_rows[row]
                 continue
 
-            dataframe_key = get_dataframe_key(row, column)
-            if dataframe_key is None:
+            try:
+                if column.startswith("MIB"):
+                    dataframe_key = config["mib_row_db_logic"][row]
+                else:
+                    dataframe_key = config["row_db_logic"][row]
+
+            except KeyError as e:
+                print(f"Error in row_db_logic with row {row}: {e}")
                 result_df.loc[row, column] = "error"
                 continue
 
             this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-            col_filtered_data = column_filter(this_row_dataframe, column, dfname=dataframe_key)
+
+            col_filtered_data = column_filter(
+                this_row_dataframe, column, dfname=dataframe_key
+            )
 
             if is_error_in_filter(col_filtered_data):
                 result_df.loc[row, column] = "error"
@@ -205,31 +116,6 @@ def filter_service_information(dataframes):
             result_df.loc[row, column] = cell_output
 
     return result_df
-
-
-def get_dataframe_key(row, column):
-    if row in [
-        "Number of unique people supported",
-    ]:
-        return (
-            "MIB_Contacts_Or_Indirects_Within_Reporting_Period"
-            if column.startswith("MIB")
-            else "Contacts_Or_Indirects_Within_Reporting_Period"
-        )
-    elif row in [
-        "How many young people disengaged, couldn’t be contacted or rejected a referral?", 
-        "How many were declined by the service?",
-        "How many people have moved on"
-        ]:
-        return (
-            "File_Closures_Within_Reporting_Period"
-        )
-    elif row == "Active cases":
-        return (
-            "Referrals_Within_Reporting_Period"
-        )
-    else:
-        return None
 
 
 def is_error_in_filter(col_filtered_data):
