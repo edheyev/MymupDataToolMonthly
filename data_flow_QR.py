@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from data_config import file_info, service_info_config
+from data_config import file_info, service_info_config, table_configs
 from data_cleaning import (
     clean_column_names,
     remove_duplicates,
@@ -8,7 +8,12 @@ from data_cleaning import (
     validate_data_files,
     isolate_reporting_period,
 )
-from QR_filters import column_filter, SI_row_filter
+from QR_filters import (
+    filter_function_map,
+    column_filter,
+    SI_row_filter,
+    gender_category_filter,
+)
 
 
 def main():
@@ -21,6 +26,8 @@ def main():
     )
     raw_data = load_data_files(directory, file_info)
 
+    # TODO check that all necessary files are included !!
+
     # Define reporting period parameters
     start_date, end_date, date_column = "2020-04-01", "2020-06-30", "date_of_contact"
 
@@ -29,8 +36,8 @@ def main():
     validated_data = validate_data_files(cleaned_data, file_info)
 
     # Produce and save tables
-    output_df = produce_tables(validated_data)
-    output_df[0].to_csv("output_report.csv", index=False)
+    produce_tables(validated_data)
+    # output_df[0].to_csv("output_report.csv", index=False)
 
     print("Report generated and saved as output_report.csv")
 
@@ -63,57 +70,79 @@ def clean_data(dataframes, start_date, end_date, date_column):
 
 def produce_tables(dataframes):
     print("Producing output tables...")
+
     report_dfs = []
-    OT_service_information = filter_service_information(dataframes)
-    report_dfs.append(OT_service_information)
+    column_headings = [
+        "Q1_Totals",
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ]
+
+    # Write the column headings to the CSV file
+    with open("my_csv.csv", "w") as f:
+        f.write(",".join(column_headings) + "\n")
+
+    # Append each table to the CSV file
+    for name in filter_function_map.keys():
+        print(f"Processing {name}")
+        thisconfig = find_dict_by_table_name(name, table_configs)
+        this_table = filter_service_information(dataframes, thisconfig)
+
+        # Check if DataFrame is not empty
+        if not this_table.empty:
+            # Write DataFrame without headers
+            this_table.to_csv("my_csv.csv", mode="a", header=False, index=False)
+            # Optionally, add an empty row or some separator after each table
+            with open("my_csv.csv", "a") as f:
+                f.write("\n")
+        else:
+            print(f"No data to write for {name}")
     return report_dfs
 
 
-def filter_service_information(dataframes):
-    print("Generating service information table...")
-    config = service_info_config
+def find_dict_by_table_name(table_name, dict_array):
+    for dictionary in dict_array:
+        if dictionary.get("table_name") == table_name:
+            return dictionary
+    raise ValueError(
+        f"Dictionary with table_name '{table_name}' not found in the array."
+    )
 
-    # Define your column headings and row names
+
+def filter_service_information(dataframes, config):
+    print("Generating service information table...", config["table_name"])
+
     row_names = config["row_names"]
     column_headings = config["column_headings"]
-    placeholder_rows = config[
-        "placeholder_rows"
-    ]  # Rows that require a placeholder value
+    placeholder_rows = config["placeholder_rows"]
 
-    # Create an empty DataFrame
     result_df = pd.DataFrame(index=row_names, columns=column_headings)
 
-    # Processing logic for each cell in the DataFrame
+    filter_func = filter_function_map.get(config["table_name"])
+    if not filter_func:
+        raise ValueError(f"No filter function found for table {config['table_name']}")
+
     for row in row_names:
         for column in column_headings:
-            # Check if the row requires a placeholder
             if row in placeholder_rows:
                 result_df.loc[row, column] = placeholder_rows[row]
                 continue
 
             try:
-                if column.startswith("MIB"):
-                    dataframe_key = config["mib_row_db_logic"][row]
-                else:
-                    dataframe_key = config["row_db_logic"][row]
-
-            except KeyError as e:
-                print(f"Error in row_db_logic with row {row}: {e}")
+                dataframe_key = config["row_db_logic"].get(row, "Default Logic")
+                this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
+                cell_output = filter_func(this_row_dataframe, row, dfname=dataframe_key)
+                result_df.loc[row, column] = cell_output
+            except Exception as e:
+                print(f"Error processing {row}, {column}: {e}")
                 result_df.loc[row, column] = "error"
-                continue
-
-            this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-
-            col_filtered_data = column_filter(
-                this_row_dataframe, column, dfname=dataframe_key
-            )
-
-            if is_error_in_filter(col_filtered_data):
-                result_df.loc[row, column] = "error"
-                continue
-
-            cell_output = SI_row_filter(col_filtered_data, row, dfname=dataframe_key)
-            result_df.loc[row, column] = cell_output
 
     return result_df
 
