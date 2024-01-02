@@ -326,7 +326,6 @@ def age_category_filter(df, row, dfname="empty"):
 
     return 0
 
-
 def area_category_filter(df, row, dfname="empty"):
     area_map = {
         "BAILDON": "BAILDON",
@@ -387,222 +386,180 @@ def area_category_filter(df, row, dfname="empty"):
 
     return "row or dataframe error"
 
-
-
 def asylum_status_filter(df, row, dfname="empty"):
-    try:
-        # Filter logic based on asylum seeker/refugee status
-        if row == "Yes":
-            filtered_df = df[df["asylum_status"] == "Yes"]
-        elif row == "No":
-            filtered_df = df[df["asylum_status"] == "No"]
-        elif row == "Not known":
-            filtered_df = df[df["asylum_status"] == "Not known"]
-        elif row == "Blank (nothing selected )":
-            filtered_df = df[
-                df["asylum_status"].isna()
-            ]  # Adjust this condition for blank entries
-        else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
+    asylum_seeker_map = {
+        "Yes": "Yes",
+        "No": "No",
+        "Not known": "Unknown",  
+        "Blank (nothing selected )": None  
+    }
 
-        # Further processing logic here
-        pass
+    try:
+        if row in asylum_seeker_map:
+            if asylum_seeker_map[row] is not None:
+                return df[df['client_asylum_seeker'] == asylum_seeker_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected )":
+                # Counting rows where 'client asylum seeker' is NaN
+                return df[df['client_asylum_seeker'].isna()]['client_id'].nunique()
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in asylum_status_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in asylum_seeker_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Or return some other result based on the processing logic
+    return "row or dataframe error"
 
+def sen_category_filter(df, row, dfname="empty"):
+    sen_map = {
+        "No": "No",
+        "Not known": "Not known",
+        "Yes": "Yes",
+        "Not applicable": "Not applicable",
+        "Blank (nothing selected )": None
+    }
 
-def special_ed_needs_filter(df, row, dfname="empty"):
     try:
-        # Filter logic based on special educational needs status
-        if row == "No":
-            filtered_df = df[df["special_ed_needs"] == "No"]
-        elif row == "Not known":
-            filtered_df = df[df["special_ed_needs"] == "Not known"]
-        elif row == "Yes":
-            filtered_df = df[df["special_ed_needs"] == "Yes"]
-        elif row == "Not applicable":
-            filtered_df = df[df["special_ed_needs"] == "Not applicable"]
-        elif row == "Blank (nothing selected )":
-            filtered_df = df[
-                df["special_ed_needs"].isna()
-            ]  # Adjust this condition for blank entries
+        if row in sen_map:
+            if sen_map[row] is not None:
+                return df[df['client_sen'] == sen_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected )":
+                return df[df['client_sen'].isna()]['client_id'].nunique()
         else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
-
-        # Further processing logic here
-        pass
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in special_ed_needs_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in sen_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Or return some other result based on the processing logic
+    return "row or dataframe error"
 
+def ehcp_category_filter(df, row, dfname="empty"):
+    ehcp_map = {
+        "No": "No",
+        "Not known": "Not known",
+        "Yes": "Yes",
+        "Not applicable": "Not applicable",
+        "Blank (nothing selected )": None
+    }
 
-def ed_health_care_plan_filter(df, row, dfname="empty"):
     try:
-        # Filter logic based on education, health and care plan status
-        if row == "Yes":
-            filtered_df = df[df["ed_health_care_plan"] == "Yes"]
-        elif row == "No":
-            filtered_df = df[df["ed_health_care_plan"] == "No"]
-        elif row == "Not known":
-            filtered_df = df[df["ed_health_care_plan"] == "Not known"]
-        elif row == "Not applicable":
-            filtered_df = df[df["ed_health_care_plan"] == "Not applicable"]
-        elif row == "Blank (nothing selected )":
-            filtered_df = df[
-                df["ed_health_care_plan"].isna()
-            ]  # Adjust this condition for blank entries
+        if row in ehcp_map:
+            if ehcp_map[row] is not None:
+                return df[df['client_ehcp'] == ehcp_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected )":
+                return df[df['client_ehcp'].isna()]['client_id'].nunique()
         else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
-
-        # Further processing logic here
-        pass
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in ed_health_care_plan_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in ehcp_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Or return some other result based on the processing logic
-
+    return "row or dataframe error"
 
 def at_risk_exploitation_filter(df, row, dfname="empty"):
-    try:
-        if row == "Yes":
-            filtered_df = df[df["at_risk_exploitation"] == "Yes"]
-        elif row == "No":
-            filtered_df = df[df["at_risk_exploitation"] == "No"]
-        elif row == "Not known":
-            filtered_df = df[df["at_risk_exploitation"] == "Not known"]
-        elif row == "Blank (nothing selected )":
-            filtered_df = df[
-                df["at_risk_exploitation"].isna()
-            ]  # or use appropriate condition for blank entries
-        else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
+    are_map = {
+        "No": "No",
+        "Not known": "Unknown",
+        "Yes": "Yes",
+        "Blank (nothing selected )": None
+    }
 
-        # Here, you can add further processing logic for the filtered data
-        pass
+    try:
+        if row in are_map:
+            if are_map[row] is not None:
+                return df[df['client_exploitation_risk'] == are_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected )":
+                return df[df['client_exploitation_risk'].isna()]['client_id'].nunique()
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in at_risk_exploitation_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in at_risk_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Return the filtered DataFrame or some other result based on processing logic
-
+    return "row or dataframe error"
 
 def leaving_care_filter(df, row, dfname="empty"):
-    try:
-        if row == "Yes":
-            filtered_df = df[df["leaving_care"] == "Yes"]
-        elif row == "No":
-            filtered_df = df[df["leaving_care"] == "No"]
-        elif row == "Not Known":
-            filtered_df = df[df["leaving_care"] == "Not Known"]
-        elif row == "Blank (nothing selected)":
-            filtered_df = df[
-                df["leaving_care"].isna()
-            ]  # or use appropriate condition for blank entries
-        else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
+    lc_map = {
+        "Yes": "Yes",
+        "No": "No",
+        "Not Known": "Unknown",  # Adjusted to match the row name
+        "Blank (nothing selected)": None  # Handling for blank entries
+    }
 
-        # Here, you can add further processing logic for the filtered data
-        pass
+    try:
+        if row in lc_map:
+            if lc_map[row] is not None:
+                return df[df['client_leaving_care'] == lc_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                return df[df['client_leaving_care'].isna()]['client_id'].nunique()
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in leaving_care_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in leaving_care_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Return the filtered DataFrame or some other result based on processing logic
+    return "row or dataframe error"
 
+def lac_category_filter(df, row, dfname="empty"):
+    lac_map = {
+        "Yes": "Yes (Is a child looked after)",
+        "No": "No (Is not a child looked after)",
+        "Not known": "Not Known",
+        "Blank (nothing selected)": None  # Handling for blank entries
+    }
 
-def looked_after_child_filter(df, row, dfname="empty"):
     try:
-        if row == "Yes":
-            filtered_df = df[df["looked_after_child"] == "Yes"]
-        elif row == "No":
-            filtered_df = df[df["looked_after_child"] == "No"]
-        elif row == "Not known":
-            filtered_df = df[df["looked_after_child"] == "Not known"]
-        elif row == "Blank (nothing selected)":
-            filtered_df = df[
-                df["looked_after_child"].isna()
-            ]  # or use appropriate condition for blank entries
+        if row in lac_map:
+            if lac_map[row] is not None:
+                return df[df['client_lac'] == lac_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                return df[df['client_lac'].isna()]['client_id'].nunique()
         else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
-
-        # Further processing logic here
-        pass
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in looked_after_child_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in lac_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Return the filtered DataFrame or some other result based on processing logic
+    return 0
 
 
-def child_protection_plan_filter(df, row, dfname="empty"):
+def cpp_category_filter(df, row, dfname="empty"):
+    cpp_map = {
+        "No": "No",
+        "Has never been subject to a plan": "Has never been subject to a plan",
+        "Not known": "Not Known",
+        "Has been previously subject to a plan": "Has been previous subject to a plan",  # Adjusted to match dataset
+        "Is currently subject to a plan": "Is currently subject to a plan",
+        "Under assessment": None,  # Not found in your dataset
+        "Blank (nothing selected)": None  # Handling for blank entries
+    }
+
     try:
-        if row == "No":
-            filtered_df = df[df["child_protection_plan"] == "No"]
-        elif row == "Has never been subject to a plan":
-            filtered_df = df[
-                df["child_protection_plan"] == "Has never been subject to a plan"
-            ]
-        elif row == "Not known":
-            filtered_df = df[df["child_protection_plan"] == "Not known"]
-        elif row == "Has been previously subject to a plan":
-            filtered_df = df[
-                df["child_protection_plan"] == "Has been previously subject to a plan"
-            ]
-        elif row == "Is currently subject to a plan":
-            filtered_df = df[
-                df["child_protection_plan"] == "Is currently subject to a plan"
-            ]
-        elif row == "Under assessment":
-            filtered_df = df[df["child_protection_plan"] == "Under assessment"]
-        elif row == "Blank (nothing selected)":
-            filtered_df = df[
-                df["child_protection_plan"].isna()
-            ]  # or use appropriate condition for blank entries
+        if row in cpp_map:
+            if cpp_map[row] is not None:
+                return df[df['client_cpp'] == cpp_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                return df[df['client_cpp'].isna()]['client_id'].nunique()
         else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
-
-        # Further processing logic here
-        pass
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in child_protection_plan_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in cpp_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Return the filtered DataFrame or some other result based on processing logic
-
+    return 0
 
 
 
@@ -616,10 +573,10 @@ filter_function_map = {
     "yp_age_config": age_category_filter,
     "yp_area_config": area_category_filter,
     "yp_asylum_status_config": asylum_status_filter,
-    "yp_special_ed_needs_config": special_ed_needs_filter,
-    "yp_ed_health_care_plan_config": ed_health_care_plan_filter,
+    "yp_special_ed_needs_config": sen_category_filter,
+    "yp_ed_health_care_plan_config": ehcp_category_filter,
     "yp_at_risk_exploitation_config": at_risk_exploitation_filter,
     "yp_leaving_care_config": leaving_care_filter,
-    "yp_looked_after_child_config": looked_after_child_filter,
-    "yp_child_protection_plan_config": child_protection_plan_filter,
+    "yp_looked_after_child_config": lac_category_filter,
+    "yp_child_protection_plan_config": cpp_category_filter,
 }

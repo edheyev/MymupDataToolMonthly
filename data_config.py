@@ -498,18 +498,8 @@ yp_special_ed_needs_config = {
     ],
     "placeholder_rows": {},
     "row_db_logic": {
-        "No": "Contacts_Or_Indirects_Within_Reporting_Period",
-        "Not known": "Contacts_Or_Indirects_Within_Reporting_Period",
-        "Yes": "Contacts_Or_Indirects_Within_Reporting_Period",
-        "Not applicable": "Contacts_Or_Indirects_Within_Reporting_Period",
-        "Blank (nothing selected )": "Contacts_Or_Indirects_Within_Reporting_Period",
     },
     "mib_row_db_logic": {
-        "No": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
-        "Not known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
-        "Yes": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
-        "Not applicable": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
-        "Blank (nothing selected )": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
     'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
     'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 

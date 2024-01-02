@@ -15,6 +15,8 @@ from QR_filters import (
 )
 
 
+#todo: make sure global filtering is good
+
 def main():
     print("Begin Processing files")
 
@@ -104,7 +106,7 @@ def produce_tables(dataframes):
                 f.write("\n")
         else:
             print(f"No data to write for {name}")
-        if i == 6:
+        if i == 13:
             break
         else:
             i = i+1
