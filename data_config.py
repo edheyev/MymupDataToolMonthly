@@ -748,6 +748,42 @@ yp_young_carer_config = {
     'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
 }
 
+
+total_attended_contacts_filter = {
+    "table_name": "total_attended_contacts_filter",
+    "row_names": [
+        "Total Number of Attended Contacts",
+        "One to One Contacts",
+        "Group Contacts",
+        "Indirect Activities",
+        "Other (email and text)",
+        "Admin Contacts",
+        "Total number of DNA Contacts",
+        "Percentage of DNA Contacts"
+    ],
+    "column_headings": [
+        "Q1_Totals",
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each row, if needed
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each row, if needed
+    },
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
+}
+
 table_configs = [
     service_info_config,
     yp_gender_config,
@@ -765,5 +801,6 @@ table_configs = [
     yp_child_protection_plan_config,
     yp_child_in_need_plan_config,
     yp_young_carer_config,
+    total_attended_contacts_filter
     # Add more config tables as needed
 ]

@@ -16,7 +16,7 @@ from QR_filters import (
 
 
 #todo: make sure global filtering is good
-
+# todo fix duplicate removal to only remove if date is also teh same
 def main():
     print("Begin Processing files")
 
@@ -60,12 +60,12 @@ def load_data_files(directory, file_info):
 def clean_data(dataframes, start_date, end_date, date_column):
     print("Cleaning dataframes...")
     cleaned_dataframes = clean_column_names(dataframes)
-    cleaned_dataframes = remove_duplicates(cleaned_dataframes)
     # cleaned_dataframes = isolate_reporting_period(
     # cleaned_dataframes, start_date, end_date, date_column
     # )
     cleaned_dataframes = filter_mib_services(cleaned_dataframes)
     cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes)
+    cleaned_dataframes = remove_duplicates(cleaned_dataframes)
 
     return cleaned_dataframes
 
@@ -87,10 +87,10 @@ def produce_tables(dataframes):
         "SELFA (Mighty Minds)",
     ]
 
-    # Write the column headings to the CSV file
-    with open("my_csv.csv", "w") as f:
+    # Uncomment to write column headings to the CSV file
+    with open("my_csv.csv", "w", newline='') as f:
         f.write(",".join(column_headings) + "\n")
-    i = 0
+
     # Append each table to the CSV file
     for name in filter_function_map.keys():
         print(f"Processing {name}")
@@ -99,18 +99,18 @@ def produce_tables(dataframes):
 
         # Check if DataFrame is not empty
         if not this_table.empty:
-            # Write DataFrame without headers
-            this_table.to_csv("my_csv.csv", mode="a", header=False, index=False)
-            # Optionally, add an empty row or some separator after each table
-            with open("my_csv.csv", "a") as f:
+            with open("my_csv.csv", "a", newline='') as f:
+                # Write the table name on its own line
+                f.write(f"{name}\n")
+                # Write the DataFrame
+                this_table.to_csv(f, header=False, index=False)
+                # Optionally, add an empty row or some separator after each table
                 f.write("\n")
         else:
             print(f"No data to write for {name}")
-        # if i == 13:
-        #     break
-        # else:
-        #     i = i+1
+
     return report_dfs
+
 
 
 def find_dict_by_table_name(table_name, dict_array):
@@ -155,8 +155,9 @@ def filter_service_information(dataframes, config):
                 this_row_dataframe = column_filter(this_row_dataframe, column)
                 cell_output = filter_func(this_row_dataframe, row, dfname=dataframe_key)
                 result_df.loc[row, column] = cell_output
+                
             except Exception as e:
-                print(f"Error processing {row}, {column}: {e}")
+                print(f"Error processing row: {row}. col:  {column}. error:{e}")
                 result_df.loc[row, column] = "error"
 
 

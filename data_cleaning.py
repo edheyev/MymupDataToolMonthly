@@ -20,6 +20,8 @@ def remove_duplicates(dataframes):
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
         cleaned_dataframes[df_name] = df.drop_duplicates()
+        # cleaned_dataframes[df_name] = df.drop_duplicates(subset=['client_id', 'contact_date'])
+        # 
     return cleaned_dataframes
 
 

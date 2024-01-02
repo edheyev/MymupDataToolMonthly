@@ -533,7 +533,6 @@ def lac_category_filter(df, row, dfname="empty"):
 
     return "row or dataframe error"
 
-
 def cpp_category_filter(df, row, dfname="empty"):
     cpp_map = {
         "No": "No",
@@ -541,7 +540,7 @@ def cpp_category_filter(df, row, dfname="empty"):
         "Not known": "Not Known",
         "Has been previously subject to a plan": "Has been previous subject to a plan",  # Adjusted to match dataset
         "Is currently subject to a plan": "Is currently subject to a plan",
-        "Under assessment": None,  # Not found in your dataset
+        "Under assessment": "Under assessment",  # Not found in your dataset
         "Blank (nothing selected)": None  # Handling for blank entries
     }
 
@@ -613,6 +612,89 @@ def young_carer_category_filter(df, row, dfname="empty"):
 
     return "row or dataframe error"
 
+def attended_contacts_filter(df, row, dfname="empty"):
+
+    is_mib = dfname.startswith("MIB")
+    initial_filtering = total_attended_contacts(df, is_mib)
+    
+    if row == "Total Number of Attended Contacts":
+        return initial_filtering['client_id'].nunique()
+
+    elif row == "One to One Contacts":
+        #  activity details client therapy mode individual patient
+        if is_mib:
+            session_types = ["1 to 1", "2 to 1"]
+            dfout = initial_filtering[initial_filtering['contact_session_type'].isin(session_types)]
+        else:
+            dfout = initial_filtering[initial_filtering['contact_therapy_mode'] == 'Individual patient']
+        
+        return dfout['client_id'].nunique()  # Count unique client_ids
+
+    elif row == "Group Contacts":
+        # Filtering for 'Group' session type and 'group therapy' mode
+        if is_mib:
+            # If MIB specific logic is needed, include it here
+            dfout = initial_filtering[(initial_filtering['contact_session_type'] == 'Group') ]
+        else:
+            dfout = initial_filtering[(initial_filtering['contact_therapy_mode'] == 'group therapy')]
+        
+
+        # Count the number of rows
+        return len(dfout)
+
+
+    elif row == "Indirect Activities":
+        # Filter for rows where 'indirect service type' is not empty or NA
+        dfout = df[df['indirect_service_type'].notna() & (df['indirect_service_type'] != '')]
+
+        return len(dfout)
+
+    elif row == "Other (email and text)":
+        # Add specific filters for this row
+        return "TODO"
+
+    elif row == "Admin Contacts":
+        # Add specific filters for this row
+        return "TODO"
+
+    elif row == "Total number of DNA Contacts":
+        # Add specific filters for this row
+        return "TODO"
+
+    elif row == "Percentage of DNA Contacts":
+        # Add specific filters for this row
+        return "TODO"
+
+    else:
+        print(f"Row not recognised: {row}")
+        return "error"
+
+    # After applying filters, calculate and return the desired output
+    # For example, return the count of unique 'client id'
+    # return df['client id'].nunique()
+
+    # Placeholder return statement
+    return "result after filtering"
+
+def total_attended_contacts(df, is_mib):
+    # Common filters
+    df = df[df['contact_attendance'] == 'Attended']
+
+    # MIB-specific or general filters
+    if is_mib:
+        df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+        df = df[df['contact_service_type'] == 'Know Your Mind'] # not sure about this
+        contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
+        df = df[df['contact_approach'].isin(contact_approaches)]
+        # Include additional MIB-specific filters here
+    else:
+        df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+        contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
+        df = df[df['contact_approach'].isin(contact_approaches)]
+        # Include additional general filters here
+
+    return df
+
 
 
 filter_function_map = {
@@ -631,5 +713,6 @@ filter_function_map = {
     "yp_looked_after_child_config": lac_category_filter,
     "yp_child_protection_plan_config": cpp_category_filter,
     "yp_child_in_need_plan_config": cinp_category_filter,
-    "yp_young_carer_config": young_carer_category_filter
+    "yp_young_carer_config": young_carer_category_filter,
+    "total_attended_contacts_filter": attended_contacts_filter
 }
