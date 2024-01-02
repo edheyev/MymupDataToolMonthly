@@ -1,4 +1,4 @@
-from data_config import YiM_Providers
+from data_config import yim_providers
 
 def clean_column_names(dataframes):
     print("Standardizing column names...")
@@ -92,14 +92,18 @@ def filter_mib_services(dataframes):
     for df_name, df in dataframes.items():
         if df_name.lower().startswith('mib'):
             # Process dataframes whose names start with 'mib'
-            if df_name in YiM_Providers:
-                filtered_dataframes[df_name] = df[df["service_type"].isin(YiM_Providers)]
+            if 'contact_service_type' in df.columns and df_name in yim_providers:
+                filtered_dataframes[df_name] = df[df["contact_service_type"].isin(yim_providers)]
             else:
                 filtered_dataframes[df_name] = df
         else:
             # Process dataframes whose names do not start with 'mib'
-            # Include all rows except those where 'franchise' is 'Inspiring neighborhoods' and 'service_type' is not 'CYP'
-            filtered_df = df[~((df["franchise"] == "Inspiring neighborhoods") & (df["service_type"] != "CYP"))]
+            if 'franchise' in df.columns and 'contact_service_type' in df.columns:
+                # Include all rows except those where 'franchise' is 'Inspiring neighborhoods' and 'service_type' is not 'CYP'
+                filtered_df = df[~((df["franchise"] == "Inspiring neighborhoods") & (df["contact_service_type"] != "CYP"))]
+            else:
+                # If the required columns are not present, keep the dataframe as is
+                filtered_df = df
             filtered_dataframes[df_name] = filtered_df
 
     return filtered_dataframes

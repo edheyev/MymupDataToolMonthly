@@ -8,6 +8,7 @@ Created on Wed Dec 20 15:58:58 2023
 import pandas as pd
 
 
+
 def column_filter(df, column, dfname="empty"):
     try:
         if column == "Q1_Totals":
@@ -51,9 +52,7 @@ def SI_row_filter(df, row, dfname="empty"):
         mib = True if dfname.startswith("MIB") else False
 
         # print("Row Filter: "+ row)
-        if row == "Number of unique people supported (old rule)":
-            return "MYMUP"
-        elif row == "Number of unique people supported":
+        if row == "Number of unique people supported":
             if not mib:
                 # exclude admin contacts
                 df = df[df["contact_themes"] != "Administrative"]
@@ -93,11 +92,6 @@ def SI_row_filter(df, row, dfname="empty"):
 
                 # Count of unique clients
                 return df["client_id"].count()
-
-        elif row == "How many unique referrals":
-            return "MYMUP"
-        elif row == "How many new people referred":
-            return "MYMUP"
 
         elif row == "How many were declined by the service?":
             return df["client_id"].count()
@@ -139,22 +133,6 @@ def SI_row_filter(df, row, dfname="empty"):
             ]
             df_moved_on = df[df["reason"].isin(move_on_reasons)]
             return df_moved_on["client_id"].nunique()
-
-        elif (
-            row
-            == "% clients with initial contact within 7 days of referral (old rule not including admin contacts)"
-        ):
-            return "MYMUP"
-        elif (
-            row
-            == "% clients who had the first support session offered within 21 days of referral"
-        ):
-            return "MYMUP"
-        elif (
-            row
-            == "% clients attended the first contact by video/face to face/telephone within 21 days of referral"
-        ):
-            return "MYMUP"
         else:
             print("Row not recognised by filters")
         return pd.DataFrame()
@@ -655,6 +633,9 @@ def child_protection_plan_filter(df, row, dfname="empty"):
         return "error"
 
     return filtered_df  # Return the filtered DataFrame or some other result based on processing logic
+
+
+
 
 
 filter_function_map = {

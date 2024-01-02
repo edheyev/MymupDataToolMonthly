@@ -54,7 +54,7 @@ file_info = {
     # Add more file information as needed
 }
 
-YiM_Providers = [
+yim_providers = [
     "Barnardos",
     "Bradford Youth Service (BYS)",
     "Brathay -MAGIC service type only",

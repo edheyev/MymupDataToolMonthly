@@ -12,7 +12,7 @@ from data_cleaning import (
 from QR_filters import (
     filter_function_map,
     column_filter,
-    SI_row_filter,
+    # SI_row_filter,
     gender_category_filter,
 )
 
@@ -37,7 +37,7 @@ def main():
     validated_data = validate_data_files(cleaned_data, file_info)
 
     # Produce and save tables
-    # produce_tables(validated_data)
+    produce_tables(validated_data)
     # output_df[0].to_csv("output_report.csv", index=False)
 
     print("Report generated and saved as output_report.csv")
@@ -148,6 +148,9 @@ def filter_service_information(dataframes, config):
                     dataframe_key = config["row_db_logic"].get(row, default_db_key)
 
                 this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
+                
+                # filter datafrane
+                this_row_dataframe = column_filter(this_row_dataframe, column)
                 cell_output = filter_func(this_row_dataframe, row, dfname=dataframe_key)
                 result_df.loc[row, column] = cell_output
             except Exception as e:
