@@ -122,6 +122,8 @@ service_info_config = {
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
         "Active cases": "Referrals_Within_Reporting_Period",
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
 }
 
 yp_gender_config = {
@@ -172,6 +174,9 @@ yp_gender_config = {
         "Other (not listed)": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected)": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_ethnicity_config = {
@@ -215,11 +220,14 @@ yp_ethnicity_config = {
     ],
     "placeholder_rows": {},
     "row_db_logic": {
-        row: "Contacts_Or_Indirects_Within_Reporting_Period" for row in row_names
+        # row: "Contacts_Or_Indirects_Within_Reporting_Period" for row in row_names
     },
     "mib_row_db_logic": {
-        row: "MIB_Contacts_Or_Indirects_Within_Reporting_Period" for row in row_names
+        # row: "MIB_Contacts_Or_Indirects_Within_Reporting_Period" for row in row_names
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_sexual_orientation_config = {
@@ -260,6 +268,9 @@ yp_sexual_orientation_config = {
         "Bisexual": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         # ... (and so on for each row name)
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_age_config = {
@@ -313,6 +324,9 @@ yp_age_config = {
         "Age 3": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         # ... (and so on for each age)
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_area_config = {
@@ -383,6 +397,9 @@ yp_area_config = {
         "BAILDON": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         # ... (and so on for each area)
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_asylum_status_config = {
@@ -413,6 +430,9 @@ yp_asylum_status_config = {
         "Not known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected )": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_special_ed_needs_config = {
@@ -451,6 +471,9 @@ yp_special_ed_needs_config = {
         "Not applicable": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected )": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_ed_health_care_plan_config = {
@@ -489,6 +512,9 @@ yp_ed_health_care_plan_config = {
         "Not applicable": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected )": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_at_risk_exploitation_config = {
@@ -519,6 +545,9 @@ yp_at_risk_exploitation_config = {
         "Not known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected )": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_leaving_care_config = {
@@ -549,6 +578,9 @@ yp_leaving_care_config = {
         "Not Known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected)": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 yp_looked_after_child_config = {
@@ -579,6 +611,10 @@ yp_looked_after_child_config = {
         "Not known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected)": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+
 }
 
 yp_child_protection_plan_config = {
@@ -611,6 +647,9 @@ yp_child_protection_plan_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
+    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    
 }
 
 table_configs = [

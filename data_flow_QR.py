@@ -7,6 +7,7 @@ from data_cleaning import (
     remove_trailing_spaces_from_values,
     validate_data_files,
     isolate_reporting_period,
+    filter_mib_services
 )
 from QR_filters import (
     filter_function_map,
@@ -21,8 +22,8 @@ def main():
 
     # Load and process data
     directory = (
-        # r"D:/OneDrive/Documents/src/python_testing/MyMupDataTool/quarterly_data_dump"
-        r"./quarterly_data_dump"
+        r"D:/OneDrive/Documents/src/python_testing/MyMupDataTool/quarterly_data_dump"
+        # r"./quarterly_data_dump"
     )
     raw_data = load_data_files(directory, file_info)
 
@@ -36,7 +37,7 @@ def main():
     validated_data = validate_data_files(cleaned_data, file_info)
 
     # Produce and save tables
-    produce_tables(validated_data)
+    # produce_tables(validated_data)
     # output_df[0].to_csv("output_report.csv", index=False)
 
     print("Report generated and saved as output_report.csv")
@@ -63,6 +64,7 @@ def clean_data(dataframes, start_date, end_date, date_column):
     # cleaned_dataframes = isolate_reporting_period(
     # cleaned_dataframes, start_date, end_date, date_column
     # )
+    cleaned_dataframes = filter_mib_services(cleaned_dataframes)
     cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes)
 
     return cleaned_dataframes
@@ -114,14 +116,16 @@ def find_dict_by_table_name(table_name, dict_array):
     raise ValueError(
         f"Dictionary with table_name '{table_name}' not found in the array."
     )
-
-
+    
+    
 def filter_service_information(dataframes, config):
     print("Generating service information table...", config["table_name"])
 
     row_names = config["row_names"]
     column_headings = config["column_headings"]
     placeholder_rows = config["placeholder_rows"]
+    default_db_key = config.get('row_db_default', 'Default Logic')  # Default key for regular rows
+    mib_default_db_key = config.get('mib_row_db_default', 'MIB Default Logic')  # Default key for MIB rows
 
     result_df = pd.DataFrame(index=row_names, columns=column_headings)
 
@@ -136,7 +140,13 @@ def filter_service_information(dataframes, config):
                 continue
 
             try:
-                dataframe_key = config["row_db_logic"].get(row, "Default Logic")
+                if column.startswith("MIB"):
+                    # Use mib_row_db_logic for MIB columns, with mib_default_db_key as default
+                    dataframe_key = config["mib_row_db_logic"].get(row, mib_default_db_key)
+                else:
+                    # Use row_db_logic for regular columns, with default_db_key as default
+                    dataframe_key = config["row_db_logic"].get(row, default_db_key)
+
                 this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
                 cell_output = filter_func(this_row_dataframe, row, dfname=dataframe_key)
                 result_df.loc[row, column] = cell_output
@@ -145,6 +155,9 @@ def filter_service_information(dataframes, config):
                 result_df.loc[row, column] = "error"
 
     return result_df
+
+
+
 
 
 def is_error_in_filter(col_filtered_data):

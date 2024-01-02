@@ -1,3 +1,5 @@
+from data_config import YiM_Providers
+
 def clean_column_names(dataframes):
     print("Standardizing column names...")
     cleaned_dataframes = {}
@@ -70,3 +72,34 @@ def validate_data_files(dataframes, file_info):
                 )
             print("...ok")
     return dataframes
+
+
+def filter_mib_services(dataframes):
+    """
+    Filters dataframes based on the following criteria:
+    - If a dataframe's name starts with 'mib', it filters rows where 'service_type' matches the YIM providers.
+    - If a dataframe's name does not start with 'mib', it includes:
+        - All rows that are not franchise 'Inspiring neighborhoods'.
+        - Rows of franchise 'Inspiring neighborhoods' with 'service_type' 'CYP'.
+
+    :param dataframes: A dictionary of pandas DataFrames to filter.
+    :param yim_providers: A list of YIM provider service types.
+    :return: A dictionary of filtered pandas DataFrames.
+    """
+    print("Filtering MIB services...")
+    filtered_dataframes = {}
+
+    for df_name, df in dataframes.items():
+        if df_name.lower().startswith('mib'):
+            # Process dataframes whose names start with 'mib'
+            if df_name in YiM_Providers:
+                filtered_dataframes[df_name] = df[df["service_type"].isin(YiM_Providers)]
+            else:
+                filtered_dataframes[df_name] = df
+        else:
+            # Process dataframes whose names do not start with 'mib'
+            # Include all rows except those where 'franchise' is 'Inspiring neighborhoods' and 'service_type' is not 'CYP'
+            filtered_df = df[~((df["franchise"] == "Inspiring neighborhoods") & (df["service_type"] != "CYP"))]
+            filtered_dataframes[df_name] = filtered_df
+
+    return filtered_dataframes
