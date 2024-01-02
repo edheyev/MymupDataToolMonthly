@@ -130,3 +130,5 @@ dmypy.json
 
 # data
 quarterly_data_dump/
+*.csv
+*.xlsx
