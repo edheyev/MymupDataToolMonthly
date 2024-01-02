@@ -297,110 +297,96 @@ def sexual_orientation_filter(df, row, dfname="empty"):
 
     return "Some result or DataFrame"
 
-
 def age_category_filter(df, row, dfname="empty"):
+    age_groups = {
+        "Age 4": 4, "Age 5": 5, "Age 6": 6, "Age 7": 7, "Age 8": 8, "Age 9": 9,
+        "Age 10": 10, "Age 11": 11, "Age 12": 12, "Age 13": 13, "Age 14": 14,
+        "Age 15": 15, "Age 16": 16, "Age 17": 17, "Age 18": 18, "Age 19": 19,
+        "Age 20": 20, "Age 21": 21, "Age 22": 22, "Age 23": 23, "Age 24": 24,
+        "Age 25": 25, "Out of age Range": None
+    }
+
     try:
-        # Extract age number from row name
-        if row.startswith("Age "):
-            age = int(row.split(" ")[1])
-            # Apply filter logic based on extracted age
-            filtered_df = df[
-                df["age"] == age
-            ]  # Assuming 'age' is the column name for age in the DataFrame
-            # Further processing logic here
-            pass
-        elif row == "Out of age Range":
-            # Logic for handling out of age range
-            filtered_df = df[
-                df["age"] > 25
-            ]  # Adjust the condition based on your age range criteria
-            # Further processing logic here
-            pass
+        if row in age_groups:
+            if age_groups[row] is not None:
+                age = age_groups[row]
+                return df[df['client_age'] == age]['client_id'].nunique()
+            else:
+                # Handling "Out of age Range" by filtering ages not in the specified range
+                specified_ages = list(age_groups.values())
+                specified_ages.remove(None)
+                return df[~df['client_age'].isin(specified_ages)]['client_id'].nunique()
         else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in age_category_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in age_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Or return some other result based on the processing logic
+    return 0
 
 
 def area_category_filter(df, row, dfname="empty"):
-    try:
-        if row == "BAILDON":
-            filtered_df = df[df["area"] == "BAILDON"]
-        elif row == "Bentham":
-            filtered_df = df[df["area"] == "Bentham"]
-        elif row == "BINGLEY":
-            filtered_df = df[df["area"] == "BINGLEY"]
-        elif row == "BINGLEY RURAL":
-            filtered_df = df[df["area"] == "BINGLEY RURAL"]
-        elif row == "BOLTON & UNDERCLIFFE":
-            filtered_df = df[df["area"] == "BOLTON & UNDERCLIFFE"]
-        elif row == "BOWLING & BARKEREND":
-            filtered_df = df[df["area"] == "BOWLING & BARKEREND"]
-        elif row == "BRADFORD MOOR":
-            filtered_df = df[df["area"] == "BRADFORD MOOR"]
-        elif row == "CITY":
-            filtered_df = df[df["area"] == "CITY"]
-        elif row == "CLAYTON & FAIRWEATHER GREEN":
-            filtered_df = df[df["area"] == "CLAYTON & FAIRWEATHER GREEN"]
-        elif row == "CRAVEN":
-            filtered_df = df[df["area"] == "CRAVEN"]
-        # ... Add similar conditions for all other areas ...
-        elif row == "KEIGHLEY WEST":
-            filtered_df = df[df["area"] == "KEIGHLEY WEST"]
-        elif row == "LITTLE HORTON":
-            filtered_df = df[df["area"] == "LITTLE HORTON"]
-        elif row == "MANNINGHAM":
-            filtered_df = df[df["area"] == "MANNINGHAM"]
-        elif row == "OUT OF AREA":
-            filtered_df = df[df["area"] == "OUT OF AREA"]
-        elif row == "QUEENSBURY":
-            filtered_df = df[df["area"] == "QUEENSBURY"]
-        elif row == "ROYDS":
-            filtered_df = df[df["area"] == "ROYDS"]
-        elif row == "SHIPLEY":
-            filtered_df = df[df["area"] == "SHIPLEY"]
-        elif row == "THORNTON & ALLERTON":
-            filtered_df = df[df["area"] == "THORNTON & ALLERTON"]
-        elif row == "TOLLER":
-            filtered_df = df[df["area"] == "TOLLER"]
-        elif row == "TONG":
-            filtered_df = df[df["area"] == "TONG"]
-        elif row == "WHARFEDALE":
-            filtered_df = df[df["area"] == "WHARFEDALE"]
-        elif row == "WIBSEY":
-            filtered_df = df[df["area"] == "WIBSEY"]
-        elif row == "WINDHILL & WROSE":
-            filtered_df = df[df["area"] == "WINDHILL & WROSE"]
-        elif row == "WORTH VALLEY":
-            filtered_df = df[df["area"] == "WORTH VALLEY"]
-        elif row == "WYKE":
-            filtered_df = df[df["area"] == "WYKE"]
-        elif row == "Blank (nothing selected )":
-            filtered_df = df[
-                df["area"].isna()
-            ]  # Adjust this condition for blank entries
-        else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
+    area_map = {
+        "BAILDON": "BAILDON",
+        "Bentham": "Bentham",  # Not found in the data
+        "BINGLEY": "BINGLEY",
+        "BINGLEY RURAL": "BINGLEY RURAL",
+        "BOLTON & UNDERCLIFFE": "BOLTON & UNDERCLIFFE",
+        "BOWLING & BARKEREND": "BOWLING & BARKEREND",
+        "BRADFORD MOOR": "BRADFORD MOOR",
+        "CITY": "CITY",
+        "CLAYTON & FAIRWEATHER GREEN": "CLAYTON & FAIRWEATHER GREEN",
+        "CRAVEN": "CRAVEN",
+        "Craven Ward  -Skipton North": "Craven Ward -  Skipton North",
+        "Craven Ward  -Skipton West": "Craven Ward -  Skipton West",
+        "Craven Ward -Settle Ribblebanks": "Craven Ward - Settle Ribblebanks",  # Not found in the data
+        "Craven Ward -Sutton in Craven": "Craven Ward -  Sutton-in-Craven",
+        "Carven ward -Skipton South": "Craven Ward -  Skipton South",
+        "Craven Ward -Hellifield and Long Preston": "Craven Ward - Hellifield and Long Preston",  # Not found in the data
+        "ECCLESHILL": "ECCLESHILL",
+        "GREAT HORTON": "GREAT HORTON",
+        "HEATON": "HEATON",
+        "IDLE & THACKLEY": "IDLE & THACKLEY",
+        "ILKLEY": "ILKLEY",
+        "KEIGHLEY CENTRAL": "KEIGHLEY CENTRAL",
+        "KEIGHLEY EAST": "KEIGHLEY EAST",
+        "KEIGHLEY WEST": "KEIGHLEY WEST",
+        "LITTLE HORTON": "LITTLE HORTON",
+        "MANNINGHAM": "MANNINGHAM",
+        "OUT OF AREA": "OUT OF AREA",
+        "QUEENSBURY": "QUEENSBURY",
+        "ROYDS": "ROYDS",
+        "SHIPLEY": "SHIPLEY",
+        "THORNTON & ALLERTON": "THORNTON & ALLERTON",
+        "TOLLER": "TOLLER",
+        "TONG": "TONG",
+        "WHARFEDALE": "WHARFEDALE",
+        "WIBSEY": "WIBSEY",
+        "WINDHILL & WROSE": "WINDHILL & WROSE",
+        "WORTH VALLEY": "WORTH VALLEY",
+        "WYKE": "WYKE",
+        "Blank (nothing selected )": None  # Special handling for blank entries
+    }
 
-        # Further processing logic here
-        # Example: pass
-        pass
+    try:
+        if row in area_map:
+            if area_map[row] is not None:
+                return df[df['client_area'] == area_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected )":
+                # Counting rows where 'client area' is NaN
+                return df[df['client_area'].isna()]['client_id'].nunique()
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in area_category_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return filtered_df  # Or return some other result based on the processing logic
+    return "row or dataframe error"
+
 
 
 def asylum_status_filter(df, row, dfname="empty"):

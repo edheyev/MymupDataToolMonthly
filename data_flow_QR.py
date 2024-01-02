@@ -104,7 +104,7 @@ def produce_tables(dataframes):
                 f.write("\n")
         else:
             print(f"No data to write for {name}")
-        if i == 4:
+        if i == 6:
             break
         else:
             i = i+1

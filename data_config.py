@@ -319,7 +319,6 @@ yp_sexual_orientation_config = {
 yp_age_config = {
     "table_name": "yp_age_config",
     "row_names": [
-        "Age 3",
         "Age 4",
         "Age 5",
         "Age 6",
@@ -385,9 +384,7 @@ yp_area_config = {
         "CITY",
         "CLAYTON & FAIRWEATHER GREEN",
         "CRAVEN",
-        "Craven  -Glusburn",
         "Craven Ward  -Skipton North",
-        "Craven-ward Skipton East",
         "Craven Ward  -Skipton West",
         "Craven Ward -Settle Ribblebanks",
         "Craven Ward -Sutton in Craven",
