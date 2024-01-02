@@ -682,6 +682,72 @@ yp_child_protection_plan_config = {
     
 }
 
+yp_child_in_need_plan_config = {
+    "table_name": "yp_child_in_need_plan_config",
+    "row_names": [
+        "Is currently subject to a Child in need plan",
+        "No",
+        "Has never been subject to a Child in need plan",
+        "Not known",
+        "Has previously been subject to a Child in need plan",
+        "Under assessment",  # Not found in your dataset
+        "Blank (nothing selected)" # Handling for blank entries
+    ],
+    "column_headings": [
+        "Q1_Totals",
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
+}
+
+yp_young_carer_config = {
+    "table_name": "yp_young_carer_config",
+    "row_names": [
+        "Yes",
+        "No",
+        "Not known",
+        "Not stated",
+        "Blank (nothing selected)" # Handling for blank entries
+    ],
+    "column_headings": [
+        "Q1_Totals",
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
+}
+
 table_configs = [
     service_info_config,
     yp_gender_config,
@@ -697,5 +763,7 @@ table_configs = [
     yp_leaving_care_config,
     yp_looked_after_child_config,
     yp_child_protection_plan_config,
+    yp_child_in_need_plan_config,
+    yp_young_carer_config,
     # Add more config tables as needed
 ]

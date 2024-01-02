@@ -531,7 +531,7 @@ def lac_category_filter(df, row, dfname="empty"):
         print(f"Error in lac_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return 0
+    return "row or dataframe error"
 
 
 def cpp_category_filter(df, row, dfname="empty"):
@@ -559,8 +559,59 @@ def cpp_category_filter(df, row, dfname="empty"):
         print(f"Error in cpp_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return 0
+    return "row or dataframe error"
 
+def cinp_category_filter(df, row, dfname="empty"):
+    cinp_map = {
+        "Is currently subject to a Child in need plan": "Is currently subject to a Children In Need Plan",
+        "No": "No",
+        "Has never been subject to a Child in need plan": "Has never been subject to a Children In Need Plan",
+        "Not known": "Not known",
+        "Has previously been subject to a Child in need plan": "Has previously been subject to a Children In Need Plan",
+        "Under assessment": "Under assessment",  # Not found in your dataset
+        "Blank (nothing selected)": None  # Handling for blank entries
+    }
+
+    try:
+        if row in cinp_map:
+            if cinp_map[row] is not None:
+                return df[df['client_cinp'] == cinp_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                return df[df['client_cinp'].isna()]['client_id'].nunique()
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
+
+    except Exception as e:
+        print(f"Error in cinp_category_filter with row {row}: {e} . current df is {dfname}")
+        return "error"
+
+    return "row or dataframe error"
+
+def young_carer_category_filter(df, row, dfname="empty"):
+    young_carer_map = {
+        "Yes": "Yes - child or young PERSON has a caring role for an ill or disabled parent, carer or sibling",
+        "No": "No - child or young PERSON does not have a caring role for an ill or disabled parent, carer or sibling",
+        "Not known": "Not Known",
+        "Not stated": "Not Stated (Person asked but declined to provide a response)",
+        "Blank (nothing selected)": None  # Handling for blank entries
+    }
+
+    try:
+        if row in young_carer_map:
+            if young_carer_map[row] is not None:
+                return df[df['client_young_carer'] == young_carer_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                return df[df['client_young_carer'].isna()]['client_id'].nunique()
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
+
+    except Exception as e:
+        print(f"Error in young_carer_category_filter with row {row}: {e} . current df is {dfname}")
+        return "error"
+
+    return "row or dataframe error"
 
 
 
@@ -579,4 +630,6 @@ filter_function_map = {
     "yp_leaving_care_config": leaving_care_filter,
     "yp_looked_after_child_config": lac_category_filter,
     "yp_child_protection_plan_config": cpp_category_filter,
+    "yp_child_in_need_plan_config": cinp_category_filter,
+    "yp_young_carer_config": young_carer_category_filter
 }

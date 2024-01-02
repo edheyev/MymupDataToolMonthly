@@ -106,10 +106,10 @@ def produce_tables(dataframes):
                 f.write("\n")
         else:
             print(f"No data to write for {name}")
-        if i == 13:
-            break
-        else:
-            i = i+1
+        # if i == 13:
+        #     break
+        # else:
+        #     i = i+1
     return report_dfs
 
 
