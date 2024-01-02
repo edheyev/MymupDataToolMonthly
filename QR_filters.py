@@ -12,7 +12,21 @@ import pandas as pd
 def column_filter(df, column, dfname="empty"):
     try:
         if column == "Q1_Totals":
-            return df
+            # Apply all filters and then concatenate the results
+            filters = [
+                df["franchise"] == "Barnardos WRAP",
+                df["franchise"] == "Bradford Youth Service",
+                (df["franchise"] == "Brathay") & (df["contact_service_type"] == "MAGIC"),
+                (df["franchise"] == "Inspired Neighbourhoods") & (df["contact_service_type"] == "CYP"),
+                df["contact_service_type"] == "Know Your Mind",
+                df["contact_service_type"] == "Know Your Mind Plus",
+                df["contact_service_type"] == "Hospital Buddies AGH",
+                df["contact_service_type"] == "Hospital Buddies BRI",
+                (df["franchise"] == "Selfa") & (df["contact_service_type"] == "Mighty Minds")
+            ]
+            filtered_dfs = [df[filter_condition] for filter_condition in filters]
+            total_df = pd.concat(filtered_dfs)
+            return total_df.drop_duplicates()
         elif column == "Barnardos (Wrap)":
             return df[df["franchise"] == "Barnardos WRAP"]
         elif column == "BYS All":
@@ -45,7 +59,6 @@ def column_filter(df, column, dfname="empty"):
     except Exception as e:
         print(f"Error in col_filter with column {column}: {e} . current df is {dfname}")
         return pd.DataFrame({"error": [True]})  # Return DataFrame with an error flag
-
 
 def SI_row_filter(df, row, dfname="empty"):
     try:
@@ -140,176 +153,146 @@ def SI_row_filter(df, row, dfname="empty"):
         print(f"Error in row_filter with row {row}: {e} . current df is {dfname}")
     return "error"
 
-
 def gender_category_filter(df, row, dfname="empty"):
+    gender_map = {
+        "Female (including Transgender Woman)": "Female (including Transgender Woman)",
+        "Male (including Transgender Man)": "Man (including Transgender Man)",
+        "Non-Binary": "Non-Binary",
+        "Not known (Person stated Gender Code not recorded)": "Not Known (not recorded)",
+        "No Stated (patient asked but declined to provide a response)": "Not Stated (patient asked but declined to provide a response)",
+        "Prefer not to say": "Prefer not to say",
+        "Transgendered": "Transgendered",
+        "Other (not listed)": "Other (not listed)",
+        "Blank (nothing selected)": None  # Special handling for blank entries
+    }
+
     try:
-        if row == "Female (including Transgender Woman)":
-            pass
-
-        elif row == "Male (including Transgender Man)":
-            pass
-
-        elif row == "Non-Binary":
-            pass
-
-        elif row == "Not known (Person stated Gender Code not recorded)":
-            pass
-
-        elif row == "No Stated (patient asked but declined to provide a response)":
-            pass
-
-        elif row == "Prefer not to say":
-            pass
-
-        elif row == "Transgendered":
-            pass
-
-        elif row == "Other (not listed)":
-            pass
-
-        elif row == "Blank (nothing selected)":
-            pass
-
+        if row in gender_map:
+            if gender_map[row] is not None:
+                return df[df['client_gender'] == gender_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                # Counting rows where 'client_gender' is NaN
+                return df[df['client_gender'].isna()]['client_id'].nunique()
         else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in gender_category_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in gender_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
-    return "Some result or DataFrame"
-
+    return 0
 
 def ethnic_category_filter(df, row, dfname="empty"):
+    ethnic_map = {
+        "African": "Black or Black British - African",
+        "Any other Asian background": "Asian or Asian British - Any other Asian background",
+        "Any other Black background": "Black or Black British - Any other Black background",
+        "Any other Ethnic group": "Other Ethnic Groups - Any other ethnic group",
+        "Any other Mixed background": "Mixed - Any other mixed background",
+        "Any other White background": "White - Any other White background",
+        "Arab": "Arab",
+        "Bangladeshi": "Asian or Asian British - Bangladeshi",
+        "British": "White - British",
+        "Caribbean": "Black or Black British - Caribbean",
+        "Central and Eastern European": "Central and Eastern European",
+        "Chinese": "Other Ethnic Groups - Chinese",
+        "Gypsy/Roma/Traveller": "Gypsy/Roma/Traveller",
+        "Indian": "Asian or Asian British - Indian",
+        "Irish": "White - Irish",
+        "Latin America": "Latin America",  # Not found in the data
+        "Not known": "Not known",
+        "Not stated": "Not stated",
+        "Pakistani": "Asian or Asian British - Pakistani",
+        "White and Asian": "Mixed - White and Asian",
+        "White and Black African": "Mixed - White and Black African",
+        "White and Black Caribbean": "Mixed - White and Black Caribbean",
+        "Blank (nothing selected)": None  # Special handling for blank entries
+    }
+
     try:
-        if row == "African":
-            pass
-
-        elif row == "Any other Asian background":
-            pass
-
-        elif row == "Any other Black background":
-            pass
-
-        elif row == "Any other Ethnic group":
-            pass
-
-        elif row == "Any other Mixed background":
-            pass
-
-        elif row == "Any other White background":
-            pass
-
-        elif row == "Arab":
-            pass
-
-        elif row == "Bangladeshi":
-            pass
-
-        elif row == "British":
-            pass
-
-        elif row == "Caribbean":
-            pass
-
-        elif row == "Central and Eastern European":
-            pass
-
-        elif row == "Chinese":
-            pass
-
-        elif row == "Gypsy/Roma/Traveller":
-            pass
-
-        elif row == "Indian":
-            pass
-
-        elif row == "Irish":
-            pass
-
-        elif row == "Latin America":
-            pass
-
-        elif row == "Not known":
-            pass
-
-        elif row == "Not stated":
-            pass
-
-        elif row == "Pakistani":
-            pass
-
-        elif row == "White and Asian":
-            pass
-
-        elif row == "White and Black African":
-            pass
-
-        elif row == "White and Black Caribbean":
-            pass
-
-        elif row == "Blank (nothing selected)":
-            pass
-
+        if row in ethnic_map:
+            if ethnic_map[row] is not None:
+                return df[df['client_ethnicity'] == ethnic_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                # Counting rows where 'client ethnicity' is NaN
+                return df[df['client_ethnicity'].isna()]['client_id'].nunique()
         else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in ethnic_category_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in ethnic_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
     return "Some result or DataFrame"
 
+def disability_category_filter(df, row, dfname="empty"):
+    disability_map = {
+        "Autism or other Neurological condition": "Autism or other Neurological condition",
+        "Behaviour and Emotional": "Behaviour and Emotional",
+        "Hearing": "Hearing",
+        "Manual Dexterity": "Manual Dexterity",  # Not found in the data
+        "Memory or ability to concentrate, learn or understand (Learning Disability)": "Memory or ability to concentrate, learn or understand (Learning Disability)",
+        "Mobility and Gross Motor": "Mobility and Gross Motor",
+        "No disability": "No disability",
+        "Not Known": "Not Known",
+        "Not stated (Person asked but declined to provide a response)": "Not stated (Person asked but declined to provide a response)",
+        "Other": "Other (not listed)",  
+        "Perception of Physical Danger": "Perception of Physical Danger",  # Not found in the data
+        "Personal, Self-Care and Continence": "Personal, Self-Care and Continence",  # Not found in the data
+        "Progressive Conditions and Physical Health (such as HIV, Cancer, Multiple Sclerosis, Fits)": "Progressive Conditions and Physical Health (such as HIV, cancer, multiple sclerosis, fits etc)", 
+        "Sight": "Sight",
+        "Speech": "Speech",
+        "Yes": "Yes",
+        "Blank (nothing selected)": None  # Special handling for blank entries
+    }
 
-def sexual_orientation_filter(df, row, dfname="empty"):
     try:
-        if row == "Asexual":
-            pass
-
-        elif row == "Bisexual":
-            pass
-
-        elif row == "Gay":
-            pass
-
-        elif row == "Heterosexual or Straight":
-            pass
-
-        elif row == "Lesbian":
-            pass
-
-        elif row == "Not asked/Unknown":
-            pass
-
-        elif row == "Not stated (Person asked but declined to provide a response)":
-            pass
-
-        elif row == "Other":
-            pass
-
-        elif row == "Pansexual":
-            pass
-
-        elif row == "Person asked and did not know/is unsure or undecided":
-            pass
-
-        elif row == "Blank (nothing selected)":
-            pass
-
+        if row in disability_map:
+            if disability_map[row] is not None:
+                return df[df['client_disability'] == disability_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                # Counting rows where 'client disability' is NaN
+                return df[df['client_disability'].isna()]['client_id'].nunique()
         else:
-            print("Row not recognised by filters")
-            return pd.DataFrame()
+            print("Row not recognised by filters: " + row)
+            return "error"
 
     except Exception as e:
-        print(
-            f"Error in sexual_orientation_filter with row {row}: {e} . current df is {dfname}"
-        )
+        print(f"Error in disability_category_filter with row {row}: {e} . current df is {dfname}")
+        return "error"
+
+    return "Some result or DataFrame"
+
+def sexual_orientation_filter(df, row, dfname="empty"):
+    sexuality_map = {
+        "Asexual": "Asexual",
+        "Bisexual": "Bisexual",
+        "Gay": "Gay",
+        "Heterosexual or Straight": "Heterosexual or Straight",
+        "Lesbian": "Lesbian",
+        "Not asked/Unknown": "Not asked/Unknown",
+        "Not stated (Person asked but declined to provide a response)": "Not stated (Person asked but declined to provide a response)",
+        "Other": "Other",
+        "Pansexual": "Pansexual",
+        "Person asked and did not know/is unsure or undecided": "Person asked and did not know/is unsure or undecided",
+        "Blank (nothing selected)": None  # Special handling for blank entries
+    }
+
+    try:
+        if row in sexuality_map:
+            if sexuality_map[row] is not None:
+                return df[df['client_sexuality'] == sexuality_map[row]]['client_id'].nunique()
+            elif row == "Blank (nothing selected)":
+                # Counting rows where 'client sexuality' is NaN
+                return df[df['client_sexuality'].isna()]['client_id'].nunique()
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
+
+    except Exception as e:
+        print(f"Error in sexuality_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
     return "Some result or DataFrame"
@@ -642,6 +625,7 @@ filter_function_map = {
     "service_info_config": SI_row_filter,
     "yp_gender_config": gender_category_filter,
     "yp_ethnicity_config": ethnic_category_filter,
+    "yp_disability_config": disability_category_filter,
     "yp_sexual_orientation_config": sexual_orientation_filter,
     "yp_age_config": age_category_filter,
     "yp_area_config": area_category_filter,

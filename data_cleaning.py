@@ -97,13 +97,13 @@ def filter_mib_services(dataframes):
             else:
                 filtered_dataframes[df_name] = df
         else:
-            # Process dataframes whose names do not start with 'mib'
-            if 'franchise' in df.columns and 'contact_service_type' in df.columns:
-                # Include all rows except those where 'franchise' is 'Inspiring neighborhoods' and 'service_type' is not 'CYP'
-                filtered_df = df[~((df["franchise"] == "Inspiring neighborhoods") & (df["contact_service_type"] != "CYP"))]
-            else:
-                # If the required columns are not present, keep the dataframe as is
-                filtered_df = df
+        # # Process dataframes whose names do not start with 'mib'
+        # if 'franchise' in df.columns and 'contact_service_type' in df.columns:
+        #     # Include all rows except those where 'franchise' is 'Inspiring neighborhoods' and 'service_type' is not 'CYP'
+        #     filtered_df = df[~((df["franchise"] == "Inspiring neighborhoods") & (df["contact_service_type"] != "CYP"))]
+        # else:
+        #     # If the required columns are not present, keep the dataframe as is
+            filtered_df = df
             filtered_dataframes[df_name] = filtered_df
 
     return filtered_dataframes

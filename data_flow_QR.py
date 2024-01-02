@@ -12,8 +12,6 @@ from data_cleaning import (
 from QR_filters import (
     filter_function_map,
     column_filter,
-    # SI_row_filter,
-    gender_category_filter,
 )
 
 
@@ -90,7 +88,7 @@ def produce_tables(dataframes):
     # Write the column headings to the CSV file
     with open("my_csv.csv", "w") as f:
         f.write(",".join(column_headings) + "\n")
-
+    i = 0
     # Append each table to the CSV file
     for name in filter_function_map.keys():
         print(f"Processing {name}")
@@ -106,6 +104,10 @@ def produce_tables(dataframes):
                 f.write("\n")
         else:
             print(f"No data to write for {name}")
+        if i == 4:
+            break
+        else:
+            i = i+1
     return report_dfs
 
 
@@ -120,12 +122,12 @@ def find_dict_by_table_name(table_name, dict_array):
     
 def filter_service_information(dataframes, config):
     print("Generating service information table...", config["table_name"])
-
+    
     row_names = config["row_names"]
     column_headings = config["column_headings"]
     placeholder_rows = config["placeholder_rows"]
-    default_db_key = config.get('row_db_default', 'Default Logic')  # Default key for regular rows
-    mib_default_db_key = config.get('mib_row_db_default', 'MIB Default Logic')  # Default key for MIB rows
+    default_db_key = config.get('row_db_default', 'Default Logic')
+    mib_default_db_key = config.get('mib_row_db_default', 'MIB Default Logic')
 
     result_df = pd.DataFrame(index=row_names, columns=column_headings)
 
@@ -135,21 +137,19 @@ def filter_service_information(dataframes, config):
 
     for row in row_names:
         for column in column_headings:
+            if column == "Q1_Totals":  # Skip the totals column for now
+                continue
             if row in placeholder_rows:
                 result_df.loc[row, column] = placeholder_rows[row]
                 continue
 
             try:
                 if column.startswith("MIB"):
-                    # Use mib_row_db_logic for MIB columns, with mib_default_db_key as default
                     dataframe_key = config["mib_row_db_logic"].get(row, mib_default_db_key)
                 else:
-                    # Use row_db_logic for regular columns, with default_db_key as default
                     dataframe_key = config["row_db_logic"].get(row, default_db_key)
 
                 this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-                
-                # filter datafrane
                 this_row_dataframe = column_filter(this_row_dataframe, column)
                 cell_output = filter_func(this_row_dataframe, row, dfname=dataframe_key)
                 result_df.loc[row, column] = cell_output
@@ -157,8 +157,20 @@ def filter_service_information(dataframes, config):
                 print(f"Error processing {row}, {column}: {e}")
                 result_df.loc[row, column] = "error"
 
-    return result_df
 
+    for row in row_names:
+        total = 0
+        for col in column_headings:
+            if col == "Q1_Totals":
+                continue
+            value = result_df.loc[row, col]
+            # Convert value to numeric, non-numeric becomes NaN
+            numeric_value = pd.to_numeric(value, errors='coerce')
+            if numeric_value is not None and not pd.isna(numeric_value):
+                total += numeric_value
+        result_df.loc[row, "Q1_Totals"] = total
+
+    return result_df
 
 
 
