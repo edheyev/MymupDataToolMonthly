@@ -9,6 +9,8 @@ def clean_column_names(dataframes):
             col = col.replace(" ", "_").lower()
             if col == "service_type":
                 col = "contact_service_type"
+            # elif col == "file_closure_service_type":
+            #      col = "contact_service_type"
             new_columns.append(col)
         df.columns = new_columns
         cleaned_dataframes[df_name] = df

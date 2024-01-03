@@ -10,19 +10,26 @@ import pandas as pd
 
 
 def column_filter(df, column, dfname="empty"):
+    
+    if dfname == "File_Closures_And_Goals_Within_Reporting_Period" or dfname == "MIB_File_Closures_And_Goals_Within_Reporting_Period":
+        contact_service = "file_closure_service_type"
+    else:
+        contact_service = "contact_service_type"
+    
+    
     try:
         if column == "Q1_Totals":
-            # Apply all filters and then concatenate the results
+        # ACTUALLY THIS initial FILTER IS DEPRECATED AND IS BEING TOTALLED IN THE REPORTING SCRIPT
             filters = [
                 df["franchise"] == "Barnardos WRAP",
                 df["franchise"] == "Bradford Youth Service",
-                (df["franchise"] == "Brathay") & (df["contact_service_type"] == "MAGIC"),
-                (df["franchise"] == "Inspired Neighbourhoods") & (df["contact_service_type"] == "CYP"),
-                df["contact_service_type"] == "Know Your Mind",
-                df["contact_service_type"] == "Know Your Mind Plus",
-                df["contact_service_type"] == "Hospital Buddies AGH",
-                df["contact_service_type"] == "Hospital Buddies BRI",
-                (df["franchise"] == "Selfa") & (df["contact_service_type"] == "Mighty Minds")
+                (df["franchise"] == "Brathay") & (df[contact_service] == "MAGIC"),
+                (df["franchise"] == "Inspired Neighbourhoods") & (df[contact_service] == "CYP"),
+                df[contact_service] == "Know Your Mind",
+                df[contact_service] == "Know Your Mind Plus",
+                df[contact_service] == "Hospital Buddies AGH",
+                df[contact_service] == "Hospital Buddies BRI",
+                (df["franchise"] == "Selfa") & (df[contact_service] == "Mighty Minds")
             ]
             filtered_dfs = [df[filter_condition] for filter_condition in filters]
             total_df = pd.concat(filtered_dfs)
@@ -33,25 +40,25 @@ def column_filter(df, column, dfname="empty"):
             return df[df["franchise"] == "Bradford Youth Service"]
         elif column == "Brathay Magic":
             return df[
-                (df["franchise"] == "Brathay") & (df["contact_service_type"] == "MAGIC")
+                (df["franchise"] == "Brathay") & (df[contact_service] == "MAGIC")
             ]
         elif column == "INCIC (CYP)":
             return df[
                 (df["franchise"] == "Inspired Neighbourhoods")
-                & (df["contact_service_type"] == "CYP")
+                & (df[contact_service] == "CYP")
             ]
         elif column == "MIB Know Your Mind":
-            return df[df["contact_service_type"] == "Know Your Mind"]
+            return df[df[contact_service] == "Know Your Mind"]
         elif column == "MIB Know Your Mind +":
-            return df[df["contact_service_type"] == "Know Your Mind Plus"]
+            return df[df[contact_service] == "Know Your Mind Plus"]
         elif column == "MIB Hospital Buddys Airedale General":
-            return df[df["contact_service_type"] == "Hospital Buddies AGH"]
+            return df[df[contact_service] == "Hospital Buddies AGH"]
         elif column == "MIB Hospital Buddys BRI":
-            return df[df["contact_service_type"] == "Hospital Buddies BRI"]
+            return df[df[contact_service] == "Hospital Buddies BRI"]
         elif column == "SELFA (Mighty Minds)":
             return df[
                 (df["franchise"] == "Selfa")
-                & (df["contact_service_type"] == "Mighty Minds")
+                & (df[contact_service] == "Mighty Minds")
             ]
         else:
             print("column not recognised by filters")
@@ -744,6 +751,162 @@ def total_attended_contacts(df, is_mib):
 
     return df
 
+def goals_based_outcomes_filter(df, row, dfname="empty"):
+    # Additional filters may be required based on the dataset and requirements
+    print(f"Row: {row}")
+    print(f"dfname: {dfname}")
+    print(f"df: {df}")
+    if row == "% of closed cases with initial outcomes measure completed":
+        # Logic to calculate this percentage
+        pass
+
+    elif row == "% of closed cases with follow-up/final outcomes measure completed":
+        # Logic to calculate this percentage
+        pass
+
+    elif row == "% of GBOs demonstrating reliable change":
+        # Logic to calculate this percentage
+        pass
+    
+    else:
+        print(f"Row not recognised: {row}")
+        return "error"
+
+    return "result after filtering"
+
+def average_goals_based_outcomes_filter(df, row, dfname="empty"):
+    
+    is_mib = dfname.startswith("MIB")
+    
+
+    df_copy = df.copy()
+
+    # Convert dates to datetime
+    df_copy['referral_date'] = pd.to_datetime(df_copy['referral_date'], errors='coerce')
+    df_copy['file_closure_date'] = pd.to_datetime(df_copy['file_closure_date'], errors='coerce')
+    df_copy['goal_score_date'] = pd.to_datetime(df_copy['goal_score_date'], errors='coerce')
+
+    # Filter for Initial and Follow-Up/Final GBOs
+    df_initial = df_copy[df_copy['initial_/_followup_/_final'].str.contains("Initial", case=False, na=False)]
+    df_followup_final = df_copy[df_copy['initial_/_followup_/_final'].isin(["Follow up", "Final"])]
+
+    # Ensure that 'goal_score_date' is uniquely named in df_followup_final
+    df_followup_final = df_followup_final.rename(columns={'goal_score_date': 'goal_score_date_fu_f'})
+
+    # Merge on 'goal_id'
+    merged_df = pd.merge(df_initial[['goal_id', 'referral_date', 'file_closure_date', 'score_1', 'score_2', 'score_3']], 
+                        df_followup_final[['goal_id', 'goal_score_date_fu_f']], 
+                        on='goal_id', 
+                        how='inner')
+
+    # Apply the criteria for paired GBOs
+    paired_gbo_df = merged_df[(merged_df['goal_score_date_fu_f'] > merged_df['referral_date']) & 
+                            (merged_df['goal_score_date_fu_f'] < merged_df['file_closure_date'])]
+
+    # Count the paired GBOs
+        
+    if row == "% of closed case that have an initial and follow up/final paired GBO":
+        
+        if len(df_initial) == 0:
+            return str(0) + "%"
+        else:
+            return str(round(len(paired_gbo_df) / len(df_initial) * 100, 2)) + "%"
+
+    elif row == "% of closed cases with reliable change in paired GBO":
+        return "todo"
+        # Check if required columns exist
+        required_columns = ['score_1', 'score_2', 'score_3']
+        
+        print(paired_gbo_df.columns.tolist())
+
+        for col in required_columns:
+            if col not in paired_gbo_df.columns:
+                print(f"Column {col} not found in DataFrame.")
+                return "error"
+
+        # Check for NaN values in 'score_1' and 'score_2'
+        if paired_gbo_df[['score_1', 'score_2']].isna().any().any():
+            print("NaN values found in 'score_1' or 'score_2'.")
+            return "error"
+        # Ensure that only goals with at least two scores are included
+        paired_gbo_with_scores = paired_gbo_df.dropna(subset=['score_1', 'score_2'])
+
+        # Use score_3 if available, otherwise use score_2
+        paired_gbo_with_scores['follow_up_score'] = paired_gbo_with_scores['score_3'].fillna(paired_gbo_with_scores['score_2'])
+
+        # Calculate score change
+        paired_gbo_with_scores['score_change'] = paired_gbo_with_scores['follow_up_score'] - paired_gbo_with_scores['score_1']
+
+        # Determine goals with reliable change (+3 or more)
+        reliable_change_count = (paired_gbo_with_scores['score_change'] >= 3).sum()
+
+        # Calculate the percentage of goals showing reliable change
+        total_goals_count = len(paired_gbo_with_scores)
+        percentage_reliable_change = (reliable_change_count / total_goals_count) * 100 if total_goals_count > 0 else 0
+
+        return percentage_reliable_change
+
+
+    elif row == "Average impact score of all paired goals":
+        return "todo"
+
+    else:
+        print(f"Row not recognised: {row}")
+        return "error"
+
+    return "result after filtering"
+
+def goal_themes_filter(df, row, dfname="empty"):
+    
+    theme_map = {
+    "Being able to maintain and build positive relationships":"Being able to maintain and build positive relationships",
+    "Being able to support others":"Being able to support others",
+    "Being better at managing my emotional wellbeing":"Being better at managing my emotional wellbeing",
+    "Being better at managing risks and feeling safer":"Being better at managing risks and feeling safer",
+    "Covid-19 Support":"Covid-19 Support",
+    "Improving my confidence and self-esteem":"Improving my confidence and self esteem",
+    "Improving my physical wellbeing":"Improving my physical wellbeing",
+    "Reducing my isolation":"Reducing my isolation",
+    "Understanding who I am":"Understanding who I am",}
+    
+    
+        
+    try:
+        if row in theme_map:
+            if theme_map[row] is not None:
+                this_theme_df = df[df['goal_themes'] == theme_map[row]]
+            elif row == "Blank (nothing selected )":
+                # Counting rows where 'client area' is NaN
+                this_theme_df = df[df['goal_themes'].isna()]
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
+        
+        if len(df) == 0:
+            return str(0) + "$"
+        else:
+            return str(round(len(this_theme_df) / len(df) * 100, 2)) + "%"
+
+    except Exception as e:
+        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
+        return "error"
+
+ 
+
+def dss_goal_filter(df, row, dfname="empty"):
+
+    if row == "How many unique clients have had a distress scale score in reporting period":
+        return "to do"
+
+    elif row == "Average change score for distress scale":
+        return "to do"
+
+    else:
+        print(f"Row not recognised: {row}")
+        return "error"
+
+
+
 
 
 filter_function_map = {
@@ -763,5 +926,9 @@ filter_function_map = {
     "yp_child_protection_plan_config": cpp_category_filter,
     "yp_child_in_need_plan_config": cinp_category_filter,
     "yp_young_carer_config": young_carer_category_filter,
-    "total_attended_contacts_filter": attended_contacts_filter
+    "total_attended_contacts_config": attended_contacts_filter,
+    "goals_based_outcomes_config": goals_based_outcomes_filter,
+    "average_goals_based_outcomes_config": average_goals_based_outcomes_filter,
+    "goal_themes_goals_based_outcomes_config": goal_themes_filter,
+    "dss_goals_based_outcomes_config": dss_goal_filter,
 }

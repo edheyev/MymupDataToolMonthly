@@ -27,6 +27,10 @@ file_info = {
         "filename": "file_closures_and_goals_within_reporting_period.csv",
         "columns": ["client_id"],
     },
+    "MIB_File_Closures_And_Goals_Within_Reporting_Period": {
+        "filename": "mib_file_closures_and_goals_within_reporting_period.csv",
+        "columns": ["client_id"],
+    },
     "File_Closures_Within_Reporting_Period": {
         "filename": "file_closures_within_reporting_period.csv",
         "columns": ["client_id"],
@@ -749,8 +753,8 @@ yp_young_carer_config = {
 }
 
 
-total_attended_contacts_filter = {
-    "table_name": "total_attended_contacts_filter",
+total_attended_contacts_config = {
+    "table_name": "total_attended_contacts_config",
     "row_names": [
         "Total Number of Attended Contacts",
         "One to One Contacts",
@@ -784,6 +788,138 @@ total_attended_contacts_filter = {
     'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
 }
 
+goals_based_outcomes_config = {
+    "table_name": "goals_based_outcomes_config",
+    "row_names": [
+        "% of closed cases with initial outcomes measure completed",
+        "% of closed cases with follow-up/final outcomes measure completed",
+        "% of GBOs demonstrating reliable change",
+    ],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {
+        "% of closed cases with initial outcomes measure completed":"XXX",
+        "% of closed cases with follow-up/final outcomes measure completed":"XXX",
+        "% of GBOs demonstrating reliable change":"XXX",
+    },
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'MIB_File_Closures_And_Goals_Within_Reporting_Period',
+    'row_db_default': 'File_Closures_And_Goals_Within_Reporting_Period',
+}
+
+average_goals_based_outcomes_config = {
+    "table_name": "average_goals_based_outcomes_config",
+    "row_names": [
+        "% of closed case that have an initial and follow up/final paired GBO",
+        "% of closed cases with reliable change in paired GBO",
+        "Average impact score of all paired goals",
+    ],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'MIB_File_Closures_And_Goals_Within_Reporting_Period',
+    'row_db_default': 'File_Closures_And_Goals_Within_Reporting_Period',
+}
+
+goal_themes_goals_based_outcomes_config = {
+    "table_name": "goal_themes_goals_based_outcomes_config",
+    "row_names": [
+        "Being able to maintain and build positive relationships",
+        "Being able to support others",
+        "Being better at managing my emotional wellbeing",
+        "Being better at managing risks and feeling safer",
+        "Covid-19 Support",
+        "Improving my confidence and self-esteem",
+        "Improving my physical wellbeing",
+        "Reducing my isolation",
+        "Understanding who I am",
+    ],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'Initial_Goals_Within_Reporting_Period',
+    'row_db_default': 'Initial_Goals_Within_Reporting_Period',
+}
+
+dss_goals_based_outcomes_config = {
+    "table_name": "dss_goals_based_outcomes_config",
+    "row_names": [
+        "How many unique clients have had a distress scale score in reporting period",
+        "Average change score for distress scale",
+    ],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'File_Closures_And_Goals_Within_Reporting_Period',
+    'row_db_default': 'File_Closures_And_Goals_Within_Reporting_Period',
+}
+
+
+
+
 table_configs = [
     service_info_config,
     yp_gender_config,
@@ -801,6 +937,10 @@ table_configs = [
     yp_child_protection_plan_config,
     yp_child_in_need_plan_config,
     yp_young_carer_config,
-    total_attended_contacts_filter
+    total_attended_contacts_config,
+    goals_based_outcomes_config,
+    average_goals_based_outcomes_config,
+    goal_themes_goals_based_outcomes_config,
+    dss_goals_based_outcomes_config,
     # Add more config tables as needed
 ]

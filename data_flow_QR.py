@@ -132,11 +132,14 @@ def filter_service_information(dataframes, config):
     mib_default_db_key = config.get('mib_row_db_default', 'MIB Default Logic')
 
     result_df = pd.DataFrame(index=row_names, columns=column_headings)
-
+    
+    if config["table_name"] == "goals_based_outcomes_config":
+        print("goals_based_outcomes_config")
+    
     filter_func = filter_function_map.get(config["table_name"])
     if not filter_func:
         raise ValueError(f"No filter function found for table {config['table_name']}")
-
+    
     for row in row_names:
         for column in column_headings:
             if column == "Q1_Totals":  # Skip the totals column for now
@@ -152,7 +155,7 @@ def filter_service_information(dataframes, config):
                     dataframe_key = config["row_db_logic"].get(row, default_db_key)
 
                 this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-                this_row_dataframe = column_filter(this_row_dataframe, column)
+                this_row_dataframe = column_filter(this_row_dataframe, column, dataframe_key)
                 cell_output = filter_func(this_row_dataframe, row, dfname=dataframe_key)
                 result_df.loc[row, column] = cell_output
                 
@@ -164,6 +167,8 @@ def filter_service_information(dataframes, config):
     for row in row_names:
         total = 0
         for col in column_headings:
+            # TODo this is not correct for percentages
+            
             if col == "Q1_Totals":
                 continue
             value = result_df.loc[row, col]
