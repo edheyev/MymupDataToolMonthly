@@ -906,6 +906,74 @@ def dss_goal_filter(df, row, dfname="empty"):
         return "error"
 
 
+def contact_by_theme_filter(df, row, dfname="empty"):
+    theme_map = {        
+    "Abuse / exploitation":"Abuse / exploitation",
+    "Administrative":"Administrative",
+    "Activities / opportunities":"Activities / opportunities",
+    "Anger":"Anger issues",
+    "Anxiety / stress":"Anxiety / stress",
+    "Bereavement / grief / loss":"Bereavement / grief / loss",
+    "Boyfriend / girlfriend relationships":"Boyfriend / girlfriend relationships",
+    "Bullying":"Bullying",
+    "Caring for others":"Caring for others", 
+    "Covid-19 support":"Covid-19 support",
+    "Depression / low mood":"Depression / low mood",
+    "Domestic abuse":"Domestic abuse",
+    "Eating difficulties":"Eating difficulties",
+    "Family relationships / home life":"Family relationships / home life",
+    "Finances / debt /poverty":"Finances / debt /poverty",
+    "Friendships":"Friendships",
+    "Harm to others":"Harm to others",
+    "Hearing Voices":"Hearing Voices",# not found in data
+    "Homelessness":"Homelessness",# not found in data
+    "Identity issues":"Identity issues",
+    "Ill Health":"Ill Health",# not found in data
+    "In Crisis/De-escalation":"In Crisis/De-escalation",
+    "Issues with medication":"Issues with medication",
+    "Loss Job/house":"Loss Job/house",# not found in data
+    "Loneliness / isolation":"Loneliness / isolation",
+    "Low confidence / self-worth":"Low confidence / self-worth", # not found in data
+    "Low mood":"Low mood",
+    "Neurodevelopmental issues":"Neurodevelopmental issues",
+    "OCD":"OCD",
+    "Offending behaviour":"Offending behaviour",
+    "Panic":"Panic",
+    "Phobias":"Phobias",
+    "Physical health / illness / disability":"Physical health / illness / disability",
+    "Psychosis / psychotic episodes":"Psychosis / psychotic episodes",
+    "PTSD":"PTSD",
+    "School / college / employment":"School / college / employment",
+    "Self-Care":"Self-Care",# not found in data
+    "Self-Harm":"Self-Harm",# not found in data
+    "Sexual Violence":"Sexual Violence",# not found in data
+    "Sleep problems":"Sleep problems",
+    "Substance Misuse":"Substance Misuse",
+    "Suicidal Ideation":"Suicidal Ideation",
+    "Transition":"Transition",
+    "Trauma":"Trauma",
+    }
+  
+    try:
+        if row in theme_map:
+            if theme_map[row] is not None:
+                # Split the row into multiple themes based on comma separation
+                themes = theme_map[row].split(', ')
+                # Fill NaN values in 'contact_themes' with an empty string using .loc[]
+                df.loc[df['contact_themes'].isna(), 'contact_themes'] = ''
+                # Check if any of the themes exist in the 'contact_themes' column
+                this_theme_df = df[df['contact_themes'].str.contains('|'.join(themes))]
+            elif row == "Blank (nothing selected )":
+                # Count rows where 'client area' is NaN
+                this_theme_df = df[df['contact_themes'].isna()]
+        else:
+            print("Row not recognized by filters: " + row)
+            return "error"
+        
+        return len(this_theme_df)
+    except Exception as e:
+        print("An error occurred:", str(e))
+        return "error"
 
 
 
@@ -931,4 +999,5 @@ filter_function_map = {
     "average_goals_based_outcomes_config": average_goals_based_outcomes_filter,
     "goal_themes_goals_based_outcomes_config": goal_themes_filter,
     "dss_goals_based_outcomes_config": dss_goal_filter,
+    "contacts_by_theme_config": contact_by_theme_filter
 }

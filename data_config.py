@@ -917,6 +917,76 @@ dss_goals_based_outcomes_config = {
     'row_db_default': 'File_Closures_And_Goals_Within_Reporting_Period',
 }
 
+contacts_by_theme_config = {
+    "table_name": "contacts_by_theme_config",
+    "row_names": [
+        "Abuse / exploitation",
+        "Administrative",
+        "Activities / opportunities",
+        "Anger",
+        "Anxiety / stress",
+        "Bereavement / grief / loss",
+        "Boyfriend / girlfriend relationships",
+        "Bullying",
+        "Caring for others",
+        "Covid-19 support",
+        "Depression / low mood",
+        "Domestic abuse",
+        "Eating difficulties",
+        "Family relationships / home life",
+        "Finances / debt /poverty",
+        "Friendships",
+        "Harm to others",
+        "Hearing Voices",
+        "Homelessness",
+        "Identity issues",
+        "Ill Health",
+        "In Crisis/De-escalation",
+        "Issues with medication",
+        "Loss Job/house",
+        "Loneliness / isolation",
+        "Low confidence / self-worth",
+        "Low mood",
+        "Neurodevelopmental issues",
+        "OCD",
+        "Offending behaviour",
+        "Panic",
+        "Phobias",
+        "Physical health / illness / disability",
+        "Psychosis / psychotic episodes",
+        "PTSD",
+        "School / college / employment",
+        "Self-Care",
+        "Self-Harm",
+        "Sexual Violence",
+        "Sleep problems",
+        "Substance Misuse",
+        "Suicidal Ideation",
+        "Transition",
+        "Trauma",
+    ],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
 
 
 
@@ -942,5 +1012,6 @@ table_configs = [
     average_goals_based_outcomes_config,
     goal_themes_goals_based_outcomes_config,
     dss_goals_based_outcomes_config,
+    contacts_by_theme_config
     # Add more config tables as needed
 ]
