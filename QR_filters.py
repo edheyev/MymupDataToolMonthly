@@ -615,12 +615,14 @@ def young_carer_category_filter(df, row, dfname="empty"):
 def attended_contacts_filter(df, row, dfname="empty"):
 
     is_mib = dfname.startswith("MIB")
-    initial_filtering = total_attended_contacts(df, is_mib)
+    
     
     if row == "Total Number of Attended Contacts":
+        initial_filtering = total_attended_contacts(df, is_mib)
         return initial_filtering['client_id'].nunique()
 
     elif row == "One to One Contacts":
+        initial_filtering = total_attended_contacts(df, is_mib)
         #  activity details client therapy mode individual patient
         if is_mib:
             session_types = ["1 to 1", "2 to 1"]
@@ -631,6 +633,7 @@ def attended_contacts_filter(df, row, dfname="empty"):
         return dfout['client_id'].nunique()  # Count unique client_ids
 
     elif row == "Group Contacts":
+        initial_filtering = total_attended_contacts(df, is_mib)
         # Filtering for 'Group' session type and 'group therapy' mode
         if is_mib:
             # If MIB specific logic is needed, include it here
@@ -644,37 +647,83 @@ def attended_contacts_filter(df, row, dfname="empty"):
 
 
     elif row == "Indirect Activities":
+        if is_mib:
+            df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+        else:
+            df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+        
+        df = df[df['contact_attendance'] == 'Attended']
         # Filter for rows where 'indirect service type' is not empty or NA
-        dfout = df[df['indirect_service_type'].notna() & (df['indirect_service_type'] != '')]
+        indirect_approaches = ["Email", "Text Message (Asynchronous)"]
+        dfout = df[df['contact_approach'].isin(indirect_approaches)]
 
         return len(dfout)
 
     elif row == "Other (email and text)":
-        # Add specific filters for this row
-        return "TODO"
-
+        if is_mib:
+            df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+        else:
+            df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+        
+        df = df[df['contact_attendance'] == 'Attended']
+        other_approachs = ["Email", "Text Message (Asynchronous)", "Chat Room (Asynchronous)","Message Board (Asynchronous)" "Chat Room (Asynchronous)", "Instant Messaging (Asynchronous)", "Other (not listed)"]
+        dfout = df[df['contact_approach'].isin(other_approachs)]
+        return len(dfout)
+        
+        
     elif row == "Admin Contacts":
-        # Add specific filters for this row
-        return "TODO"
+        if is_mib:
+            dfout = df[df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+        else:
+            dfout = df[df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+        
+        return len(dfout)
 
     elif row == "Total number of DNA Contacts":
-        # Add specific filters for this row
-        return "TODO"
+        # MIB-specific or general filters
+        if is_mib:
+            df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+            df = df[df['contact_service_type'] == 'Know Your Mind'] # not sure about this
+            contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
+            df = df[df['contact_approach'].isin(contact_approaches)]
+            # Include additional MIB-specific filters here
+        else:
+            df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+            contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
+            df = df[df['contact_approach'].isin(contact_approaches)]
+            # Include additional general filters here.
+        dfout = df[df['contact_attendance'] == 'Did not Attend']
+        
+        return len(dfout)
+
+
 
     elif row == "Percentage of DNA Contacts":
-        # Add specific filters for this row
-        return "TODO"
+       # MIB-specific or general filters
+        if is_mib:
+            df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+            df = df[df['contact_service_type'] == 'Know Your Mind'] # not sure about this
+            contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
+            df = df[df['contact_approach'].isin(contact_approaches)]
+            # Include additional MIB-specific filters here
+        else:
+            df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+            contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
+            df = df[df['contact_approach'].isin(contact_approaches)]
+            # Include additional general filters here.
+        dftotal = df
+        dfdna = df[df['contact_attendance'] == 'Did not Attend']
+        
+        if len(dftotal) == 0:
+            return 0
+        else:
+            return round(len(dfdna)/len(dftotal)*100, 2)
 
     else:
         print(f"Row not recognised: {row}")
         return "error"
 
-    # After applying filters, calculate and return the desired output
-    # For example, return the count of unique 'client id'
-    # return df['client id'].nunique()
-
-    # Placeholder return statement
-    return "result after filtering"
+    return "FILTERING FAILED"
 
 def total_attended_contacts(df, is_mib):
     # Common filters
