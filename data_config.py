@@ -989,6 +989,628 @@ contacts_by_theme_config = {
 }
 
 
+source_of_referral_config = {
+    "table_name": "source_of_referral_config",
+    "row_names": [
+        "Primary Health Care: General Medical Practitioner Practice (GP)",
+        "Accident And Emergency Department",
+        "CAMHS Core/Step down",
+        "CAMHS Crisis Team",
+        "CAMHS Waiting List",
+        "Child Health: Community-based Paediatrics",
+        "Child Health: Hospital-based Paediatrics",
+        "Child Health: School Nurse",
+        "Community Mental Health Team (Adult Mental Health)",
+        "Employer",
+        "Employer: Occupational Health",
+        "Family Support Worker",
+        "Improving Access to Psychological Therapies Service",
+        "Independent sector: Low secure Inpatients",
+        "Independent sector: Medium secure Inpatients",
+        "Inpatient Service Child and Adult Mental Health",
+        "Inpatient Service Learning Disabilities",
+        "Internal Referral",
+        "Justice System: Court Liaison and Diversion Service",
+        "Justice System: Courts",
+        "Justice System: Police",
+        "Justice System: Prison",
+        "Justice System: Probation",
+        "Justice System: Youth Offending Team",
+        "Local Authority and Other Public Services: Education Service / Educational Establishment",
+        "Local Authority and Other Public Services: Housing Service",
+        "Local Authority and Other Public Services: Social Services",
+        "Mental Health Drop In Service",
+        "Not Known",
+        "Other Independent Sector Mental Health Services",
+        "Other Primary Health Care",
+        "Other secondary care specialty",
+        "Other Service or Agency",
+        "Other: Asylum Services",
+        "Other: Drug Action Team / Drug Misuse Agency",
+        "Other: Job Centre Plus",
+        "Other: Out of Area Agency",
+        "Other: Single Point of Access Service",
+        "Other: Urgent and Emergency Care Ambulance Service",
+        "Permanent Transfer from Another Mental Health Trust",
+        "Primary Health Care: Health Visitor",
+        "Primary Health Care: Maternity Service",
+        "Self-Referral :Self",
+        "Self-Referral: Carer/Relative",
+        "Temporary Transfer from Another Mental Health Trust",
+        "Transfer by Graduation from CAMHS to Adult Mental Health Services",
+        "Voluntary Sector",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'MIB_Referrals_Within_Reporting_Period',
+    'row_db_default': 'Referrals_Within_Reporting_Period',
+}
+
+reason_for_referral_config = {
+    "table_name": "reason_for_referral_config",
+    "row_names": [
+        "Adjustment to Health Issues",
+        "Anxiety",
+        "Attachment Difficulties",
+        "Behaviour Disorder",
+        "Behaviours That Challenge due to a Learning Disability",
+        "Bi-polar Disorder",
+        "Conduct Disorders",
+        "Depression",
+        "Diagnosed Autism Spectrum Disorder",
+        "Drug and Alcohol Difficulties",
+        "Eating Disorders",
+        "Gender Discomfort Issues",
+        "In Crisis",
+        "Isolation",
+        "Neurodevelopmental Conditions, excl. ASD",
+        "Not Known",
+        "Obsessive Compulsive Disorder",
+        "Ongoing or Recurrent Psychosis",
+        "Organic Brain Disorder",
+        "Other",
+        "Panic Attacks",
+        "Perinatal Mental Health Issues",
+        "Personality Disorders",
+        "Phobias",
+        "Post-Traumatic Stress Disorder",
+        "Preconception Perinatal Mental Health Concern",
+        "Relationship Difficulties",
+        "Self-Care Issues",
+        "Self-Harm Behaviours",
+        "Suspected Autism Spectrum Disorder",
+        "Suspected First Episode Psychosis",
+        "Unexplained Physical Symptoms",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'MIB_Referrals_Within_Reporting_Period',
+    'row_db_default': 'Referrals_Within_Reporting_Period',
+}
+
+other_reason_for_referral_config = {
+    "table_name": "other_reason_for_referral_config",
+    "row_names": [
+        "Anti-Social Behaviour",
+        "At risk of CSE",
+        "Bereavement",
+        "Bullying",
+        "Community Involvement/Participation",
+        "Covid 19",
+        "Criminal offending behaviour/or at risk of",
+        "Discrimination",
+        "Domestic Abuse",
+        "Early Help",
+        "Education Support",
+        "Emotional Support",
+        "Employability",
+        "Family Problems/Home Life",
+        "Family Support",
+        "Financial Support",
+        "Friendships",
+        "Harm to others",
+        "Hearing Voices",
+        "Historic domestic abuse",
+        "Homelessness",
+        "Housing",
+        "Identity issues",
+        "Ill Health",
+        "In Crisis",
+        "In Crisis/De-escalation",
+        "Issues with medication",
+        "LGBTQ",
+        "Loneliness / isolation",
+        "Loss Job/house",
+        "Low confidence / self-worth",
+        "Low mood",
+        "Mental Health Support",
+        "Neurodevelopmental issues",
+        "OCD",
+        "Offending behaviour",
+        "Panic",
+        "Personal Safety",
+        "Phobias",
+        "Physical Health",
+        "Physical health / illness / disability",
+        "Psychosis / psychotic episodes",
+        "PTSD",
+        "School / college / employment",
+        "Self-Care",
+        "Self-Harm",
+        "Sexual Health",
+        "Sexual Violence",
+        "Sexualised Abuse",
+        "Sleep Hygiene",
+        "Sleep problems",
+        "Social Isolation and Loneliness",
+        "Substance Misuse",
+        "Suicidal Ideation",
+        "Transition",
+        "Trauma",
+        "Victim of CSE",
+        "Wellness Health Education, Guidance and Counselling",
+        "Young Carer/Adult Carer",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
+    "placeholder_rows": {},
+    "row_db_logic": {
+        # Logic mappings for each status
+    },
+    "mib_row_db_logic": {
+        # MIB-specific logic mappings for each status
+    },
+    'mib_row_db_default': 'MIB_Referrals_Within_Reporting_Period',
+    'row_db_default': 'Referrals_Within_Reporting_Period',
+}
+
+
+#
+# 
+gender_config = {
+    "table_name": "gender_config",
+    "row_names": [
+        "Female (including Transgender Woman)",
+        "Male (including Transgender Man)",
+        "Non-Binary",
+        "Not known (Person stated Gender Code not recorded)",
+        "No Stated (patient asked but declined to provide a response)",
+        "Prefer not to say",
+        "Transgendered",
+        "Other (not listed)",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Female (including Transgender Woman)": "MUMUP_URL",
+        "Male (including Transgender Man)": "MUMUP_URL",
+        "Non-Binary": "MUMUP_URL",
+        "Not known (Person stated Gender Code not recorded)": "MUMUP_URL",
+        "No Stated (patient asked but declined to provide a response)": "MUMUP_URL",
+        "Prefer not to say": "MUMUP_URL",
+        "Transgendered": "MUMUP_URL",
+        "Other (not listed)": "MUMUP_URL",
+        "Blank (nothing selected)": "MUMUP_URL"
+        },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+ethnicity_config = {
+    "table_name": "ethnicity_config",
+    "row_names": [
+        "African",
+        "Any other Asian background",
+        "Any other Black background",
+        "Any other Ethnic group",
+        "Any other Mixed background",
+        "Any other White background",
+        "Arab",
+        "Bangladeshi",
+        "British",
+        "Caribbean",
+        "Central and Eastern European",
+        "Chinese",
+        "Gypsy/Roma/Traveller",
+        "Indian",
+        "Irish",
+        "Latin America",
+        "Not known",
+        "Not stated",
+        "Pakistani",
+        "White and Asian",
+        "White and Black African",
+        "White and Black Caribbean",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "African": "MUMUP_URL",
+        "Any other Asian background": "MUMUP_URL",
+        "Any other Black background": "MUMUP_URL",
+        "Any other Ethnic group": "MUMUP_URL",
+        "Any other Mixed background": "MUMUP_URL",
+        "Any other White background": "MUMUP_URL",
+        "Arab": "MUMUP_URL",
+        "Bangladeshi": "MUMUP_URL",
+        "British": "MUMUP_URL",
+        "Caribbean": "MUMUP_URL",
+        "Central and Eastern European": "MUMUP_URL",
+        "Chinese": "MUMUP_URL",
+        "Gypsy/Roma/Traveller": "MUMUP_URL",
+        "Indian": "MUMUP_URL",
+        "Irish": "MUMUP_URL",
+        "Latin America": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Not stated": "MUMUP_URL",
+        "Pakistani": "MUMUP_URL",
+        "White and Asian": "MUMUP_URL",
+        "White and Black African": "MUMUP_URL",
+        "White and Black Caribbean": "MUMUP_URL",
+        "Blank (nothing selected)": "MUMUP_URL"
+        },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+disability_config = {
+    "table_name": "disability_config",
+    "row_names": [
+        "Autism or other Neurological condition",
+        "Behaviour and Emotional",
+        "Hearing",
+        "Manual Dexterity",
+        "Memory or ability to concentrate, learn or understand (Learning Disability)",
+        "Mobility and Gross Motor",
+        "No disability",
+        "Not Known",
+        "Not stated (Person asked but declined to provide a response)",
+        "Other",
+        "Perception of Physical Danger",
+        "Personal, Self-Care and Continence",
+        "Progressive Conditions and Physical Health (such as HIV, Cancer, Multiple Sclerosis, Fits)",
+        "Sight",
+        "Speech",
+        "Yes",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Autism or other Neurological condition": "MUMUP_URL",
+        "Behaviour and Emotional": "MUMUP_URL",
+        "Hearing": "MUMUP_URL",
+        "Manual Dexterity": "MUMUP_URL",
+        "Memory or ability to concentrate, learn or understand (Learning Disability)": "MUMUP_URL",
+        "Mobility and Gross Motor": "MUMUP_URL",
+        "No disability": "MUMUP_URL",
+        "Not Known": "MUMUP_URL",
+        "Not stated (Person asked but declined to provide a response)": "MUMUP_URL",
+        "Other": "MUMUP_URL",
+        "Perception of Physical Danger": "MUMUP_URL",
+        "Personal, Self-Care and Continence": "MUMUP_URL",
+        "Progressive Conditions and Physical Health (such as HIV, Cancer, Multiple Sclerosis, Fits)": "MUMUP_URL",
+        "Sight": "MUMUP_URL",
+        "Speech": "MUMUP_URL",
+        "Yes": "MUMUP_URL",
+        "Blank (nothing selected)": "MUMUP_URL"
+        },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+sexual_orientation_config = {
+    "table_name": "sexual_orientation_config",
+    "row_names": [
+        "Asexual",
+        "Bisexual",
+        "Gay",
+        "Heterosexual or Straight",
+        "Lesbian",
+        "Not asked/Unknown",
+        "Not stated (Person asked but declined to provide a response)",
+        "Other",
+        "Person asked and did not know/is unsure or undecided",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Asexual": "MUMUP_URL",
+        "Bisexual": "MUMUP_URL",
+        "Gay": "MUMUP_URL",
+        "Heterosexual or Straight": "MUMUP_URL",
+        "Lesbian": "MUMUP_URL",
+        "Not asked/Unknown": "MUMUP_URL",
+        "Not stated (Person asked but declined to provide a response)": "MUMUP_URL",
+        "Other": "MUMUP_URL",
+        "Person asked and did not know/is unsure or undecided": "MUMUP_URL",
+        "Blank (nothing selected)": "MUMUP_URL"
+        },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+asylum_seeker_refugee_status_config = {
+    "table_name": "asylum_seeker_refugee_status_config",
+    "row_names": [
+        "Asylum seeker / Refugee Status",
+        "Yes",
+        "No",
+        "Not known",
+        "Blank (nothing selected )"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Asylum seeker / Refugee Status": "MUMUP_URL",
+        "Yes": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Blank (nothing selected )": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+special_educational_needs_config = {
+    "table_name": "special_educational_needs_config",
+    "row_names": [
+        "Special Educational Needs",
+        "No",
+        "Not known",
+        "Yes",
+        "Not applicable",
+        "Blank (nothing selected )"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Special Educational Needs": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Yes": "MUMUP_URL",
+        "Not applicable": "MUMUP_URL",
+        "Blank (nothing selected )": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+education_health_care_plan_config = {
+    "table_name": "education_health_care_plan_config",
+    "row_names": [
+        "Education, Health and Care plan",
+        "Yes",
+        "No",
+        "Not known",
+        "Not applicable",
+        "Blank (nothing selected )"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Education, Health and Care plan": "MUMUP_URL",
+        "Yes": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Not applicable": "MUMUP_URL",
+        "Blank (nothing selected )": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+at_risk_of_exploitation_config = {
+    "table_name": "at_risk_of_exploitation_config",
+    "row_names": [
+        "At risk of Exploitation",
+        "Yes",
+        "No",
+        "Not known",
+        "Blank (nothing selected )"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "At risk of Exploitation": "MUMUP_URL",
+        "Yes": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Blank (nothing selected )": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+
+leaving_care_config = {
+    "table_name": "leaving_care_config",
+    "row_names": [
+        "Leaving Care",
+        "Yes",
+        "No",
+        "Not Known",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Leaving Care": "MUMUP_URL",
+        "Yes": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Not Known": "MUMUP_URL",
+        "Blank (nothing selected)": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+looked_after_child_config = {
+    "table_name": "looked_after_child_config",
+    "row_names": [
+        "Looked after child",
+        "Yes",
+        "No",
+        "Not known",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Looked after child": "MUMUP_URL",
+        "Yes": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Blank (nothing selected)": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+
+child_protection_plan_config = {
+    "table_name": "child_protection_plan_config",
+    "row_names": [
+        "Child Protection Plan",
+        "No",
+        "Has never been subject to a plan",
+        "Not known",
+        "Has been previously subject to a plan",
+        "Is currently subject to a plan",
+        "Under assessment",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Child Protection Plan": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Has never been subject to a plan": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Has been previously subject to a plan": "MUMUP_URL",
+        "Is currently subject to a plan": "MUMUP_URL",
+        "Under assessment": "MUMUP_URL",
+        "Blank (nothing selected)": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+child_in_need_plan_config = {
+    "table_name": "child_in_need_plan_config",
+    "row_names": [
+        "Child in Need Plan",
+        "Is currently subject to a Child in need plan",
+        "No",
+        "Has never been subject to a Child in need plan",
+        "Not known",
+        "Has previously been subject to a Child in need plan",
+        "Under assessment",
+        "Blank (nothing selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Child in Need Plan": "MUMUP_URL",
+        "Is currently subject to a Child in need plan": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Has never been subject to a Child in need plan": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Has previously been subject to a Child in need plan": "MUMUP_URL",
+        "Under assessment": "MUMUP_URL",
+        "Blank (nothing selected)": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
+young_carer_config = {
+    "table_name": "young_carer_config",
+    "row_names": [
+        "Young Carer",
+        "Yes",
+        "No",
+        "Not known",
+        "Not stated",
+        "Blank (nothing Selected)"
+    ],
+    "column_headings": [],
+    "placeholder_rows": {
+        "Young Carer": "MUMUP_URL",
+        "Yes": "MUMUP_URL",
+        "No": "MUMUP_URL",
+        "Not known": "MUMUP_URL",
+        "Not stated": "MUMUP_URL",
+        "Blank (nothing Selected)": "MUMUP_URL"
+    },
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+}
+
 
 table_configs = [
     service_info_config,
@@ -1012,6 +1634,21 @@ table_configs = [
     average_goals_based_outcomes_config,
     goal_themes_goals_based_outcomes_config,
     dss_goals_based_outcomes_config,
-    contacts_by_theme_config
-    # Add more config tables as needed
+    contacts_by_theme_config,
+    source_of_referral_config,
+    reason_for_referral_config,
+    other_reason_for_referral_config,
+    gender_config,
+    ethnicity_config,
+    disability_config,
+    sexual_orientation_config,
+    asylum_seeker_refugee_status_config,
+    special_educational_needs_config,
+    education_health_care_plan_config,
+    at_risk_of_exploitation_config,
+    leaving_care_config,
+    looked_after_child_config,
+    child_protection_plan_config,
+    child_in_need_plan_config,
+    young_carer_config,
 ]

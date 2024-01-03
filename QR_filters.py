@@ -891,8 +891,6 @@ def goal_themes_filter(df, row, dfname="empty"):
         print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
         return "error"
 
- 
-
 def dss_goal_filter(df, row, dfname="empty"):
 
     if row == "How many unique clients have had a distress scale score in reporting period":
@@ -904,7 +902,6 @@ def dss_goal_filter(df, row, dfname="empty"):
     else:
         print(f"Row not recognised: {row}")
         return "error"
-
 
 def contact_by_theme_filter(df, row, dfname="empty"):
     theme_map = {        
@@ -971,11 +968,254 @@ def contact_by_theme_filter(df, row, dfname="empty"):
             return "error"
         
         return len(this_theme_df)
+    
     except Exception as e:
         print("An error occurred:", str(e))
         return "error"
 
+def source_of_referral_filter(df, row, dfname="empty"):
+    reason_map = {
+        "Primary Health Care: General Medical Practitioner Practice (GP)": "Primary Health Care: General Medical Practitioner Practice (GP)",
+        "Accident And Emergency Department": "Accident And Emergency Department",
+        "CAMHS Core/Step down": "CAMHS Core/Step down",
+        "CAMHS Crisis Team": "CAMHS Crisis Team",
+        "CAMHS Waiting List": "CAMHS Waiting List",
+        "Child Health: Community-based Paediatrics": "Child Health: Community-based Paediatrics",
+        "Child Health: Hospital-based Paediatrics": "Child Health: Hospital-based Paediatrics",
+        "Child Health: School Nurse": "Child Health: School Nurse",
+        "Community Mental Health Team (Adult Mental Health)": "Community Mental Health Team (Adult Mental Health)",
+        "Employer": "Employer",
+        "Employer: Occupational Health": "Employer: Occupational Health",
+        "Family Support Worker": "Family Support Worker",
+        "Improving Access to Psychological Therapies Service": "Improving Access to Psychological Therapies Service",
+        "Independent sector: Low secure Inpatients": "Independent sector: Low secure Inpatients",
+        "Independent sector: Medium secure Inpatients": "Independent sector: Medium secure Inpatients",
+        "Inpatient Service Child and Adult Mental Health": "Inpatient Service Child and Adult Mental Health",
+        "Inpatient Service Learning Disabilities": "Inpatient Service Learning Disabilities",
+        "Internal Referral": "Internal Referral",
+        "Justice System: Court Liaison and Diversion Service": "Justice System: Court Liaison and Diversion Service",
+        "Justice System: Courts": "Justice System: Courts",
+        "Justice System: Police": "Justice System: Police",
+        "Justice System: Prison": "Justice System: Prison",
+        "Justice System: Probation": "Justice System: Probation",
+        "Justice System: Youth Offending Team": "Justice System: Youth Offending Team",
+        "Local Authority and Other Public Services: Education Service / Educational Establishment": "Local Authority and Other Public Services: Education Service / Educational Establishment",
+        "Local Authority and Other Public Services: Housing Service": "Local Authority and Other Public Services: Housing Service",
+        "Local Authority and Other Public Services: Social Services": "Local Authority and Other Public Services: Social Services",
+        "Mental Health Drop In Service": "Mental Health Drop In Service",
+        "Not Known": "Not Known",
+        "Other Independent Sector Mental Health Services": "Other Independent Sector Mental Health Services",
+        "Other Primary Health Care": "Other Primary Health Care",
+        "Other secondary care specialty": "Other secondary care specialty",
+        "Other Service or Agency": "Other Service or Agency",
+        "Other: Asylum Services": "Other: Asylum Services",
+        "Other: Drug Action Team / Drug Misuse Agency": "Other: Drug Action Team / Drug Misuse Agency",
+        "Other: Job Centre Plus": "Other: Job Centre Plus",
+        "Other: Out of Area Agency": "Other: Out of Area Agency",
+        "Other: Single Point of Access Service": "Other: Single Point of Access Service",
+        "Other: Urgent and Emergency Care Ambulance Service": "Other: Urgent and Emergency Care Ambulance Service",
+        "Permanent Transfer from Another Mental Health Trust": "Permanent Transfer from Another Mental Health Trust",
+        "Primary Health Care: Health Visitor": "Primary Health Care: Health Visitor",
+        "Primary Health Care: Maternity Service": "Primary Health Care: Maternity Service",
+        "Self-Referral :Self": "Self-Referral :Self",
+        "Self-Referral: Carer/Relative": "Self-Referral: Carer/Relative",
+        "Temporary Transfer from Another Mental Health Trust": "Temporary Transfer from Another Mental Health Trust",
+        "Transfer by Graduation from CAMHS to Adult Mental Health Services": "Transfer by Graduation from CAMHS to Adult Mental Health Services",
+        "Voluntary Sector": "Voluntary Sector",
+        "Blank (nothing selected)": "Blank (nothing selected)"
+    }
+    try:
+        if row in reason_map:
+            if reason_map[row] is not None:
+                df_filtered = df[df['source'] == reason_map[row]]
+            elif row == "Blank (nothing selected )":
+                df_filtered = df[df['source'].isna()]
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
+        
+        return len(df_filtered)
 
+    except Exception as e:
+        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
+        return "error"
+
+    return "row or dataframe error"
+
+
+def reason_for_referral_filter(df, row, dfname="empty"):
+    reason_map = {
+        "Adjustment to Health Issues": "Adjustment to Health Issues",
+        "Anxiety": "Anxiety",
+        "Attachment Difficulties": "Attachment Difficulties",
+        "Behaviour Disorder": "Behaviour Disorder",
+        "Behaviours That Challenge due to a Learning Disability": "Behaviours That Challenge due to a Learning Disability",
+        "Bi-polar Disorder": "Bi-polar Disorder",
+        "Conduct Disorders": "Conduct Disorders",
+        "Depression": "Depression",
+        "Diagnosed Autism Spectrum Disorder": "Diagnosed Autism Spectrum Disorder",
+        "Drug and Alcohol Difficulties": "Drug and Alcohol Difficulties",
+        "Eating Disorders": "Eating Disorders",
+        "Gender Discomfort Issues": "Gender Discomfort Issues",
+        "In Crisis": "In Crisis",
+        "Isolation": "Isolation",
+        "Neurodevelopmental Conditions, excl. ASD": "Neurodevelopmental Conditions, excl. ASD",
+        "Not Known": "Not Known",
+        "Obsessive Compulsive Disorder": "Obsessive Compulsive Disorder",
+        "Ongoing or Recurrent Psychosis": "Ongoing or Recurrent Psychosis",
+        "Organic Brain Disorder": "Organic Brain Disorder",
+        "Other": "Other",
+        "Panic Attacks": "Panic Attacks",
+        "Perinatal Mental Health Issues": "Perinatal Mental Health Issues",
+        "Personality Disorders": "Personality Disorders",
+        "Phobias": "Phobias",
+        "Post-Traumatic Stress Disorder": "Post-Traumatic Stress Disorder",
+        "Preconception Perinatal Mental Health Concern": "Preconception Perinatal Mental Health Concern",
+        "Relationship Difficulties": "Relationship Difficulties",
+        "Self-Care Issues": "Self-Care Issues",
+        "Self-Harm Behaviours": "Self-Harm Behaviours",
+        "Suspected Autism Spectrum Disorder": "Suspected Autism Spectrum Disorder",
+        "Suspected First Episode Psychosis": "Suspected First Episode Psychosis",
+        "Unexplained Physical Symptoms": "Unexplained Physical Symptoms",
+        "Blank (nothing selected)": "Blank (nothing selected)"
+    }
+    try:
+        if row in reason_map:
+            if reason_map[row] is not None:
+                df_filtered = df[df['reason'] == reason_map[row]]
+            elif row == "Blank (nothing selected )":
+                df_filtered = df[df['reason'].isna()]
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
+        
+        return len(df_filtered)
+
+    except Exception as e:
+        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
+        return "error"
+
+    return "row or dataframe error"
+
+def other_reason_for_referral_filter(df, row, dfname="empty"):
+    reason_map = {
+        "Anti-Social Behaviour": "Anti-Social Behaviour",
+        "At risk of CSE": "At risk of CSE",
+        "Bereavement": "Bereavement",
+        "Bullying": "Bullying",
+        "Community Involvement/Participation": "Community Involvement/Participation",
+        "Covid 19": "Covid 19",
+        "Criminal offending behaviour/or at risk of": "Criminal offending behaviour/or at risk of",
+        "Discrimination": "Discrimination",
+        "Domestic Abuse": "Domestic Abuse",
+        "Early Help": "Early Help",
+        "Education Support": "Education Support",
+        "Emotional Support": "Emotional Support",
+        "Employability": "Employability",
+        "Family Problems/Home Life": "Family Problems/Home Life",
+        "Family Support": "Family Support",
+        "Financial Support": "Financial Support",
+        "Friendships": "Friendships",
+        "Harm to others": "Harm to others",
+        "Hearing Voices": "Hearing Voices",
+        "Historic domestic abuse": "Historic domestic abuse",
+        "Homelessness": "Homelessness",
+        "Housing": "Housing",
+        "Identity issues": "Identity issues",
+        "Ill Health": "Ill Health",
+        "In Crisis": "In Crisis",
+        "In Crisis/De-escalation": "In Crisis/De-escalation",
+        "Issues with medication": "Issues with medication",
+        "LGBTQ": "LGBTQ",
+        "Loneliness / isolation": "Loneliness / isolation",
+        "Loss Job/house": "Loss Job/house",
+        "Low confidence / self-worth": "Low confidence / self-worth",
+        "Low mood": "Low mood",
+        "Mental Health Support": "Mental Health Support",
+        "Neurodevelopmental issues": "Neurodevelopmental issues",
+        "OCD": "OCD",
+        "Offending behaviour": "Offending behaviour",
+        "Panic": "Panic",
+        "Personal Safety": "Personal Safety",
+        "Phobias": "Phobias",
+        "Physical Health": "Physical Health",
+        "Physical health / illness / disability": "Physical health / illness / disability",
+        "Psychosis / psychotic episodes": "Psychosis / psychotic episodes",
+        "PTSD": "PTSD",
+        "School / college / employment": "School / college / employment",
+        "Self-Care": "Self-Care",
+        "Self-Harm": "Self-Harm",
+        "Sexual Health": "Sexual Health",
+        "Sexual Violence": "Sexual Violence",
+        "Sexualised Abuse": "Sexualised Abuse",
+        "Sleep Hygiene": "Sleep Hygiene",
+        "Sleep problems": "Sleep problems",
+        "Social Isolation and Loneliness": "Social Isolation and Loneliness",
+        "Substance Misuse": "Substance Misuse",
+        "Suicidal Ideation": "Suicidal Ideation",
+        "Transition": "Transition",
+        "Trauma": "Trauma",
+        "Victim of CSE": "Victim of CSE",
+        "Wellness Health Education, Guidance and Counselling": "Wellness Health Education, Guidance and Counselling",
+        "Young Carer/Adult Carer": "Young Carer/Adult Carer",
+        "Blank (nothing selected)": "Blank (nothing selected)"
+    }
+    try:
+        if row in reason_map:
+            if reason_map[row] is not None:
+                df_filtered = df[df['reason_other'] == reason_map[row]]
+            elif row == "Blank (nothing selected )":
+                df_filtered = df[df['reason_other'].isna()]
+        else:
+            print("Row not recognised by filters: " + row)
+            return "error"
+        
+        return len(df_filtered)
+
+    except Exception as e:
+        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
+        return "error"
+
+    return "row or dataframe error"
+
+def gender_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def ethnicity_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def disability_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def sexual_orientation_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def asylum_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def spec_ed_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def ed_hcp_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def are_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def leaving_care_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def lac_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def cpp_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def cinp_filter(df, row, dfname="empty"):
+    return "mymupURL"
+
+def young_carer_filter(df, row, dfname="empty"):
+    return "mymupURL"
 
 filter_function_map = {
     "service_info_config": SI_row_filter,
@@ -999,5 +1239,21 @@ filter_function_map = {
     "average_goals_based_outcomes_config": average_goals_based_outcomes_filter,
     "goal_themes_goals_based_outcomes_config": goal_themes_filter,
     "dss_goals_based_outcomes_config": dss_goal_filter,
-    "contacts_by_theme_config": contact_by_theme_filter
+    "contacts_by_theme_config": contact_by_theme_filter,
+    "source_of_referral_config": source_of_referral_filter,
+    "reason_for_referral_config": reason_for_referral_filter,
+    "other_reason_for_referral_config": other_reason_for_referral_filter,
+    "gender_config": gender_filter,
+    "ethnicity_config": ethnicity_filter,
+    "disability_config": disability_filter,
+    "sexual_orientation_config": sexual_orientation_filter,
+    "asylum_seeker_refugee_status_config": asylum_filter,
+    "special_educational_needs_config": spec_ed_filter,
+    "education_health_care_plan_config": ed_hcp_filter,
+    "at_risk_of_exploitation_config": are_filter,
+    "leaving_care_config": leaving_care_filter,
+    "looked_after_child_config": lac_filter,
+    "child_protection_plan_config": cpp_filter,
+    "child_in_need_plan_config": cinp_filter,
+    "young_carer_config": young_carer_filter,
 }
