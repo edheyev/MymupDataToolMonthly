@@ -16,21 +16,8 @@ def column_filter(df, column, dfname="empty"):
     
     try:
         if column == "Q1_Totals":
-        # ACTUALLY THIS initial FILTER IS DEPRECATED AND IS BEING TOTALLED IN THE REPORTING SCRIPT
-            filters = [
-                df["franchise"] == "Barnardos WRAP",
-                df["franchise"] == "Bradford Youth Service",
-                (df["franchise"] == "Brathay") & (df[contact_service] == "MAGIC"),
-                (df["franchise"] == "Inspired Neighbourhoods") & (df[contact_service] == "CYP"),
-                df[contact_service] == "Know Your Mind",
-                df[contact_service] == "Know Your Mind Plus",
-                df[contact_service] == "Hospital Buddies AGH",
-                df[contact_service] == "Hospital Buddies BRI",
-                (df["franchise"] == "Selfa") & (df[contact_service] == "Mighty Minds")
-            ]
-            filtered_dfs = [df[filter_condition] for filter_condition in filters]
-            total_df = pd.concat(filtered_dfs)
-            return total_df.drop_duplicates()
+        # totals calculated in the main script
+            pass
         elif column == "Barnardos (Wrap)":
             return df[df["franchise"] == "Barnardos WRAP"]
         elif column == "BYS All":
@@ -85,7 +72,7 @@ def SI_row_filter(df, row, dfname="empty"):
                 df = df[df["contact_approach"].isin(contact_approaches)]
 
                 # Count of unique clients
-                return df["client_id"].count()
+                return df
             else:
                 # exclude admin contacts
                 df = df[df["contact_themes"] != "Administrative"]
@@ -107,11 +94,10 @@ def SI_row_filter(df, row, dfname="empty"):
                     )
                 ]
 
-                # Count of unique clients
-                return df["client_id"].count()
+                return df
 
         elif row == "How many were declined by the service?":
-            return df["client_id"].count()
+            return df
 
         elif (
             row
@@ -129,14 +115,14 @@ def SI_row_filter(df, row, dfname="empty"):
                 "Client declined a service prior or during assessment",
             ]
             df_filtered = df[df["reason"].isin(closure_reasons)]
-            return df_filtered["client_id"].nunique()
+            return df_filtered
 
         elif row == "Active cases":
             # Count clients with no file closure date and status active, pending, processing, or waiting list
             active_statuses = ["active", "pending", "processing", "waiting list"]
             # df_active = df[df['client_status'].isin(active_statuses) & df['file_closure_date'].isna()]
             # df_active = df[df['client_status'].isin(active_statuses) & df['file_closure_date'].isna()]
-            return df["client_id"].nunique()
+            return df
 
         elif row == "How many people have moved on":
             # Filter by specific file closure reasons for moving on and count unique clients
@@ -149,13 +135,13 @@ def SI_row_filter(df, row, dfname="empty"):
                 "Single episode",
             ]
             df_moved_on = df[df["reason"].isin(move_on_reasons)]
-            return df_moved_on["client_id"].nunique()
+            return df_moved_on
         else:
             print("Row not recognised by filters")
         return pd.DataFrame()
     except Exception as e:
         print(f"Error in row_filter with row {row}: {e} . current df is {dfname}")
-    return "error"
+    return None
 
 def gender_category_filter(df, row, dfname="empty"):
     gender_map = {
@@ -169,23 +155,22 @@ def gender_category_filter(df, row, dfname="empty"):
         "Other (not listed)": "Other (not listed)",
         "Blank (nothing selected)": None  # Special handling for blank entries
     }
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[df['client_gender'].isna()]
+        return df[df['client_gender'] == mapped_value]
 
     try:
-        if row in gender_map:
-            if gender_map[row] is not None:
-                return df[df['client_gender'] == gender_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                # Counting rows where 'client_gender' is NaN
-                return df[df['client_gender'].isna()]['client_id'].nunique()
+        mapped_value = gender_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected)":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in gender_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in gender_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
-
-    return 0
+        print(f"Error in gender_category_filter with row {row}: {e}. Current df: {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
 def ethnic_category_filter(df, row, dfname="empty"):
     ethnic_map = {

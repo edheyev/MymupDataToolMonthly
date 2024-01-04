@@ -94,11 +94,13 @@ def filter_mib_services(dataframes):
 
     for df_name, df in dataframes.items():
         if df_name.lower().startswith('mib'):
+            filtered_df = df
+            filtered_dataframes[df_name] = filtered_df
             # Process dataframes whose names start with 'mib'
-            if 'contact_service_type' in df.columns and df_name in yim_providers:
-                filtered_dataframes[df_name] = df[df["contact_service_type"].isin(yim_providers)]
-            else:
-                filtered_dataframes[df_name] = df
+            # if 'contact_service_type' in df.columns and df_name in yim_providers:
+            #     filtered_dataframes[df_name] = df[df["contact_service_type"].isin(yim_providers)]
+            # else:
+            #     filtered_dataframes[df_name] = df
         else:
         #     # If the required columns are not present, keep the dataframe as is
             filtered_df = df
