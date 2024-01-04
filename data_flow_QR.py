@@ -75,6 +75,7 @@ def produce_tables(dataframes):
 
     report_dfs = []
     column_headings = [
+        "Row Name",
         "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
@@ -90,9 +91,12 @@ def produce_tables(dataframes):
     # Uncomment to write column headings to the CSV file
     with open("my_csv.csv", "w", newline='') as f:
         f.write(",".join(column_headings) + "\n")
+        
+    mylooplist = list(filter_function_map.keys())[0:5]
 
     # Append each table to the CSV file
-    for name in filter_function_map.keys():
+    # for name in filter_function_map.keys():
+    for name in mylooplist:
         print(f"Processing {name}")
         thisconfig = find_dict_by_table_name(name, table_configs)
         this_table = filter_service_information(dataframes, thisconfig)
@@ -131,21 +135,23 @@ def filter_service_information(dataframes, config):
     default_db_key = config.get('row_db_default', 'Default Logic')
     mib_default_db_key = config.get('mib_row_db_default', 'MIB Default Logic')
 
-    result_df = pd.DataFrame(index=row_names, columns=column_headings)
-    
-    if config["table_name"] == "goals_based_outcomes_config":
-        print("goals_based_outcomes_config")
-    
+    # Create the result DataFrame with the specified column headings
+    result_df = pd.DataFrame(columns=["Row Name"] + column_headings)
+
     filter_func = filter_function_map.get(config["table_name"])
     if not filter_func:
         raise ValueError(f"No filter function found for table {config['table_name']}")
-    
+
+    # Loop through each row
     for row in row_names:
+        new_row = {'Row Name': row}  # Initialize the new row with the row name
+
+        # Loop through each column
         for column in column_headings:
             if column == "Q1_Totals":  # Skip the totals column for now
                 continue
             if row in placeholder_rows:
-                result_df.loc[row, column] = placeholder_rows[row]
+                new_row[column] = placeholder_rows[row]
                 continue
 
             try:
@@ -157,28 +163,30 @@ def filter_service_information(dataframes, config):
                 this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
                 this_row_dataframe = column_filter(this_row_dataframe, column, dataframe_key)
                 cell_output = filter_func(this_row_dataframe, row, dfname=dataframe_key)
-                result_df.loc[row, column] = cell_output
+                new_row[column] = cell_output
                 
             except Exception as e:
-                print(f"Error processing row: {row}. col:  {column}. error:{e}")
-                result_df.loc[row, column] = "error"
+                print(f"Error processing row: {row}, column: {column}. Error: {e}")
+                new_row[column] = "error"
 
+        # Convert the new_row dictionary to a DataFrame and append to result_df
+        new_row_df = pd.DataFrame([new_row])
+        result_df = pd.concat([result_df, new_row_df], ignore_index=True)
 
-    for row in row_names:
+    # Calculation of totals for each row
+    for index, row in result_df.iterrows():
         total = 0
         for col in column_headings:
-            # TODo this is not correct for percentages
-            
             if col == "Q1_Totals":
                 continue
-            value = result_df.loc[row, col]
-            # Convert value to numeric, non-numeric becomes NaN
+            value = row[col]
             numeric_value = pd.to_numeric(value, errors='coerce')
             if numeric_value is not None and not pd.isna(numeric_value):
                 total += numeric_value
-        result_df.loc[row, "Q1_Totals"] = total
+        result_df.at[index, "Q1_Totals"] = total
 
     return result_df
+
 
 
 

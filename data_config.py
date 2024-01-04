@@ -1227,7 +1227,18 @@ gender_config = {
         "Other (not listed)",
         "Blank (nothing selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Female (including Transgender Woman)": "MUMUP_URL",
         "Male (including Transgender Man)": "MUMUP_URL",
@@ -1272,7 +1283,18 @@ ethnicity_config = {
         "White and Black Caribbean",
         "Blank (nothing selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "African": "MUMUP_URL",
         "Any other Asian background": "MUMUP_URL",
@@ -1325,7 +1347,18 @@ disability_config = {
         "Yes",
         "Blank (nothing selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Autism or other Neurological condition": "MUMUP_URL",
         "Behaviour and Emotional": "MUMUP_URL",
@@ -1365,7 +1398,18 @@ sexual_orientation_config = {
         "Person asked and did not know/is unsure or undecided",
         "Blank (nothing selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Asexual": "MUMUP_URL",
         "Bisexual": "MUMUP_URL",
@@ -1393,7 +1437,18 @@ asylum_seeker_refugee_status_config = {
         "Not known",
         "Blank (nothing selected )"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Asylum seeker / Refugee Status": "MUMUP_URL",
         "Yes": "MUMUP_URL",
@@ -1417,7 +1472,18 @@ special_educational_needs_config = {
         "Not applicable",
         "Blank (nothing selected )"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Special Educational Needs": "MUMUP_URL",
         "No": "MUMUP_URL",
@@ -1442,7 +1508,18 @@ education_health_care_plan_config = {
         "Not applicable",
         "Blank (nothing selected )"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Education, Health and Care plan": "MUMUP_URL",
         "Yes": "MUMUP_URL",
@@ -1466,7 +1543,18 @@ at_risk_of_exploitation_config = {
         "Not known",
         "Blank (nothing selected )"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "At risk of Exploitation": "MUMUP_URL",
         "Yes": "MUMUP_URL",
@@ -1490,7 +1578,18 @@ leaving_care_config = {
         "Not Known",
         "Blank (nothing selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Leaving Care": "MUMUP_URL",
         "Yes": "MUMUP_URL",
@@ -1513,7 +1612,18 @@ looked_after_child_config = {
         "Not known",
         "Blank (nothing selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Looked after child": "MUMUP_URL",
         "Yes": "MUMUP_URL",
@@ -1540,7 +1650,18 @@ child_protection_plan_config = {
         "Under assessment",
         "Blank (nothing selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Child Protection Plan": "MUMUP_URL",
         "No": "MUMUP_URL",
@@ -1569,7 +1690,18 @@ child_in_need_plan_config = {
         "Under assessment",
         "Blank (nothing selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Child in Need Plan": "MUMUP_URL",
         "Is currently subject to a Child in need plan": "MUMUP_URL",
@@ -1596,7 +1728,18 @@ young_carer_config = {
         "Not stated",
         "Blank (nothing Selected)"
     ],
-    "column_headings": [],
+    "column_headings": [
+        "Q1_Totals",  
+        "Barnardos (Wrap)",
+        "BYS All",
+        "Brathay Magic",
+        "INCIC (CYP)",
+        "MIB Know Your Mind",
+        "MIB Know Your Mind +",
+        "MIB Hospital Buddys Airedale General",
+        "MIB Hospital Buddys BRI",
+        "SELFA (Mighty Minds)",
+    ],
     "placeholder_rows": {
         "Young Carer": "MUMUP_URL",
         "Yes": "MUMUP_URL",
