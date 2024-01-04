@@ -2,12 +2,9 @@
 """
 Created on Wed Dec 20 15:58:58 2023
 
-@author: Edloc
+@author: Ed Heywood-Everett
 """
-
 import pandas as pd
-
-
 
 def column_filter(df, column, dfname="empty"):
     
@@ -1041,7 +1038,6 @@ def source_of_referral_filter(df, row, dfname="empty"):
         return "error"
 
     return "row or dataframe error"
-
 
 def reason_for_referral_filter(df, row, dfname="empty"):
     reason_map = {

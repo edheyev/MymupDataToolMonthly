@@ -1,3 +1,4 @@
+import sys
 import os
 import pandas as pd
 from data_config import file_info, service_info_config, table_configs
@@ -5,9 +6,9 @@ from data_cleaning import (
     clean_column_names,
     remove_duplicates,
     remove_trailing_spaces_from_values,
-    validate_data_files,
     isolate_reporting_period,
-    filter_mib_services
+    filter_mib_services,
+    validate_data_files,
 )
 from QR_filters import (
     filter_function_map,
@@ -17,8 +18,12 @@ from QR_filters import (
 
 #todo: make sure global filtering is good
 # todo fix duplicate removal to only remove if date is also teh same
+
 def main():
     print("Begin Processing files")
+    
+    # Define reporting period parameters
+    start_date, end_date, date_column = "2020-04-01", "2020-06-30", "date_of_contact"
 
     # Load and process data
     directory = (
@@ -27,14 +32,14 @@ def main():
     )
     raw_data = load_data_files(directory, file_info)
 
-    # TODO check that all necessary files are included !!
-
-    # Define reporting period parameters
-    start_date, end_date, date_column = "2020-04-01", "2020-06-30", "date_of_contact"
-
     # Data cleaning and validation
-    cleaned_data = clean_data(raw_data, start_date, end_date, date_column)
-    validated_data = validate_data_files(cleaned_data, file_info)
+    try:
+        cleaned_data = clean_data(raw_data, start_date, end_date, date_column)
+        validated_data = validate_data_files(cleaned_data, file_info)
+    except Exception as e:
+        print(f"Error cleaning data: {e}")
+        sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
+
 
     # Produce and save tables
     produce_tables(validated_data)
@@ -46,6 +51,20 @@ def main():
 def load_data_files(directory, file_info):
     print("Loading data files...")
     dataframes = {}
+
+    # Check if all files exist
+    missing_files = []
+    for key, info in file_info.items():
+        full_path = os.path.join(directory, info["filename"])
+        if not os.path.exists(full_path):
+            missing_files.append(info["filename"])
+
+    # If there are missing files, stop the function and report
+    if missing_files:
+        missing_files_str = ", ".join(missing_files)
+        raise FileNotFoundError(f"The following required files are missing: {missing_files_str}")
+
+    # If all files are present, proceed to load them
     for key, info in file_info.items():
         full_path = os.path.join(directory, info["filename"])
         print(f"Attempting to load: {full_path}")  # Print the full path
@@ -54,7 +73,9 @@ def load_data_files(directory, file_info):
             print(f'> Loaded {key} from {info["filename"]}')
         except Exception as e:
             print(f"Error loading {full_path}: {e}")
+
     return dataframes
+
 
 
 def clean_data(dataframes, start_date, end_date, date_column):
@@ -88,27 +109,25 @@ def produce_tables(dataframes):
         "SELFA (Mighty Minds)",
     ]
 
-    # Uncomment to write column headings to the CSV file
+    # Write column headings to the CSV file
     with open("my_csv.csv", "w", newline='') as f:
         f.write(",".join(column_headings) + "\n")
         
-    mylooplist = list(filter_function_map.keys())[0:5]
 
+    # mylooplist = list(filter_function_map.keys())[0:5]
+    # for name in mylooplist:
+    
     # Append each table to the CSV file
-    # for name in filter_function_map.keys():
-    for name in mylooplist:
+    for name in filter_function_map.keys():
         print(f"Processing {name}")
         thisconfig = find_dict_by_table_name(name, table_configs)
         this_table = filter_service_information(dataframes, thisconfig)
 
-        # Check if DataFrame is not empty
+        # Check if DataFrame is not empty and write to csv
         if not this_table.empty:
             with open("my_csv.csv", "a", newline='') as f:
-                # Write the table name on its own line
                 f.write(f"{name}\n")
-                # Write the DataFrame
                 this_table.to_csv(f, header=False, index=False)
-                # Optionally, add an empty row or some separator after each table
                 f.write("\n")
         else:
             print(f"No data to write for {name}")
@@ -188,13 +207,10 @@ def filter_service_information(dataframes, config):
     return result_df
 
 
-
-
-
-def is_error_in_filter(col_filtered_data):
-    if "error" in col_filtered_data.columns and col_filtered_data["error"].iloc[0]:
-        return True
-    return False
+# def is_error_in_filter(col_filtered_data):
+#     if "error" in col_filtered_data.columns and col_filtered_data["error"].iloc[0]:
+#         return True
+#     return False
 
 
 if __name__ == "__main__":

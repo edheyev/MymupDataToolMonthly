@@ -24,8 +24,8 @@ def plot_comparison(count_7_days, count_21_days, count_difference):
     plt.show()
 
 # File paths
-file_seven_days = "D:\OneDrive\Documents\src\python_testing\quarterly_data_dump\contacts_within_twenty_one_days.csv"
-file_twenty_one_days = "D:\OneDrive\Documents\src\python_testing\quarterly_data_dump\contacts_within_seven_days.csv"
+file_seven_days = "D:\OneDrive\Documents\src\python_testing\MyMupDataTool\quarterly_data_dump\contacts_within_twenty_one_days.csv"
+file_twenty_one_days = "D:\OneDrive\Documents\src\python_testing\MyMupDataTool\quarterly_data_dump\contacts_within_seven_days.csv"
 
 # Load datasets
 df_7_days = load_data(file_seven_days)
@@ -37,6 +37,7 @@ unique_ids_21_days = get_unique_ids(df_21_days, 'client_id')
 
 # Compare IDs
 ids_not_in_21_days = compare_ids(unique_ids_7_days, unique_ids_21_days)
+print(len(ids_not_in_21_days))
 
 # Plotting the comparison
 plot_comparison(len(unique_ids_7_days), len(unique_ids_21_days), len(ids_not_in_21_days))
