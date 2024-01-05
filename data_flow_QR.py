@@ -97,7 +97,6 @@ def clean_data(dataframes, start_date, end_date, date_column):
 def produce_tables(dataframes):
     print("Producing output tables...")
 
-    report_dfs = []
     column_headings = [
         "Row Name",
         "Q1_Totals",
@@ -112,18 +111,14 @@ def produce_tables(dataframes):
         "SELFA (Mighty Minds)",
     ]
 
-
-
-
     # Write column headings to the CSV file
     with open("my_csv.csv", "w", newline='') as f:
         f.write(",".join(column_headings) + "\n")
         
-        
     #optionally initialise empty df
     combined_df = pd.DataFrame(columns=column_headings)
 
-    mylooplist = list(filter_function_map.keys())[0:1]
+    mylooplist = list(filter_function_map.keys())[22:23]
     
     # Append each table to the CSV file
     # for name in filter_function_map.keys():
@@ -281,7 +276,7 @@ def calculate_percentage_as_number(numerator_df, denominator_df):
 
 
 def is_percentage_row(row_name):
-    return row_name.startswith('%') or row_name.startswith('average')
+    return row_name.startswith('%') or row_name.startswith('average') or row_name.startswith('Percentage')
 
 
 

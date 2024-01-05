@@ -138,7 +138,19 @@ def SI_row_filter(df, row, dfname="empty"):
                 "Single episode",
             ]
             df_moved_on = df[df["reason"].isin(move_on_reasons)]
-            return df_moved_on
+            
+            unique_clients_df = df_moved_on.drop_duplicates(subset='client_id')
+            
+            return unique_clients_df
+        
+        
+        elif row == "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":
+                      
+            return (pd.DataFrame(), pd.DataFrame())
+        elif row == "% clients who had the first support session offered within 21 days of referral":
+            pass
+        elif row == "% clients attended the first contact by video/face to face/telephone within 21 days of referral":
+            pass
         else:
             print("Row not recognised by filters")
         return pd.DataFrame()
@@ -156,16 +168,18 @@ def gender_category_filter(df, row, dfname="empty"):
         "Prefer not to say": "Prefer not to say",
         "Transgendered": "Transgendered",
         "Other (not listed)": "Other (not listed)",
-        "Blank (nothing selected)": None  # Special handling for blank entries
+        "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
+
     def filter_logic(mapped_value):
-        if mapped_value is None:
-            return df[df['client_gender'].isna()]
+        if mapped_value == "Blank":
+            # Filter for rows where 'client_disability' is NaN
+            return df[pd.isna(df['client_gender'])]
         return df[df['client_gender'] == mapped_value]
 
     try:
         mapped_value = gender_map.get(row)
-        if mapped_value is not None or row == "Blank (nothing selected)":
+        if mapped_value is not None:
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in gender_category_filter. Current df: {dfname}")
@@ -199,25 +213,27 @@ def ethnic_category_filter(df, row, dfname="empty"):
         "White and Asian": "Mixed - White and Asian",
         "White and Black African": "Mixed - White and Black African",
         "White and Black Caribbean": "Mixed - White and Black Caribbean",
-        "Blank (nothing selected)": None  # Special handling for blank entries
+        "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
+    
+    def filter_logic(mapped_value):
+        if mapped_value == "Blank":
+            # Filter for rows where 'client_disability' is NaN
+            return df[pd.isna(df['client_ethnicity'])]
+        return df[df['client_ethnicity'] == mapped_value]
 
     try:
-        if row in ethnic_map:
-            if ethnic_map[row] is not None:
-                return df[df['client_ethnicity'] == ethnic_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                # Counting rows where 'client ethnicity' is NaN
-                return df[df['client_ethnicity'].isna()]['client_id'].nunique()
+        mapped_value = ethnic_map.get(row)
+        if mapped_value is not None:
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in ethnicity_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in ethnic_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in ethnicity_category_filter with row {row}: {e}. Current df: {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "Some result or DataFrame"
 
 def disability_category_filter(df, row, dfname="empty"):
     disability_map = {
@@ -237,25 +253,27 @@ def disability_category_filter(df, row, dfname="empty"):
         "Sight": "Sight",
         "Speech": "Speech",
         "Yes": "Yes",
-        "Blank (nothing selected)": None  # Special handling for blank entries
+        "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
 
+    def filter_logic(mapped_value):
+        if mapped_value == "Blank":
+            # Filter for rows where 'client_disability' is NaN
+            return df[pd.isna(df['client_disability'])]
+        return df[df['client_disability'] == mapped_value]
+
     try:
-        if row in disability_map:
-            if disability_map[row] is not None:
-                return df[df['client_disability'] == disability_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                # Counting rows where 'client disability' is NaN
-                return df[df['client_disability'].isna()]['client_id'].nunique()
+        mapped_value = disability_map.get(row)
+        if mapped_value is not None:
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in disability_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in disability_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in disability_category_filter with row {row}: {e}. Current df: {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "Some result or DataFrame"
 
 def sexual_orientation_filter(df, row, dfname="empty"):
     sexuality_map = {
@@ -269,25 +287,26 @@ def sexual_orientation_filter(df, row, dfname="empty"):
         "Other": "Other",
         "Pansexual": "Pansexual",
         "Person asked and did not know/is unsure or undecided": "Person asked and did not know/is unsure or undecided",
-        "Blank (nothing selected)": None  # Special handling for blank entries
+        "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
+    
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_sexuality'])]
+        return df[df['client_sexuality'] == mapped_value]
 
     try:
-        if row in sexuality_map:
-            if sexuality_map[row] is not None:
-                return df[df['client_sexuality'] == sexuality_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                # Counting rows where 'client sexuality' is NaN
-                return df[df['client_sexuality'].isna()]['client_id'].nunique()
+        mapped_value = sexuality_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected)":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in sexual_orientation_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in sexuality_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in sexual_orientation_filter with row {row}: {e}. Current df: {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "Some result or DataFrame"
 
 def age_category_filter(df, row, dfname="empty"):
     age_groups = {
@@ -298,25 +317,25 @@ def age_category_filter(df, row, dfname="empty"):
         "Age 25": 25, "Out of age Range": None
     }
 
+    def filter_logic(age):
+        if age is None:
+            # Handling "Out of age Range" by filtering ages not in the specified range
+            specified_ages = list(age_groups.values())
+            specified_ages.remove(None)
+            return df[~df['client_age'].isin(specified_ages)]
+        return df[df['client_age'] == age]
     try:
-        if row in age_groups:
-            if age_groups[row] is not None:
-                age = age_groups[row]
-                return df[df['client_age'] == age]['client_id'].nunique()
-            else:
-                # Handling "Out of age Range" by filtering ages not in the specified range
-                specified_ages = list(age_groups.values())
-                specified_ages.remove(None)
-                return df[~df['client_age'].isin(specified_ages)]['client_id'].nunique()
+        age = age_groups.get(row)
+        if age is not None or row == "Out of age Range":
+            return filter_logic(age)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in age_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in age_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in age_category_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return 0
 
 def area_category_filter(df, row, dfname="empty"):
     area_map = {
@@ -361,22 +380,23 @@ def area_category_filter(df, row, dfname="empty"):
         "Blank (nothing selected )": None  # Special handling for blank entries
     }
 
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_area'])]
+        return df[df['client_area'] == mapped_value]
+
     try:
-        if row in area_map:
-            if area_map[row] is not None:
-                return df[df['client_area'] == area_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected )":
-                # Counting rows where 'client area' is NaN
-                return df[df['client_area'].isna()]['client_id'].nunique()
+        mapped_value = area_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected )":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in area_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in area_category_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def asylum_status_filter(df, row, dfname="empty"):
     asylum_seeker_map = {
@@ -386,72 +406,76 @@ def asylum_status_filter(df, row, dfname="empty"):
         "Blank (nothing selected )": None  
     }
 
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_asylum_seeker'])]
+        return df[df['client_asylum_seeker'] == mapped_value]
+
     try:
-        if row in asylum_seeker_map:
-            if asylum_seeker_map[row] is not None:
-                return df[df['client_asylum_seeker'] == asylum_seeker_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected )":
-                # Counting rows where 'client asylum seeker' is NaN
-                return df[df['client_asylum_seeker'].isna()]['client_id'].nunique()
+        mapped_value = asylum_seeker_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected )":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in asylum_status_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in asylum_seeker_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in asylum_status_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def sen_category_filter(df, row, dfname="empty"):
     sen_map = {
         "No": "No",
-        "Not known": "Not known",
+        "Not known": "Not Known",
         "Yes": "Yes",
-        "Not applicable": "Not applicable",
+        "Not applicable": "Not Applicable",
         "Blank (nothing selected )": None
     }
 
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_sen'])]
+        return df[df['client_sen'] == mapped_value]
+
     try:
-        if row in sen_map:
-            if sen_map[row] is not None:
-                return df[df['client_sen'] == sen_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected )":
-                return df[df['client_sen'].isna()]['client_id'].nunique()
+        mapped_value = sen_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected )":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in sen_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in sen_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
-
-    return "row or dataframe error"
+        print(f"Error in sen_category_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
 def ehcp_category_filter(df, row, dfname="empty"):
     ehcp_map = {
         "No": "No",
-        "Not known": "Not known",
+        "Not known": "Not Known",
         "Yes": "Yes",
-        "Not applicable": "Not applicable",
+        "Not applicable": "Not Applicable",
         "Blank (nothing selected )": None
     }
 
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_ehcp'])]
+        return df[df['client_ehcp'] == mapped_value]
+
     try:
-        if row in ehcp_map:
-            if ehcp_map[row] is not None:
-                return df[df['client_ehcp'] == ehcp_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected )":
-                return df[df['client_ehcp'].isna()]['client_id'].nunique()
+        mapped_value = ehcp_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected )":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in ehcp_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in ehcp_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in ehcp_category_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def at_risk_exploitation_filter(df, row, dfname="empty"):
     are_map = {
@@ -461,21 +485,23 @@ def at_risk_exploitation_filter(df, row, dfname="empty"):
         "Blank (nothing selected )": None
     }
 
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_exploitation_risk'])]
+        return df[df['client_exploitation_risk'] == mapped_value]
+
     try:
-        if row in are_map:
-            if are_map[row] is not None:
-                return df[df['client_exploitation_risk'] == are_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected )":
-                return df[df['client_exploitation_risk'].isna()]['client_id'].nunique()
+        mapped_value = are_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected )":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in at_risk_exploitation_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in at_risk_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in at_risk_exploitation_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def leaving_care_filter(df, row, dfname="empty"):
     lc_map = {
@@ -485,21 +511,23 @@ def leaving_care_filter(df, row, dfname="empty"):
         "Blank (nothing selected)": None  # Handling for blank entries
     }
 
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_leaving_care'])]
+        return df[df['client_leaving_care'] == mapped_value]
+
     try:
-        if row in lc_map:
-            if lc_map[row] is not None:
-                return df[df['client_leaving_care'] == lc_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                return df[df['client_leaving_care'].isna()]['client_id'].nunique()
+        mapped_value = lc_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected)":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in leaving_care_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in leaving_care_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in leaving_care_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def lac_category_filter(df, row, dfname="empty"):
     lac_map = {
@@ -509,21 +537,23 @@ def lac_category_filter(df, row, dfname="empty"):
         "Blank (nothing selected)": None  # Handling for blank entries
     }
 
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_lac'])]
+        return df[df['client_lac'] == mapped_value]
+
     try:
-        if row in lac_map:
-            if lac_map[row] is not None:
-                return df[df['client_lac'] == lac_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                return df[df['client_lac'].isna()]['client_id'].nunique()
+        mapped_value = lac_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected)":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in lac_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in lac_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in lac_category_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def cpp_category_filter(df, row, dfname="empty"):
     cpp_map = {
@@ -536,21 +566,24 @@ def cpp_category_filter(df, row, dfname="empty"):
         "Blank (nothing selected)": None  # Handling for blank entries
     }
 
+
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_cpp'])]
+        return df[df['client_cpp'] == mapped_value]
+
     try:
-        if row in cpp_map:
-            if cpp_map[row] is not None:
-                return df[df['client_cpp'] == cpp_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                return df[df['client_cpp'].isna()]['client_id'].nunique()
+        mapped_value = cpp_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected)":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in cpp_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in cpp_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in cpp_category_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def cinp_category_filter(df, row, dfname="empty"):
     cinp_map = {
@@ -562,22 +595,23 @@ def cinp_category_filter(df, row, dfname="empty"):
         "Under assessment": "Under assessment",  # Not found in your dataset
         "Blank (nothing selected)": None  # Handling for blank entries
     }
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_cinp'])]
+        return df[df['client_cinp'] == mapped_value]
 
     try:
-        if row in cinp_map:
-            if cinp_map[row] is not None:
-                return df[df['client_cinp'] == cinp_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                return df[df['client_cinp'].isna()]['client_id'].nunique()
+        mapped_value = cinp_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected)":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in cinp_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in cinp_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in cinp_category_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def young_carer_category_filter(df, row, dfname="empty"):
     young_carer_map = {
@@ -588,54 +622,46 @@ def young_carer_category_filter(df, row, dfname="empty"):
         "Blank (nothing selected)": None  # Handling for blank entries
     }
 
+
+    def filter_logic(mapped_value):
+        if mapped_value is None:
+            return df[pd.isna(df['client_young_carer'])]
+        return df[df['client_young_carer'] == mapped_value]
+
     try:
-        if row in young_carer_map:
-            if young_carer_map[row] is not None:
-                return df[df['client_young_carer'] == young_carer_map[row]]['client_id'].nunique()
-            elif row == "Blank (nothing selected)":
-                return df[df['client_young_carer'].isna()]['client_id'].nunique()
+        mapped_value = young_carer_map.get(row)
+        if mapped_value is not None or row == "Blank (nothing selected)":
+            return filter_logic(mapped_value)
         else:
-            print("Row not recognised by filters: " + row)
-            return "error"
+            print(f"Row '{row}' not recognised in young_carer_category_filter. Current df: {dfname}")
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
-        print(f"Error in young_carer_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in young_carer_category_filter with row {row}: {e}. Current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def attended_contacts_filter(df, row, dfname="empty"):
-
     is_mib = dfname.startswith("MIB")
-    
-    
+
     if row == "Total Number of Attended Contacts":
-        initial_filtering = total_attended_contacts(df, is_mib)
-        return initial_filtering['client_id'].nunique()
+        return total_attended_contacts(df, is_mib)
 
     elif row == "One to One Contacts":
         initial_filtering = total_attended_contacts(df, is_mib)
-        #  activity details client therapy mode individual patient
         if is_mib:
             session_types = ["1 to 1", "2 to 1"]
-            dfout = initial_filtering[initial_filtering['contact_session_type'].isin(session_types)]
+            return initial_filtering[initial_filtering['contact_session_type'].isin(session_types)]
         else:
-            dfout = initial_filtering[initial_filtering['contact_therapy_mode'] == 'Individual patient']
-        
-        return dfout['client_id'].nunique()  # Count unique client_ids
+            return initial_filtering[initial_filtering['contact_therapy_mode'] == 'Individual patient']
 
     elif row == "Group Contacts":
         initial_filtering = total_attended_contacts(df, is_mib)
-        # Filtering for 'Group' session type and 'group therapy' mode
         if is_mib:
-            # If MIB specific logic is needed, include it here
-            dfout = initial_filtering[(initial_filtering['contact_session_type'] == 'Group') ]
+            return initial_filtering[(initial_filtering['contact_session_type'] == 'Group')]
         else:
-            dfout = initial_filtering[(initial_filtering['contact_therapy_mode'] == 'group therapy')]
-        
+            return initial_filtering[(initial_filtering['contact_therapy_mode'] == 'group therapy')]
 
-        # Count the number of rows
-        return len(dfout)
 
 
     elif row == "Indirect Activities":
@@ -649,7 +675,7 @@ def attended_contacts_filter(df, row, dfname="empty"):
         indirect_approaches = ["Email", "Text Message (Asynchronous)"]
         dfout = df[df['contact_approach'].isin(indirect_approaches)]
 
-        return len(dfout)
+        return dfout
 
     elif row == "Other (email and text)":
         if is_mib:
@@ -660,7 +686,7 @@ def attended_contacts_filter(df, row, dfname="empty"):
         df = df[df['contact_attendance'] == 'Attended']
         other_approachs = ["Email", "Text Message (Asynchronous)", "Chat Room (Asynchronous)","Message Board (Asynchronous)" "Chat Room (Asynchronous)", "Instant Messaging (Asynchronous)", "Other (not listed)"]
         dfout = df[df['contact_approach'].isin(other_approachs)]
-        return len(dfout)
+        return dfout
         
         
     elif row == "Admin Contacts":
@@ -669,7 +695,7 @@ def attended_contacts_filter(df, row, dfname="empty"):
         else:
             dfout = df[df['contact_themes'].str.contains("Administrative", case=False, na=False)]
         
-        return len(dfout)
+        return dfout
 
     elif row == "Total number of DNA Contacts":
         # MIB-specific or general filters
@@ -686,7 +712,7 @@ def attended_contacts_filter(df, row, dfname="empty"):
             # Include additional general filters here.
         dfout = df[df['contact_attendance'] == 'Did not Attend']
         
-        return len(dfout)
+        return dfout
 
 
 
@@ -707,15 +733,15 @@ def attended_contacts_filter(df, row, dfname="empty"):
         dfdna = df[df['contact_attendance'] == 'Did not Attend']
         
         if len(dftotal) == 0:
-            return 0
+            return (pd.DataFrame(), dftotal)
         else:
-            return round(len(dfdna)/len(dftotal)*100, 2)
-
+            return (dfdna, dftotal)
+    
     else:
-        print(f"Row not recognised: {row}")
-        return "error"
+        print("Row not recognised by filters: " + row)
+        return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
-    return "FILTERING FAILED"
+    return pd.DataFrame()  # Fallback return for unexpected cases
 
 def total_attended_contacts(df, is_mib):
     # Common filters
@@ -907,15 +933,15 @@ def contact_by_theme_filter(df, row, dfname="empty"):
     "Finances / debt /poverty":"Finances / debt /poverty",
     "Friendships":"Friendships",
     "Harm to others":"Harm to others",
-    "Hearing Voices":"Hearing Voices",# not found in data
+    "Hearing Voices":"Hearing voices",
     "Homelessness":"Homelessness",# not found in data
     "Identity issues":"Identity issues",
-    "Ill Health":"Ill Health",# not found in data
+    "Ill Health":"Ill health",
     "In Crisis/De-escalation":"In Crisis/De-escalation",
     "Issues with medication":"Issues with medication",
-    "Loss Job/house":"Loss Job/house",# not found in data
+    "Loss Job/house":"Loss of job/house",
     "Loneliness / isolation":"Loneliness / isolation",
-    "Low confidence / self-worth":"Low confidence / self-worth", # not found in data
+    "Low confidence / self-worth":" Low confidence / self worth",
     "Low mood":"Low mood",
     "Neurodevelopmental issues":"Neurodevelopmental issues",
     "OCD":"OCD",
@@ -926,45 +952,41 @@ def contact_by_theme_filter(df, row, dfname="empty"):
     "Psychosis / psychotic episodes":"Psychosis / psychotic episodes",
     "PTSD":"PTSD",
     "School / college / employment":"School / college / employment",
-    "Self-Care":"Self-Care",# not found in data
-    "Self-Harm":"Self-Harm",# not found in data
-    "Sexual Violence":"Sexual Violence",# not found in data
+    "Self-Care":"Self Care",
+    "Self-Harm":"Self Harm",
+    "Sexual Violence":"Sexual violence",# not found in data
     "Sleep problems":"Sleep problems",
     "Substance Misuse":"Substance Misuse",
     "Suicidal Ideation":"Suicidal Ideation",
     "Transition":"Transition",
     "Trauma":"Trauma",
     }
-  
     try:
-        if row in theme_map:
-            if theme_map[row] is not None:
-                # Split the row into multiple themes based on comma separation
-                themes = theme_map[row].split(', ')
-                # Fill NaN values in 'contact_themes' with an empty string using .loc[]
-                df.loc[df['contact_themes'].isna(), 'contact_themes'] = ''
-                # Check if any of the themes exist in the 'contact_themes' column
-                this_theme_df = df[df['contact_themes'].str.contains('|'.join(themes))]
-            elif row == "Blank (nothing selected )":
-                # Count rows where 'client area' is NaN
-                this_theme_df = df[df['contact_themes'].isna()]
-        else:
-            print("Row not recognized by filters: " + row)
-            return "error"
-        
-        return len(this_theme_df)
-    
+      if row in theme_map:
+          if theme_map[row] is not None:
+              themes = theme_map[row].split(', ')
+              df.loc[df['contact_themes'].isna(), 'contact_themes'] = ''
+              this_theme_df = df[df['contact_themes'].str.contains('|'.join(themes))]
+          elif row == "Blank (nothing selected)":
+              this_theme_df = df[df['contact_themes'].isna()]
+      else:
+          print("Row not recognized by filters: " + row)
+          return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
+
+      return this_theme_df
+  
     except Exception as e:
         print("An error occurred:", str(e))
-        return "error"
+        return pd.DataFrame()  # Return empty DataFrame in case of error
+
 
 def source_of_referral_filter(df, row, dfname="empty"):
     reason_map = {
-        "Primary Health Care: General Medical Practitioner Practice (GP)": "Primary Health Care: General Medical Practitioner Practice (GP)",
+        "Primary Health Care: General Medical Practitioner Practice (GP)": "Primary Health Care: General Medical Practitioner Practice",
         "Accident And Emergency Department": "Accident And Emergency Department",
-        "CAMHS Core/Step down": "CAMHS Core/Step down",
-        "CAMHS Crisis Team": "CAMHS Crisis Team",
-        "CAMHS Waiting List": "CAMHS Waiting List",
+        "CAMHS Core/Step down": "CAMHS - Core/Step Down",
+        "CAMHS Crisis Team": "CAMHS - Crisis Team (Hospital Urgents)",
+        "CAMHS Waiting List": "CAMHS - Waiting List",
         "Child Health: Community-based Paediatrics": "Child Health: Community-based Paediatrics",
         "Child Health: Hospital-based Paediatrics": "Child Health: Hospital-based Paediatrics",
         "Child Health: School Nurse": "Child Health: School Nurse",
@@ -1009,23 +1031,23 @@ def source_of_referral_filter(df, row, dfname="empty"):
         "Voluntary Sector": "Voluntary Sector",
         "Blank (nothing selected)": "Blank (nothing selected)"
     }
+
     try:
         if row in reason_map:
             if reason_map[row] is not None:
                 df_filtered = df[df['source'] == reason_map[row]]
-            elif row == "Blank (nothing selected )":
+            elif row == "Blank (nothing selected)":
                 df_filtered = df[df['source'].isna()]
         else:
             print("Row not recognised by filters: " + row)
-            return "error"
-        
-        return len(df_filtered)
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
+
+        return df_filtered
 
     except Exception as e:
-        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in source_of_referral_filter with row {row}: {e} . current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def reason_for_referral_filter(df, row, dfname="empty"):
     reason_map = {
@@ -1171,7 +1193,7 @@ def ethnicity_filter(df, row, dfname="empty"):
 def disability_filter(df, row, dfname="empty"):
     return "mymupURL"
 
-def sexual_orientation_filter(df, row, dfname="empty"):
+def sexual_orientation_end_filter(df, row, dfname="empty"):
     return "mymupURL"
 
 def asylum_filter(df, row, dfname="empty"):
@@ -1186,7 +1208,7 @@ def ed_hcp_filter(df, row, dfname="empty"):
 def are_filter(df, row, dfname="empty"):
     return "mymupURL"
 
-def leaving_care_filter(df, row, dfname="empty"):
+def leaving_care_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
 def lac_filter(df, row, dfname="empty"):
@@ -1230,12 +1252,12 @@ filter_function_map = {
     "gender_config": gender_filter,
     "ethnicity_config": ethnicity_filter,
     "disability_config": disability_filter,
-    "sexual_orientation_config": sexual_orientation_filter,
+    "sexual_orientation_config": sexual_orientation_end_filter,
     "asylum_seeker_refugee_status_config": asylum_filter,
     "special_educational_needs_config": spec_ed_filter,
     "education_health_care_plan_config": ed_hcp_filter,
     "at_risk_of_exploitation_config": are_filter,
-    "leaving_care_config": leaving_care_filter,
+    "leaving_care_config": leaving_care_filter_end,
     "looked_after_child_config": lac_filter,
     "child_protection_plan_config": cpp_filter,
     "child_in_need_plan_config": cinp_filter,
