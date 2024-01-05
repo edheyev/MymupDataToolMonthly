@@ -2,6 +2,7 @@ import sys
 import os
 import pandas as pd
 from data_config import file_info, service_info_config, table_configs
+
 from data_cleaning import (
     clean_column_names,
     remove_duplicates,
@@ -42,10 +43,11 @@ def main():
 
 
     # Produce and save tables
-    produce_tables(validated_data)
-    # output_df[0].to_csv("output_report.csv", index=False)
+    output_df = produce_tables(validated_data)
+
 
     print("Report generated and saved as output_report.csv")
+    return output_df
 
 
 def load_data_files(directory, file_info):
@@ -85,6 +87,7 @@ def clean_data(dataframes, start_date, end_date, date_column):
     # cleaned_dataframes, start_date, end_date, date_column
     # )
     # cleaned_dataframes = filter_mib_services(cleaned_dataframes)
+    # cleaned_dataframes = isolate_client_ages(3, 26) 
     cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes)
     cleaned_dataframes = remove_duplicates(cleaned_dataframes)
 
@@ -109,12 +112,18 @@ def produce_tables(dataframes):
         "SELFA (Mighty Minds)",
     ]
 
+
+
+
     # Write column headings to the CSV file
     with open("my_csv.csv", "w", newline='') as f:
         f.write(",".join(column_headings) + "\n")
         
+        
+    #optionally initialise empty df
+    combined_df = pd.DataFrame(columns=column_headings)
 
-    mylooplist = list(filter_function_map.keys())[0:2]
+    mylooplist = list(filter_function_map.keys())[0:1]
     
     # Append each table to the CSV file
     # for name in filter_function_map.keys():
@@ -129,10 +138,15 @@ def produce_tables(dataframes):
                 f.write(f"{name}\n")
                 this_table.to_csv(f, header=False, index=False)
                 f.write("\n")
+                
+            # Creating a row with the name and merging it with this_table
+            name_row = pd.DataFrame([[name] + [None] * (len(column_headings) - 1)], columns=column_headings)
+            combined_row = pd.concat([name_row, this_table], ignore_index=True)
+            combined_df = pd.concat([combined_df, combined_row], ignore_index=True) 
         else:
             print(f"No data to write for {name}")
 
-    return report_dfs
+    return combined_df
 
 
 
@@ -175,6 +189,7 @@ def filter_service_information(dataframes, config):
                 continue
 
             try:
+                #overwrite df with exceptions if they exist in the config
                 if column.startswith("MIB"):
                     dataframe_key = config["mib_row_db_logic"].get(row, mib_default_db_key)
                 else:
@@ -195,7 +210,7 @@ def filter_service_information(dataframes, config):
                     row_dataframes.append(filtered_df)
 
             except Exception as e:
-                print(f"Error processing row: {row}, column: {column}. Error: {e}")
+                print(f"Error processing row: {row}, column: {column}, dfkey: {dataframe_key} Error: {e}")
                 error_message = f"Error: {e}"
                 new_row[column] = error_message  # Add the error message to the cell
                 row_dataframes.append(None)  # Append None to maintain structure
@@ -268,74 +283,8 @@ def calculate_percentage_as_number(numerator_df, denominator_df):
 def is_percentage_row(row_name):
     return row_name.startswith('%') or row_name.startswith('average')
 
-   
-# def filter_service_information(dataframes, config):
-#     print("Generating service information table...", config["table_name"])
-    
-#     row_names = config["row_names"]
-#     column_headings = config["column_headings"]
-#     placeholder_rows = config["placeholder_rows"]
-#     default_db_key = config.get('row_db_default', 'Default Logic')
-#     mib_default_db_key = config.get('mib_row_db_default', 'MIB Default Logic')
 
-#     # Create the result DataFrame with the specified column headings
-#     result_df = pd.DataFrame(columns=["Row Name"] + column_headings)
-
-#     filter_func = filter_function_map.get(config["table_name"])
-#     if not filter_func:
-#         raise ValueError(f"No filter function found for table {config['table_name']}")
-
-#     # Loop through each row
-#     for row in row_names:
-#         new_row = {'Row Name': row}  # Initialize the new row with the row name
-
-#         # Loop through each column
-#         for column in column_headings:
-#             if column == "Q1_Totals":  # Skip the totals column for now
-#                 continue
-#             if row in placeholder_rows:
-#                 new_row[column] = placeholder_rows[row]
-#                 continue
-
-#             try:
-#                 if column.startswith("MIB"):
-#                     dataframe_key = config["mib_row_db_logic"].get(row, mib_default_db_key)
-#                 else:
-#                     dataframe_key = config["row_db_logic"].get(row, default_db_key)
-
-#                 this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-#                 this_row_dataframe = column_filter(this_row_dataframe, column, dataframe_key)
-#                 cell_output = filter_func(this_row_dataframe, row, dfname=dataframe_key)
-#                 new_row[column] = cell_output
-                
-#             except Exception as e:
-#                 print(f"Error processing row: {row}, column: {column}. Error: {e}")
-#                 new_row[column] = "error"
-
-#         # Convert the new_row dictionary to a DataFrame and append to result_df
-#         new_row_df = pd.DataFrame([new_row])
-#         result_df = pd.concat([result_df, new_row_df], ignore_index=True)
-
-#     # Calculation of totals for each row
-#     for index, row in result_df.iterrows():
-#         total = 0
-#         for col in column_headings:
-#             if col == "Q1_Totals":
-#                 continue
-#             value = row[col]
-#             numeric_value = pd.to_numeric(value, errors='coerce')
-#             if numeric_value is not None and not pd.isna(numeric_value):
-#                 total += numeric_value
-#         result_df.at[index, "Q1_Totals"] = total
-
-#     return result_df
-
-
-# def is_error_in_filter(col_filtered_data):
-#     if "error" in col_filtered_data.columns and col_filtered_data["error"].iloc[0]:
-#         return True
-#     return False
 
 
 if __name__ == "__main__":
-    main()
+    resultdf = main()

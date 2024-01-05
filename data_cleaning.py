@@ -21,10 +21,11 @@ def remove_duplicates(dataframes):
     print("Removing duplicates...")
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
+        # This will drop rows only if every column in the row is identical to another row
         cleaned_dataframes[df_name] = df.drop_duplicates()
-        # cleaned_dataframes[df_name] = df.drop_duplicates(subset=['client_id', 'contact_date'])
-        # 
+
     return cleaned_dataframes
+
 
 
 def isolate_reporting_period(dataframes, start_date, end_date, date_column):

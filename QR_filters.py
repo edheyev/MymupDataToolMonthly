@@ -13,11 +13,11 @@ def column_filter(df, column, dfname="empty"):
     else:
         contact_service = "contact_service_type"
     
-    
     try:
         if column == "Q1_Totals":
         # totals calculated in the main script
             pass
+        
         elif column == "Barnardos (Wrap)":
             return df[df["franchise"] == "Barnardos WRAP"]
         elif column == "BYS All":
@@ -48,18 +48,17 @@ def column_filter(df, column, dfname="empty"):
             print("column not recognised by filters")
             return pd.DataFrame()
     except Exception as e:
-        print(f"Error in col_filter with column {column}: {e} . current df is {dfname}")
+        print(f"Error in col_filter with column {column}: {e} . current df is {dfname} error: {e}")
         return pd.DataFrame({"error": [True]})  # Return DataFrame with an error flag
 
 def SI_row_filter(df, row, dfname="empty"):
     try:
         mib = True if dfname.startswith("MIB") else False
 
-        # print("Row Filter: "+ row)
         if row == "Number of unique people supported":
             if not mib:
                 # exclude admin contacts
-                df = df[df["contact_themes"] != "Administrative"]
+                df = df[~df["contact_themes"].str.contains("Administrative", na=False)]
 
                 # contact approach face to face/ telephone/ type talk/ video/ instant messaging (synchronous) only with attendance status attended (exclude all other approaches).
                 contact_approaches = [
@@ -69,13 +68,14 @@ def SI_row_filter(df, row, dfname="empty"):
                     "Video consultation",
                     "Instant Messaging (Synchronous)",
                 ]
-                df = df[df["contact_approach"].isin(contact_approaches)]
+                df_filtered = df[df["contact_approach"].isin(contact_approaches)]
 
-                # Count of unique clients
-                return df
+                return df_filtered
             else:
-                # exclude admin contacts
-                df = df[df["contact_themes"] != "Administrative"]
+ 
+                # Exclude rows where 'contact_themes' column contains 'Administrative'
+                df = df[~df["contact_themes"].str.contains("Administrative", na=False)]
+
 
                 # contact approach face to face/ telephone/ type talk/ video/ instant messaging (synchronous) only with attendance status attended (exclude all other approaches).
                 contact_approaches = [
@@ -97,7 +97,10 @@ def SI_row_filter(df, row, dfname="empty"):
                 return df
 
         elif row == "How many were declined by the service?":
-            return df
+            # count all unique client ids within reporting period (within file closures db)
+            unique_clients_df = df.drop_duplicates(subset='client_id')
+            
+            return unique_clients_df
 
         elif (
             row
@@ -115,14 +118,14 @@ def SI_row_filter(df, row, dfname="empty"):
                 "Client declined a service prior or during assessment",
             ]
             df_filtered = df[df["reason"].isin(closure_reasons)]
-            return df_filtered
+            unique_clients_df = df_filtered.drop_duplicates(subset='client_id')
+            return unique_clients_df
 
         elif row == "Active cases":
             # Count clients with no file closure date and status active, pending, processing, or waiting list
-            active_statuses = ["active", "pending", "processing", "waiting list"]
-            # df_active = df[df['client_status'].isin(active_statuses) & df['file_closure_date'].isna()]
-            # df_active = df[df['client_status'].isin(active_statuses) & df['file_closure_date'].isna()]
-            return df
+            active_statuses = ["Active", "Pending", "Processing", "Waiting List"]
+            df_filtered = df[df["client_status"].isin(active_statuses)]
+            return df_filtered
 
         elif row == "How many people have moved on":
             # Filter by specific file closure reasons for moving on and count unique clients

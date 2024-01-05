@@ -31,14 +31,30 @@ file_info = {
         "filename": "mib_referrals_within_reporting_period.csv",
         "columns": ["client_id"],
     },
-    # "Contacts_Within_Twenty_One_Days": {
-    #     "filename": "contacts_within_twenty_one_days.csv",
-    #     "columns": ["client_id"],
-    # },
-    # "MIB_Contacts_Within_Twenty_One_Days": {
-    #     "filename": "mib_contacts_within_twenty_one_days.csv",
-    #     "columns": ["client_id"],
-    # },
+    "Referrals_Before_End_Reporting_Period": {
+        "filename": "referrals_before_end_reporting_period.csv",
+        "columns": ["client_id"],
+    },
+    "MIB_Referrals_Before_End_Reporting_Period": {
+        "filename": "mib_referrals_before_end_of_reporting_period.csv",
+        "columns": ["client_id"],
+    },
+     "Contacts_Within_Seven_Days": {
+         "filename": "contacts_within_seven_days.csv",
+         "columns": ["client_id"],
+     },
+     "MIB_Contacts_Within_Seven_Days": {
+         "filename": "mib_contacts_within_seven_days.csv",
+         "columns": ["client_id"],
+     },
+     "Contacts_Within_Twenty_One_Days": {
+         "filename": "contacts_within_twenty_one_days.csv",
+         "columns": ["client_id"],
+     },
+     "MIB_Contacts_Within_Twenty_One_Days": {
+         "filename": "mib_contacts_within_twenty_one_days.csv",
+         "columns": ["client_id"],
+     },
     # "Attended_Contacts_Within_Twenty_One_Days": {
     #     "filename": "attended_contacts_within_twenty_one_days.csv",
     #     "columns": ["client_id"],
@@ -113,21 +129,27 @@ service_info_config = {
         "% clients attended the first contact by video/face to face/telephone within 21 days of referral": "to do?",
     },
     "row_db_logic": {
-        "Number of unique people supported": "Contacts_Or_Indirects_Within_Reporting_Period",
-        "How many young people disengaged, couldn’t be contacted or rejected a referral?": "File_Closures_Within_Reporting_Period",
         "How many were declined by the service?": "File_Closures_Within_Reporting_Period",
+        "How many young people disengaged, couldn’t be contacted or rejected a referral?": "File_Closures_Within_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
-        "Active cases": "Referrals_Within_Reporting_Period",
+        "Active cases": "Referrals_Before_End_Reporting_Period",
+        "How many people have moved on": "File_Closures_Within_Reporting_Period",
+        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":"Contacts_Within_Seven_Days",
+        "% clients who had the first support session offered within 21 days of referral":"Contacts_Within_Twenty_One_Days",
+        "% clients attended the first contact by video/face to face/telephone within 21 days of referral":"Contacts_Within_Twenty_One_Days",
     },
     "mib_row_db_logic": {
-        "Number of unique people supported": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
-        "How many young people disengaged, couldn’t be contacted or rejected a referral?": "File_Closures_Within_Reporting_Period",
         "How many were declined by the service?": "File_Closures_Within_Reporting_Period",
+        "How many young people disengaged, couldn’t be contacted or rejected a referral?": "File_Closures_Within_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
-        "Active cases": "Referrals_Within_Reporting_Period",
+        "Active cases": "MIB_Referrals_Before_End_Reporting_Period",
+        "How many people have moved on": "File_Closures_Within_Reporting_Period",
+        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":"MIB_Contacts_Within_Seven_Days",
+        "% clients who had the first support session offered within 21 days of referral":"MIB_Contacts_Within_Twenty_One_Days",
+        "% clients attended the first contact by video/face to face/telephone within 21 days of referral":"MIB_Contacts_Within_Twenty_One_Days",
     },
-    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
+    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
 }
 
 yp_gender_config = {
