@@ -1014,7 +1014,7 @@ def source_of_referral_filter(df, row, dfname="empty"):
         "Other Independent Sector Mental Health Services": "Other Independent Sector Mental Health Services",
         "Other Primary Health Care": "Other Primary Health Care",
         "Other secondary care specialty": "Other secondary care specialty",
-        "Other Service or Agency": "Other Service or Agency",
+        "Other Service or Agency": "Other SERVICE or agency",
         "Other: Asylum Services": "Other: Asylum Services",
         "Other: Drug Action Team / Drug Misuse Agency": "Other: Drug Action Team / Drug Misuse Agency",
         "Other: Job Centre Plus": "Other: Job Centre Plus",
@@ -1059,13 +1059,13 @@ def reason_for_referral_filter(df, row, dfname="empty"):
         "Bi-polar Disorder": "Bi-polar Disorder",
         "Conduct Disorders": "Conduct Disorders",
         "Depression": "Depression",
-        "Diagnosed Autism Spectrum Disorder": "Diagnosed Autism Spectrum Disorder",
+        "Diagnosed Autism Spectrum Disorder": "Diagnosed Autism",
         "Drug and Alcohol Difficulties": "Drug and Alcohol Difficulties",
         "Eating Disorders": "Eating Disorders",
         "Gender Discomfort Issues": "Gender Discomfort Issues",
         "In Crisis": "In Crisis",
         "Isolation": "Isolation",
-        "Neurodevelopmental Conditions, excl. ASD": "Neurodevelopmental Conditions, excl. ASD",
+        "Neurodevelopmental Conditions, excl. ASD": "Neurodevelopmental Conditions, excluding Autism",
         "Not Known": "Not Known",
         "Obsessive Compulsive Disorder": "Obsessive Compulsive Disorder",
         "Ongoing or Recurrent Psychosis": "Ongoing or Recurrent Psychosis",
@@ -1080,7 +1080,7 @@ def reason_for_referral_filter(df, row, dfname="empty"):
         "Relationship Difficulties": "Relationship Difficulties",
         "Self-Care Issues": "Self-Care Issues",
         "Self-Harm Behaviours": "Self-Harm Behaviours",
-        "Suspected Autism Spectrum Disorder": "Suspected Autism Spectrum Disorder",
+        "Suspected Autism Spectrum Disorder": "Suspected Autism",
         "Suspected First Episode Psychosis": "Suspected First Episode Psychosis",
         "Unexplained Physical Symptoms": "Unexplained Physical Symptoms",
         "Blank (nothing selected)": "Blank (nothing selected)"
@@ -1089,19 +1089,18 @@ def reason_for_referral_filter(df, row, dfname="empty"):
         if row in reason_map:
             if reason_map[row] is not None:
                 df_filtered = df[df['reason'] == reason_map[row]]
-            elif row == "Blank (nothing selected )":
+            elif row == "Blank (nothing selected)":
                 df_filtered = df[df['reason'].isna()]
         else:
             print("Row not recognised by filters: " + row)
-            return "error"
-        
-        return len(df_filtered)
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
+
+        return df_filtered
 
     except Exception as e:
-        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
 def other_reason_for_referral_filter(df, row, dfname="empty"):
     reason_map = {
@@ -1169,58 +1168,57 @@ def other_reason_for_referral_filter(df, row, dfname="empty"):
     try:
         if row in reason_map:
             if reason_map[row] is not None:
-                df_filtered = df[df['reason_other'] == reason_map[row]]
-            elif row == "Blank (nothing selected )":
-                df_filtered = df[df['reason_other'].isna()]
+                df_filtered = df[df['reason'] == reason_map[row]]
+            elif row == "Blank (nothing selected)":
+                df_filtered = df[df['reason'].isna()]
         else:
             print("Row not recognised by filters: " + row)
-            return "error"
-        
-        return len(df_filtered)
+            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
+
+        return df_filtered
 
     except Exception as e:
-        print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
-        return "error"
+        print(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
-    return "row or dataframe error"
 
-def gender_filter(df, row, dfname="empty"):
+def gender_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def ethnicity_filter(df, row, dfname="empty"):
+def ethnicity_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def disability_filter(df, row, dfname="empty"):
+def disability_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def sexual_orientation_end_filter(df, row, dfname="empty"):
+def sexual_orientation_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def asylum_filter(df, row, dfname="empty"):
+def asylum_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def spec_ed_filter(df, row, dfname="empty"):
+def spec_ed_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def ed_hcp_filter(df, row, dfname="empty"):
+def ed_hcp_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def are_filter(df, row, dfname="empty"):
+def are_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
 def leaving_care_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def lac_filter(df, row, dfname="empty"):
+def lac_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def cpp_filter(df, row, dfname="empty"):
+def cpp_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def cinp_filter(df, row, dfname="empty"):
+def cinp_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
-def young_carer_filter(df, row, dfname="empty"):
+def young_carer_filter_end(df, row, dfname="empty"):
     return "mymupURL"
 
 filter_function_map = {
@@ -1249,17 +1247,17 @@ filter_function_map = {
     "source_of_referral_config": source_of_referral_filter,
     "reason_for_referral_config": reason_for_referral_filter,
     "other_reason_for_referral_config": other_reason_for_referral_filter,
-    "gender_config": gender_filter,
-    "ethnicity_config": ethnicity_filter,
-    "disability_config": disability_filter,
-    "sexual_orientation_config": sexual_orientation_end_filter,
-    "asylum_seeker_refugee_status_config": asylum_filter,
-    "special_educational_needs_config": spec_ed_filter,
-    "education_health_care_plan_config": ed_hcp_filter,
-    "at_risk_of_exploitation_config": are_filter,
+    "gender_config": gender_filter_end,
+    "ethnicity_config": ethnicity_filter_end,
+    "disability_config": disability_filter_end,
+    "sexual_orientation_config": sexual_orientation_filter_end,
+    "asylum_seeker_refugee_status_config": asylum_filter_end,
+    "special_educational_needs_config": spec_ed_filter_end,
+    "education_health_care_plan_config": ed_hcp_filter_end,
+    "at_risk_of_exploitation_config": are_filter_end,
     "leaving_care_config": leaving_care_filter_end,
-    "looked_after_child_config": lac_filter,
-    "child_protection_plan_config": cpp_filter,
-    "child_in_need_plan_config": cinp_filter,
-    "young_carer_config": young_carer_filter,
+    "looked_after_child_config": lac_filter_end,
+    "child_protection_plan_config": cpp_filter_end,
+    "child_in_need_plan_config": cinp_filter_end,
+    "young_carer_config": young_carer_filter_end,
 }

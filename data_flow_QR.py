@@ -118,7 +118,7 @@ def produce_tables(dataframes):
     #optionally initialise empty df
     combined_df = pd.DataFrame(columns=column_headings)
 
-    mylooplist = list(filter_function_map.keys())[22:23]
+    mylooplist = list(filter_function_map.keys())[24:25]
     
     # Append each table to the CSV file
     # for name in filter_function_map.keys():
