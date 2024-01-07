@@ -74,24 +74,24 @@ file_info = {
     # Add more file information as needed
 }
 
-yim_providers = [
-    "Barnardos",
-    "Bradford Youth Service (BYS)",
-    "Brathay -MAGIC service type only",
-    "INCIC -service type CYP only",
-    "Mind in Bradford (MiB) service type Know Your Mind, Know Your Mind plus, Hospital Buddies BRI and Hospital Buddies  AGH only",
-    "SELFA",
-]
+# yim_providers = [
+#     "Barnardos",
+#     "Bradford Youth Service (BYS)",
+#     "Brathay -MAGIC service type only",
+#     "INCIC -service type CYP only",
+#     "Mind in Bradford (MiB) service type Know Your Mind, Know Your Mind plus, Hospital Buddies BRI and Hospital Buddies  AGH only",
+#     "SELFA",
+# ]
 
-Other_VCSE = [
-    "All Star Youth Entertainment",
-    "Bradford Counselling Service",
-    "Bradford Bereavement Support",
-    "Family Action Bradford",
-    "Roshnighar",
-    "STEP 2",
-    "The Cellar Trust",
-]
+# Other_VCSE = [
+#     "All Star Youth Entertainment",
+#     "Bradford Counselling Service",
+#     "Bradford Bereavement Support",
+#     "Family Action Bradford",
+#     "Roshnighar",
+#     "STEP 2",
+#     "The Cellar Trust",
+# ]
 
 service_info_config = {
     "table_name": "service_info_config",
@@ -124,9 +124,10 @@ service_info_config = {
         "Number of unique people supported (old rule)": "MYMUP_URL",
         "How many unique referrals": "MYMUP_URL",
         "How many new people referred": "MYMUP_URL",
-        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)": "to do?",
-        "% clients who had the first support session offered within 21 days of referral": "to do?",
-        "% clients attended the first contact by video/face to face/telephone within 21 days of referral": "to do?",
+        "How many were declined by the service?": "CHECK THIS",
+        #"% clients with initial contact within 7 days of referral (old rule not including admin contacts)": "to do?",
+        # "% clients who had the first support session offered within 21 days of referral": "to do?",
+        #"% clients attended the first contact by video/face to face/telephone within 21 days of referral": "to do?",
     },
     "row_db_logic": {
         "How many were declined by the service?": "File_Closures_Within_Reporting_Period",
@@ -847,7 +848,7 @@ goals_based_outcomes_config = {
 average_goals_based_outcomes_config = {
     "table_name": "average_goals_based_outcomes_config",
     "row_names": [
-        "% of closed case that have an initial and follow up/final paired GBO",
+        "% of closed cases that have an initial and follow-up/final paired GBO",
         "% of closed cases with reliable change in paired GBO",
         "Average impact score of all paired goals",
     ],
@@ -863,9 +864,11 @@ average_goals_based_outcomes_config = {
         "MIB Hospital Buddys BRI",
         "SELFA (Mighty Minds)",
     ],
-    "placeholder_rows": {},
+    "placeholder_rows": {        
+        #"% of closed cases with reliable change in paired GBO":"todo",
+        #"Average impact score of all paired goals":"todo",
+        },
     "row_db_logic": {
-        # Logic mappings for each status
     },
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
@@ -928,7 +931,10 @@ dss_goals_based_outcomes_config = {
         "MIB Hospital Buddys BRI",
         "SELFA (Mighty Minds)",
     ],
-    "placeholder_rows": {},
+    "placeholder_rows": {
+        "How many unique clients have had a distress scale score in reporting period":"MIB_MasEx",
+        "Average change score for distress scale":"MIB_MasEx",
+        },
     "row_db_logic": {
         # Logic mappings for each status
     },

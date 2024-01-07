@@ -12,6 +12,9 @@ def column_filter(df, column, dfname="empty"):
         contact_service = "file_closure_service_type"
     else:
         contact_service = "contact_service_type"
+        
+    if dfname == "Contacts_Within_Seven_Days" or dfname == "MIB_Contacts_Within_Seven_Days"or dfname == "Contacts_Within_Twenty_One_Days"or dfname == "MIB_Contacts_Within_Twenty_One_Days":
+        contact_service = "file_closure_service_type"
     
     try:
         if column == "Q1_Totals":
@@ -145,12 +148,166 @@ def SI_row_filter(df, row, dfname="empty"):
         
         
         elif row == "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":
-                      
-            return (pd.DataFrame(), pd.DataFrame())
+            try:
+                df_contacts = df
+                
+                # Drop rows where any of the specified date columns have NaN values
+                df_contacts = df_contacts.dropna(subset=['referral_date', 'file_closure_date', 'contact_/_indirect_date'])
+
+                # Exclude clients with file closure reason "organisation cannot contact client prior to assessment"
+                df_filtered = df_contacts[df_contacts['file_closure_service_type'] != 'organisation cannot contact client prior to assessment']
+
+                # Error handling for invalid dates
+                def safe_convert_date(date_str):
+                    try:
+                        return pd.to_datetime(date_str)
+                    except:
+                        return pd.NaT  # Not a Time (NaT) for invalid dates
+
+                df_filtered['file_closure_date'] = df_filtered['file_closure_date'].apply(safe_convert_date)
+                df_filtered['referral_date'] = df_filtered['referral_date'].apply(safe_convert_date)
+                df_filtered['contact_/_indirect_date'] = df_filtered['contact_/_indirect_date'].apply(safe_convert_date)
+
+                # Drop rows with invalid dates
+                df_filtered = df_filtered.dropna(subset=['file_closure_date', 'referral_date', 'contact_/_indirect_date'])
+
+                df_first_contact = df_filtered.groupby('client_id')['contact_/_indirect_date'].min().reset_index()
+
+                df_merged = df_first_contact.merge(df_filtered[['client_id', 'referral_date', 'within_7_days']], on='client_id')
+
+                df_within_7_days = df_merged[df_merged['within_7_days'] == 'Yes']
+                
+                if df_within_7_days.empty:
+                    return (pd.DataFrame(), df_merged)
+                elif df_merged.empty:
+                    error_message = f"Error in row_filter with row {row}: {e} . current df is {dfname}"
+                    print(error_message)
+                    return (pd.DataFrame([error_message]), pd.DataFrame([error_message]))
+
+                else:
+                    return (df_within_7_days, df_merged)
+            except Exception as e:
+                print(f"Error in row_filter with row {row}: {e} . current df is {dfname}")
+                return (pd.DataFrame(), pd.DataFrame())  # Return empty DataFrames in case of an error
+            
         elif row == "% clients who had the first support session offered within 21 days of referral":
-            pass
+            # Error handling for invalid dates
+            def safe_convert_date(date_str):
+                try:
+                    return pd.to_datetime(date_str)
+                except:
+                    return pd.NaT  # Not a Time (NaT) for invalid dates
+
+            try:
+                # Define excluded file closure reasons
+                excluded_closure_reasons = [
+                    'organisation cannot contact client prior to assessment',
+                    'client rejects referral',
+                    'organisation rejects referral threshold too high',
+                    'organisation rejects referral referral not suitable pre/post assessment'
+                ]
+
+                # Define qualifying contact approaches
+                qualifying_approaches = [
+                    'Face to Face', 'Telephone', 'Talk Type', 'Video', 'Instant Messaging Synchronous'
+                ]
+
+                # Drop rows with NaN in essential columns and explicitly create a copy
+                df_filtered = df.dropna(subset=['referral_date', 'file_closure_date', 'contact_/_indirect_date']).copy()
+
+                # Exclude clients with specified file closure reasons
+                # df_filtered = df_filtered[~df_filtered['file_closure_reason'].isin(excluded_closure_reasons)]
+
+                # Convert date strings to datetime objects, handling errors safely
+                df_filtered['file_closure_date'] = df_filtered['file_closure_date'].apply(safe_convert_date)
+                df_filtered['referral_date'] = df_filtered['referral_date'].apply(safe_convert_date)
+                df_filtered['contact_/_indirect_date'] = df_filtered['contact_/_indirect_date'].apply(safe_convert_date)
+
+                # Drop rows with invalid dates
+                df_filtered = df_filtered.dropna(subset=['file_closure_date', 'referral_date', 'contact_/_indirect_date'])
+
+                # Filter for qualifying contact approaches
+                df_filtered = df_filtered[df_filtered['contact_approach'].isin(qualifying_approaches)]
+
+                # Group by client_id to find the first qualifying contact date
+                df_first_contact = df_filtered.groupby('client_id')['contact_/_indirect_date'].min().reset_index()
+
+                # Merge with original dataframe to get referral dates and within 21 days flag
+                df_merged = df_first_contact.merge(df_filtered[['client_id', 'referral_date', 'within_21_days']], on='client_id')
+
+                # Filter for clients whose first contact was within 21 days of referral
+                df_within_21_days = df_merged[df_merged['within_21_days'] == 'Yes']
+
+                if df_within_21_days.empty:
+                    return (pd.DataFrame(), df_merged)
+                elif df_merged.empty:
+                    return (pd.DataFrame([error_message]), pd.DataFrame([error_message]))
+
+                return (df_within_21_days, df_merged)
+            except Exception as e:
+                print(f"Error in filter_clients_first_support_session_offered: {e}")
+                return (pd.DataFrame(), pd.DataFrame())  # Return empty DataFrames in case of an error
+
         elif row == "% clients attended the first contact by video/face to face/telephone within 21 days of referral":
-            pass
+            # Error handling for invalid dates
+            def safe_convert_date(date_str):
+                try:
+                    return pd.to_datetime(date_str)
+                except:
+                    return pd.NaT  # Not a Time (NaT) for invalid dates
+
+            try:
+                # Define excluded file closure reasons
+                excluded_closure_reasons = [
+                    'organisation cannot contact client prior to assessment',
+                    'client rejects referral',
+                    'organisation rejects referral threshold too high',
+                    'organisation rejects referral referral not suitable pre/post assessment'
+                ]
+
+                # Define qualifying contact approaches and attendance status
+                qualifying_approaches = [
+                    'Face to Face', 'Telephone', 'Talk Type', 'Video', 'Instant Messaging Synchronous'
+                ]
+                qualifying_attendance_status = ['Attended']  # Only include 'Attended' status
+
+                # Explicitly create a copy of the DataFrame to avoid SettingWithCopyWarning
+                df_filtered = df.dropna(subset=['referral_date', 'file_closure_date', 'contact_/_indirect_date']).copy()
+
+                # Exclude clients with specified file closure reasons
+                # df_filtered = df_filtered[~df_filtered['file_closure_reason'].isin(excluded_closure_reasons)]
+
+                # Convert date strings to datetime objects, handling errors safely
+                df_filtered['file_closure_date'] = df_filtered['file_closure_date'].apply(safe_convert_date)
+                df_filtered['referral_date'] = df_filtered['referral_date'].apply(safe_convert_date)
+                df_filtered['contact_/_indirect_date'] = df_filtered['contact_/_indirect_date'].apply(safe_convert_date)
+
+                # Drop rows with invalid dates
+                df_filtered = df_filtered.dropna(subset=['file_closure_date', 'referral_date', 'contact_/_indirect_date'])
+
+                # Filter for qualifying contact approaches and attendance status
+                df_filtered = df_filtered[df_filtered['contact_approach'].isin(qualifying_approaches) & 
+                                        df_filtered['attendance_code'].isin(qualifying_attendance_status)]
+
+                # Group by client_id to find the first qualifying contact date
+                df_first_contact = df_filtered.groupby('client_id')['contact_/_indirect_date'].min().reset_index()
+
+                # Merge with original dataframe to get referral dates and within 21 days flag
+                df_merged = df_first_contact.merge(df_filtered[['client_id', 'referral_date', 'within_21_days']], on='client_id')
+
+                # Filter for clients whose first contact was within 21 days of referral
+                df_within_21_days = df_merged[df_merged['within_21_days'] == 'Yes']
+                # print(len(df_within_21_days), len(df_merged))
+                if df_within_21_days.empty:
+                    return (pd.DataFrame(), df_merged)
+                elif df_merged.empty:
+                    return (pd.DataFrame([error_message]), pd.DataFrame([error_message]))
+
+                return (df_within_21_days, df_merged)
+            except Exception as e:
+                print(f"Error in row_filter with row {row}: {e}")
+                return (pd.DataFrame(), pd.DataFrame())  # Return empty DataFrames in case of an error
+
         else:
             print("Row not recognised by filters")
         return pd.DataFrame()
@@ -234,7 +391,6 @@ def ethnic_category_filter(df, row, dfname="empty"):
         print(f"Error in ethnicity_category_filter with row {row}: {e}. Current df: {dfname}")
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
-
 def disability_category_filter(df, row, dfname="empty"):
     disability_map = {
         "Autism or other Neurological condition": "Autism or other Neurological condition",
@@ -274,7 +430,6 @@ def disability_category_filter(df, row, dfname="empty"):
         print(f"Error in disability_category_filter with row {row}: {e}. Current df: {dfname}")
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
-
 def sexual_orientation_filter(df, row, dfname="empty"):
     sexuality_map = {
         "Asexual": "Asexual",
@@ -306,7 +461,6 @@ def sexual_orientation_filter(df, row, dfname="empty"):
     except Exception as e:
         print(f"Error in sexual_orientation_filter with row {row}: {e}. Current df: {dfname}")
         return pd.DataFrame()  # Return empty DataFrame in case of error
-
 
 def age_category_filter(df, row, dfname="empty"):
     age_groups = {
@@ -763,103 +917,249 @@ def total_attended_contacts(df, is_mib):
     return df
 
 def goals_based_outcomes_filter(df, row, dfname="empty"):
-    # Additional filters may be required based on the dataset and requirements
-    print(f"Row: {row}")
-    print(f"dfname: {dfname}")
-    print(f"df: {df}")
-    if row == "% of closed cases with initial outcomes measure completed":
-        # Logic to calculate this percentage
-        pass
-
-    elif row == "% of closed cases with follow-up/final outcomes measure completed":
-        # Logic to calculate this percentage
-        pass
-
-    elif row == "% of GBOs demonstrating reliable change":
-        # Logic to calculate this percentage
-        pass
-    
-    else:
-        print(f"Row not recognised: {row}")
-        return "error"
-
-    return "result after filtering"
+    pass
 
 def average_goals_based_outcomes_filter(df, row, dfname="empty"):
     
     is_mib = dfname.startswith("MIB")
     
 
-    df_copy = df.copy()
+    # df_copy = df.copy()
 
-    # Convert dates to datetime
-    df_copy['referral_date'] = pd.to_datetime(df_copy['referral_date'], errors='coerce')
-    df_copy['file_closure_date'] = pd.to_datetime(df_copy['file_closure_date'], errors='coerce')
-    df_copy['goal_score_date'] = pd.to_datetime(df_copy['goal_score_date'], errors='coerce')
+    # # Convert dates to datetime
+    # df_copy['referral_date'] = pd.to_datetime(df_copy['referral_date'], errors='coerce')
+    # df_copy['file_closure_date'] = pd.to_datetime(df_copy['file_closure_date'], errors='coerce')
+    # df_copy['goal_score_date'] = pd.to_datetime(df_copy['goal_score_date'], errors='coerce')
 
-    # Filter for Initial and Follow-Up/Final GBOs
-    df_initial = df_copy[df_copy['initial_/_followup_/_final'].str.contains("Initial", case=False, na=False)]
-    df_followup_final = df_copy[df_copy['initial_/_followup_/_final'].isin(["Follow up", "Final"])]
+    # # Filter for Initial and Follow-Up/Final GBOs
+    # df_initial = df_copy[df_copy['initial_/_followup_/_final'].str.contains("Initial", case=False, na=False)]
+    # df_followup_final = df_copy[df_copy['initial_/_followup_/_final'].isin(["Follow up", "Final"])]
 
-    # Ensure that 'goal_score_date' is uniquely named in df_followup_final
-    df_followup_final = df_followup_final.rename(columns={'goal_score_date': 'goal_score_date_fu_f'})
+    # # Ensure that 'goal_score_date' is uniquely named in df_followup_final
+    # df_followup_final = df_followup_final.rename(columns={'goal_score_date': 'goal_score_date_fu_f'})
 
-    # Merge on 'goal_id'
-    merged_df = pd.merge(df_initial[['goal_id', 'referral_date', 'file_closure_date', 'score_1', 'score_2', 'score_3']], 
-                        df_followup_final[['goal_id', 'goal_score_date_fu_f']], 
-                        on='goal_id', 
-                        how='inner')
+    # # Merge on 'goal_id'
+    # merged_df = pd.merge(df_initial[['goal_id', 'referral_date', 'file_closure_date', 'score_1', 'score_2', 'score_3']], 
+    #                     df_followup_final[['goal_id', 'goal_score_date_fu_f']], 
+    #                     on='goal_id', 
+    #                     how='inner')
 
-    # Apply the criteria for paired GBOs
-    paired_gbo_df = merged_df[(merged_df['goal_score_date_fu_f'] > merged_df['referral_date']) & 
-                            (merged_df['goal_score_date_fu_f'] < merged_df['file_closure_date'])]
+    # # Apply the criteria for paired GBOs
+    # paired_gbo_df = merged_df[(merged_df['goal_score_date_fu_f'] > merged_df['referral_date']) & 
+    #                         (merged_df['goal_score_date_fu_f'] < merged_df['file_closure_date'])]
 
-    # Count the paired GBOs
+    # # Count the paired GBOs
         
-    if row == "% of closed case that have an initial and follow up/final paired GBO":
+    def convert_dates(df, date_columns):
+        for column in date_columns:
+            df[column] = pd.to_datetime(df[column], errors='coerce')
+        return df.dropna(subset=date_columns)
+    
+    def merge_and_filter_gbo(df_initial, df_followup_final):
+        # Merging the initial and follow-up/final GBOs on client_id and goal_id
+        df_paired_gbo = pd.merge(df_initial, df_followup_final, on=['client_id', 'goal_id'], suffixes=('_initial', '_followup_final'))
         
-        if len(df_initial) == 0:
-            return str(0) + "%"
+        # Filtering the paired GBOs based on the date criteria
+        df_paired_gbo = df_paired_gbo[
+            (df_paired_gbo['goal_score_date_initial'] >= df_paired_gbo['referral_date_initial']) & 
+            (df_paired_gbo['goal_score_date_initial'] <= df_paired_gbo['file_closure_date_initial']) &
+            (df_paired_gbo['goal_score_date_followup_final'] <= df_paired_gbo['file_closure_date_followup_final'])
+        ]
+        
+        return df_paired_gbo
+    
+    def filter_for_reliable_change(df_paired_gbo):
+        """
+        Filters the DataFrame of paired GBOs to identify cases with reliable change.
+        A reliable change is defined as a change of +3 or more in the average scores 
+        from the initial to the follow-up/final GBO.
+    
+        :param df_paired_gbo: DataFrame containing paired initial and follow-up/final GBOs.
+        :return: DataFrame with GBOs showing a reliable change.
+        """
+         # Drop rows where the precalculated change column is null
+        df_paired_gbo = df_paired_gbo.dropna(subset=['t1_to_t2_change_followup_final'])
+    
+        # Filter for GBOs that show a reliable change of +3 or more
+        # Assuming a positive value indicates improvement
+        df_reliable_change = df_paired_gbo[df_paired_gbo['t1_to_t2_change_followup_final'] >= 3]
+    
+        return df_reliable_change
+
+    def add_average_column(df):
+        # Ensure the columns exist and are not null
+        if 't1_average_followup_final' in df.columns and 't2_average_followup_final' in df.columns:
+            # Calculate the average of the two columns
+            df['average_t1_t2'] = (df['t1_average_followup_final'] + df['t2_average_followup_final']) / 2
         else:
-            return str(round(len(paired_gbo_df) / len(df_initial) * 100, 2)) + "%"
+            print("Required columns are not available in the DataFrame")
+        return df
+        
+        try:
+            # Assuming df is the DataFrame you are working with
+        
+            # Add the new average column to the DataFrame
+            df_with_average = add_average_column(df)
+        
+            # Now df_with_average contains the new column 'average_t1_t2'
+        except Exception as e:
+            print(f"Error in adding average column: {e}")
+            df_with_average = pd.DataFrame()
+    
+
+
+    if row == "% of closed cases that have an initial and follow-up/final paired GBO":
+
+        try:
+            
+
+            # Drop rows with missing 'referral_date' or 'reason'
+            df_filtered = df.dropna(subset=['referral_date', 'reason', 'goal_score_date', 'file_closure_date'])
+          
+
+            # Check for any remaining missing values
+            if df_filtered['referral_date'].isnull().any() or df_filtered['reason'].isnull().any():
+
+                return (pd.DataFrame(), pd.DataFrame())
+
+            # Define the file closure reason for selection
+            file_closure_reason = 'Treatment completed'
+
+            # Filter for the specified file closure reason
+            df_filtered = df_filtered[df_filtered['reason'] == file_closure_reason]
+
+            # Convert dates safely
+            for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
+                df_filtered.loc[:, column] = pd.to_datetime(df_filtered[column], errors='coerce')
+
+            # Drop rows with invalid dates
+            df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
+
+            # Check if there are rows left to process
+            if df_filtered.empty:
+
+                return (pd.DataFrame(), pd.DataFrame())
+
+            # Filter for initial and follow-up/final GBOs
+            df_initial_gbo = df_filtered[df_filtered['initial_/_followup_/_final'] == 'Initial']
+            df_followup_final_gbo = df_filtered[df_filtered['initial_/_followup_/_final'].isin(['Follow up', 'Final'])]
+
+
+            # Merge and filter paired GBOs
+            df_paired_gbo = merge_and_filter_gbo(df_initial_gbo, df_followup_final_gbo)
+            
+            
+            
+            
+
+            return (df_paired_gbo, df_filtered)
+        
+        except Exception as e:
+            print(f"Error in processing paired GBO: {e}")
+            return (pd.DataFrame(), pd.DataFrame())
+
+            
+
 
     elif row == "% of closed cases with reliable change in paired GBO":
-        return "todo"
-        # Check if required columns exist
-        required_columns = ['score_1', 'score_2', 'score_3']
+        try:
+            # Drop rows with missing 'referral_date' or 'reason'
+            df_filtered = df.dropna(subset=['referral_date', 'reason', 'goal_score_date', 'file_closure_date'])
+          
+
+            # Check for any remaining missing values
+            if df_filtered['referral_date'].isnull().any() or df_filtered['reason'].isnull().any():
+
+                return (pd.DataFrame(), pd.DataFrame())
+
+            # Define the file closure reason for selection
+            file_closure_reason = 'Treatment completed'
+
+            # Filter for the specified file closure reason
+            df_filtered = df_filtered[df_filtered['reason'] == file_closure_reason]
+
+            # Convert dates safely
+            for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
+                df_filtered.loc[:, column] = pd.to_datetime(df_filtered[column], errors='coerce')
+
+            # Drop rows with invalid dates
+            df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
+
+            # Check if there are rows left to process
+            if df_filtered.empty:
+                return (pd.DataFrame(), pd.DataFrame())
+
+            # Filter for initial and follow-up/final GBOs
+            df_initial_gbo = df_filtered[df_filtered['initial_/_followup_/_final'] == 'Initial']
+            df_followup_final_gbo = df_filtered[df_filtered['initial_/_followup_/_final'].isin(['Follow up', 'Final'])]
+
+
+            # Merge and filter paired GBOs
+            df_paired_gbo = merge_and_filter_gbo(df_initial_gbo, df_followup_final_gbo)
+            
+            # Filter for GBOs with reliable change
+            df_reliable_change_gbo = filter_for_reliable_change(df_paired_gbo)
         
-        print(paired_gbo_df.columns.tolist())
-
-        for col in required_columns:
-            if col not in paired_gbo_df.columns:
-                print(f"Column {col} not found in DataFrame.")
-                return "error"
-
-        # Check for NaN values in 'score_1' and 'score_2'
-        if paired_gbo_df[['score_1', 'score_2']].isna().any().any():
-            print("NaN values found in 'score_1' or 'score_2'.")
-            return "error"
-        # Ensure that only goals with at least two scores are included
-        paired_gbo_with_scores = paired_gbo_df.dropna(subset=['score_1', 'score_2'])
-
-        # Use score_3 if available, otherwise use score_2
-        paired_gbo_with_scores['follow_up_score'] = paired_gbo_with_scores['score_3'].fillna(paired_gbo_with_scores['score_2'])
-
-        # Calculate score change
-        paired_gbo_with_scores['score_change'] = paired_gbo_with_scores['follow_up_score'] - paired_gbo_with_scores['score_1']
-
-        # Determine goals with reliable change (+3 or more)
-        reliable_change_count = (paired_gbo_with_scores['score_change'] >= 3).sum()
-
-        # Calculate the percentage of goals showing reliable change
-        total_goals_count = len(paired_gbo_with_scores)
-        percentage_reliable_change = (reliable_change_count / total_goals_count) * 100 if total_goals_count > 0 else 0
-
-        return percentage_reliable_change
-
+            # The filtered DataFrame for GBOs with reliable change
+            result_reliable_change = df_reliable_change_gbo
+        
+            
+            return (result_reliable_change, df_paired_gbo)
+            
+            
+        except Exception as e:
+            print(f"Error in filtering GBOs for reliable change: {e}")
+            result_reliable_change = pd.DataFrame()
 
     elif row == "Average impact score of all paired goals":
-        return "todo"
+        
+        try:
+            # Drop rows with missing 'referral_date' or 'reason'
+            df_filtered = df.dropna(subset=['referral_date', 'reason', 'goal_score_date', 'file_closure_date'])
+          
+
+            # Check for any remaining missing values
+            if df_filtered['referral_date'].isnull().any() or df_filtered['reason'].isnull().any():
+
+                return (pd.DataFrame(), pd.DataFrame())
+
+            # Define the file closure reason for selection
+            file_closure_reason = 'Treatment completed'
+
+            # Filter for the specified file closure reason
+            df_filtered = df_filtered[df_filtered['reason'] == file_closure_reason]
+
+            # Convert dates safely
+            for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
+                df_filtered.loc[:, column] = pd.to_datetime(df_filtered[column], errors='coerce')
+
+            # Drop rows with invalid dates
+            df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
+
+            # Check if there are rows left to process
+            if df_filtered.empty:
+                return (pd.DataFrame(), "NULL")
+
+            # Filter for initial and follow-up/final GBOs
+            df_initial_gbo = df_filtered[df_filtered['initial_/_followup_/_final'] == 'Initial']
+            df_followup_final_gbo = df_filtered[df_filtered['initial_/_followup_/_final'].isin(['Follow up', 'Final'])]
+
+
+            # Merge and filter paired GBOs
+            df_paired_gbo = merge_and_filter_gbo(df_initial_gbo, df_followup_final_gbo)
+            
+
+            
+            df_with_average = add_average_column(df_paired_gbo)
+        
+            return (df_with_average, "average_t1_t2")
+            
+            
+        except Exception as e:
+            print(f"Error in filtering GBOs for reliable change: {e}")
+            result_reliable_change = pd.DataFrame()
+        
+        pass
 
     else:
         print(f"Row not recognised: {row}")
@@ -893,10 +1193,7 @@ def goal_themes_filter(df, row, dfname="empty"):
             print("Row not recognised by filters: " + row)
             return "error"
         
-        if len(df) == 0:
-            return str(0) + "$"
-        else:
-            return str(round(len(this_theme_df) / len(df) * 100, 2)) + "%"
+        return this_theme_df
 
     except Exception as e:
         print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")

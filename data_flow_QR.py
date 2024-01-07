@@ -1,8 +1,19 @@
 import sys
 import os
-import pandas as pd
-from data_config import file_info, service_info_config, table_configs
+import threading
+import queue
 
+import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import scrolledtext
+
+# Add the directory of your script and modules to the Python path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_dir)
+
+# Now import your local modules
+from data_config import file_info, service_info_config, table_configs
 from data_cleaning import (
     clean_column_names,
     remove_duplicates,
@@ -10,11 +21,52 @@ from data_cleaning import (
     isolate_reporting_period,
     filter_mib_services,
     validate_data_files,
+    add_reason_to_file_closures
 )
-from QR_filters import (
-    filter_function_map,
-    column_filter,
-)
+from QR_filters import filter_function_map, column_filter
+
+
+# Global queue for log messages
+log_queue = queue.Queue()
+
+def log_message(message):
+    """Log a message to the Tkinter text widget."""
+    log_queue.put(message)
+
+def update_text_widget(log_queue, text_widget):
+    """Update the text widget with log messages."""
+    while True:
+        message = log_queue.get()
+        if message == "QUIT":
+            break
+        text_widget.configure(state='normal')
+        text_widget.insert(tk.END, message + '\n')
+        text_widget.configure(state='disabled')
+        text_widget.yview(tk.END)
+
+def create_logging_window():
+    """Create the logging window."""
+    root = tk.Tk()
+    root.title("Logging Window")
+
+    text_widget = scrolledtext.ScrolledText(root, state='disabled', height=20)
+    text_widget.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+
+    threading.Thread(target=update_text_widget, args=(log_queue, text_widget), daemon=True).start()
+    return root
+
+def select_folder():
+    # Create a root window, but keep it hidden
+    root = tk.Tk()
+    root.withdraw()
+
+    # Open the file dialog
+    folder_path = filedialog.askdirectory()
+
+    # Destroy the root window after selection
+    root.destroy()
+
+    return folder_path
 
 
 #todo: make sure global filtering is good
@@ -22,6 +74,9 @@ from QR_filters import (
 
 def main():
     print("Begin Processing files")
+    log_message("Begin Processing files")
+    
+    
     
     # Define reporting period parameters
     start_date, end_date, date_column = "2020-04-01", "2020-06-30", "date_of_contact"
@@ -31,6 +86,10 @@ def main():
         r"D:/OneDrive/Documents/src/python_testing/MyMupDataTool/quarterly_data_dump"
         # r"./quarterly_data_dump"
     )
+    
+    
+    #directory = select_folder()
+    
     raw_data = load_data_files(directory, file_info)
 
     # Data cleaning and validation
@@ -39,6 +98,8 @@ def main():
         validated_data = validate_data_files(cleaned_data, file_info)
     except Exception as e:
         print(f"Error cleaning data: {e}")
+        log_message(f"Error cleaning data: {e}")
+
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
 
@@ -52,6 +113,7 @@ def main():
 
 def load_data_files(directory, file_info):
     print("Loading data files...")
+    log_message("Loading data files...")
     dataframes = {}
 
     # Check if all files exist
@@ -70,11 +132,14 @@ def load_data_files(directory, file_info):
     for key, info in file_info.items():
         full_path = os.path.join(directory, info["filename"])
         print(f"Attempting to load: {full_path}")  # Print the full path
+        log_message(f"Attempting to load: {full_path}")
         try:
             dataframes[key] = pd.read_csv(full_path)
             print(f'> Loaded {key} from {info["filename"]}')
+            log_message(f'> Loaded {key} from {info["filename"]}')
         except Exception as e:
             print(f"Error loading {full_path}: {e}")
+            log_message(f"Error loading {full_path}: {e}")
 
     return dataframes
 
@@ -82,6 +147,7 @@ def load_data_files(directory, file_info):
 
 def clean_data(dataframes, start_date, end_date, date_column):
     print("Cleaning dataframes...")
+    log_message("Cleaning dataframes...")
     cleaned_dataframes = clean_column_names(dataframes)
     # cleaned_dataframes = isolate_reporting_period(
     # cleaned_dataframes, start_date, end_date, date_column
@@ -90,12 +156,14 @@ def clean_data(dataframes, start_date, end_date, date_column):
     # cleaned_dataframes = isolate_client_ages(3, 26) 
     cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes)
     cleaned_dataframes = remove_duplicates(cleaned_dataframes)
+    cleaned_dataframes = add_reason_to_file_closures(cleaned_dataframes)
 
     return cleaned_dataframes
 
 
 def produce_tables(dataframes):
     print("Producing output tables...")
+    log_message("Producing output tables...")
 
     column_headings = [
         "Row Name",
@@ -118,12 +186,14 @@ def produce_tables(dataframes):
     #optionally initialise empty df
     combined_df = pd.DataFrame(columns=column_headings)
 
-    mylooplist = list(filter_function_map.keys())[24:25]
+#   mylooplist = [list(filter_function_map.keys())[i] for i in [0, 18, 19, 20]]#,  19, 20]]
+
     
     # Append each table to the CSV file
-    # for name in filter_function_map.keys():
-    for name in mylooplist:
+    #for name in mylooplist:
+    for name in filter_function_map.keys():
         print(f"Processing {name}")
+        log_message(f"Processing {name}")
         thisconfig = find_dict_by_table_name(name, table_configs)
         this_table = filter_service_information(dataframes, thisconfig)
 
@@ -140,6 +210,7 @@ def produce_tables(dataframes):
             combined_df = pd.concat([combined_df, combined_row], ignore_index=True) 
         else:
             print(f"No data to write for {name}")
+            log_message(f"No data to write for {name}")
 
     return combined_df
 
@@ -155,6 +226,7 @@ def find_dict_by_table_name(table_name, dict_array):
     
 def filter_service_information(dataframes, config):
     print("Generating service information table...", config["table_name"])
+    log_message(f"Generating service information table... {config['table_name']}")
     
     row_names = config["row_names"]
     column_headings = config["column_headings"]
@@ -199,6 +271,10 @@ def filter_service_information(dataframes, config):
                     numerator_df, denominator_df = filtered_df
                     new_row[column] = calculate_percentage(numerator_df, denominator_df)  # Calculate and add percentage
                     row_dataframes.append(filtered_df)
+                elif is_average_row(row):
+                    assert isinstance(filtered_df, tuple), "Expected a tuple for percentage row"
+                    new_row[column] = calculate_average(filtered_df)  # Calculate and add percentage
+                    row_dataframes.append(filtered_df)
                 else:
                     assert isinstance(filtered_df, pd.DataFrame), "Expected a DataFrame for count row"
                     new_row[column] = calculate_count(filtered_df)  # Calculate and add count
@@ -206,6 +282,7 @@ def filter_service_information(dataframes, config):
 
             except Exception as e:
                 print(f"Error processing row: {row}, column: {column}, dfkey: {dataframe_key} Error: {e}")
+                log_message(f"Error processing row: {row}, column: {column}, dfkey: {dataframe_key} Error: {e}")
                 error_message = f"Error: {e}"
                 new_row[column] = error_message  # Add the error message to the cell
                 row_dataframes.append(None)  # Append None to maintain structure
@@ -214,6 +291,8 @@ def filter_service_information(dataframes, config):
         # Calculate total for the row
         if is_percentage_row(row):
             new_row["Q1_Totals"] = calculate_percentage_row_total(row_dataframes)
+        elif is_average_row(row):
+            new_row["Q1_Totals"] = calculate_row_average(row_dataframes)
         else:
             new_row["Q1_Totals"] = calculate_row_total(row_dataframes)
 
@@ -236,10 +315,22 @@ def calculate_percentage(numerator_df, denominator_df):
         percentage = (numerator / denominator) * 100
         return f"{percentage:.2f}%"  # Format to two decimal places
 
+def calculate_average(dataframe_and_column):
+    # Unpack the tuple into DataFrame and column name
+    dataframe, column_name = dataframe_and_column
+    
+    # Check if the column exists in the DataFrame
+    if column_name in dataframe.columns:
+        # Calculate the average of the specified column
+        average_value = dataframe[column_name].mean()
+        return f"{average_value:.2f}"  # Format to two decimal places
+    else:
+        return "n/a"
 
 def calculate_count(filtered_df):
     count = len(filtered_df)
     return count
+
 
 def calculate_row_total(row_dataframes):
     # Sum up counts, skipping placeholders
@@ -247,22 +338,40 @@ def calculate_row_total(row_dataframes):
     return total
 
 def calculate_percentage_row_total(row_dataframes):
-    total_percentage = 0
+    total_numerator = 0
+    total_denominator = 0
+
     for cell in row_dataframes:
-        if cell is None:
-            continue  # Skip None values
+        if cell is None or not isinstance(cell, tuple):
+            continue  # Skip None values and non-tuple values
 
-        # Ensure that the cell is a tuple before unpacking
-        if isinstance(cell, tuple):
-            numerator_df, denominator_df = cell
-            total_percentage += calculate_percentage_as_number(numerator_df, denominator_df)
-        else:
-            # Handle unexpected types or add a warning if necessary
-            print(f"Unexpected type in row_dataframes: {type(cell)}")
+        numerator_df, denominator_df = cell
+        total_numerator += len(numerator_df)
+        total_denominator += len(denominator_df)
 
+    if total_denominator == 0:
+        return "0%"  # Avoid division by zero
+
+    total_percentage = (total_numerator / total_denominator) * 100
     return f"{total_percentage:.2f}%"
 
+def calculate_row_average(row_dataframes):
+    # List to hold average values of each DataFrame
+    averages = []
 
+    # Iterate over each DataFrame in the list
+    for df in row_dataframes:
+        if isinstance(df, pd.DataFrame) and not df.empty:
+            # Calculate the mean of all numeric columns in the DataFrame
+            df_mean = df.mean(numeric_only=True).mean()
+            averages.append(df_mean)
+
+    # Calculate the overall average if there are valid averages in the list
+    if averages:
+        row_average = sum(averages) / len(averages)
+        return row_average
+    else:
+        return 0  # Return 0 if no valid DataFrames are present
 
 def calculate_percentage_as_number(numerator_df, denominator_df):
     # Calculate percentage as a numeric value for summing
@@ -276,10 +385,17 @@ def calculate_percentage_as_number(numerator_df, denominator_df):
 
 
 def is_percentage_row(row_name):
-    return row_name.startswith('%') or row_name.startswith('average') or row_name.startswith('Percentage')
+    return row_name.startswith('%') or row_name.startswith('Percentage')
+
+def is_average_row(row_name):
+    return row_name.startswith('average') or row_name.startswith('Average')
+
 
 
 
 
 if __name__ == "__main__":
     resultdf = main()
+    # logging_window = create_logging_window()
+    # threading.Thread(target=main, daemon=True).start()
+    # logging_window.mainloop()

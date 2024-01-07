@@ -1,4 +1,5 @@
-from data_config import yim_providers
+#from data_config import yim_providers
+import pandas as pd
 
 def clean_column_names(dataframes):
     print("Standardizing column names...")
@@ -78,6 +79,7 @@ def validate_data_files(dataframes, file_info):
     return dataframes
 
 
+
 def filter_mib_services(dataframes):
     """
     Filters dataframes based on the following criteria:
@@ -108,3 +110,70 @@ def filter_mib_services(dataframes):
             filtered_dataframes[df_name] = filtered_df
 
     return filtered_dataframes
+
+
+def add_reason_to_file_closures(dataframes):
+
+    """
+    Merges the 'reason' column from a specified file closures DataFrame into a specified file closures goals DataFrame,
+    and handles multiple client IDs with appropriate NaN filling.
+
+    :param dataframes: A dictionary of pandas DataFrames.
+    :param df_file_closures_name: The name of the DataFrame containing file closures.
+    :param df_file_closures_goals_name: The name of the DataFrame containing file closures and goals.
+    :return: A dictionary of pandas DataFrames with the merged 'reason' column.
+    """
+    df_file_closures_name = 'File_Closures_Within_Reporting_Period'
+    df_file_closures_goals_name = 'File_Closures_And_Goals_Within_Reporting_Period'
+    MIB_df_file_closures_goals_name = 'MIB_File_Closures_And_Goals_Within_Reporting_Period'
+    
+    filtered_dataframes = {}
+
+    for df_name, df in dataframes.items():
+        if df_name == df_file_closures_goals_name or df_name == MIB_df_file_closures_goals_name:
+            # Check if the required DataFrame exists
+            if df_file_closures_name not in dataframes:
+                print(f"DataFrame '{df_file_closures_name}' not found.")
+                continue
+
+            df_file_closures = dataframes[df_file_closures_name]
+
+            # Ensure 'client_id' is present in both DataFrames
+            if 'client_id' not in df.columns or 'client_id' not in df_file_closures.columns:
+                print("Both DataFrames must contain a 'client_id' column.")
+                continue
+
+            # Merge the two DataFrames on 'client_id'
+            merged_df = pd.merge(df, df_file_closures[['client_id', 'reason']], 
+                                 on='client_id', how='left')
+            filtered_dataframes[df_name] = merged_df
+        else:
+            # Keep the dataframe as is if it's not the target dataframe
+            filtered_dataframes[df_name] = df
+
+    return filtered_dataframes
+    # filtered_dataframes = {}
+
+    # for df_name, df in dataframes.items():
+    #     if df_name == df_file_closures_goals_name:
+    #         # Check if the required DataFrame exists
+    #         if df_file_closures_name not in dataframes:
+    #             print(f"DataFrame '{df_file_closures_name}' not found.")
+    #             continue
+
+    #         df_file_closures = dataframes[df_file_closures_name]
+
+    #         # Ensure 'client_id' is present in both DataFrames
+    #         if 'client_id' not in df.columns or 'client_id' not in df_file_closures.columns:
+    #             print("Both DataFrames must contain a 'client_id' column.")
+    #             continue
+
+    #         # Merge the two DataFrames on 'client_id'
+    #         merged_df = pd.merge(df, df_file_closures[['client_id', 'reason']], 
+    #                              on='client_id', how='left')
+    #         filtered_dataframes[df_name] = merged_df
+    #     else:
+    #         # Keep the dataframe as is if it's not the target dataframe
+    #         filtered_dataframes[df_name] = df
+
+    # return filtered_dataframes
