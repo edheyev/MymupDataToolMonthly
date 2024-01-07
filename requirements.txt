@@ -1,4 +1,2 @@
-tk
-ttkthemes
 pandas
-pandastable
+
