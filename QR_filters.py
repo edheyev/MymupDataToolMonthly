@@ -923,32 +923,6 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
     
     is_mib = dfname.startswith("MIB")
     
-
-    # df_copy = df.copy()
-
-    # # Convert dates to datetime
-    # df_copy['referral_date'] = pd.to_datetime(df_copy['referral_date'], errors='coerce')
-    # df_copy['file_closure_date'] = pd.to_datetime(df_copy['file_closure_date'], errors='coerce')
-    # df_copy['goal_score_date'] = pd.to_datetime(df_copy['goal_score_date'], errors='coerce')
-
-    # # Filter for Initial and Follow-Up/Final GBOs
-    # df_initial = df_copy[df_copy['initial_/_followup_/_final'].str.contains("Initial", case=False, na=False)]
-    # df_followup_final = df_copy[df_copy['initial_/_followup_/_final'].isin(["Follow up", "Final"])]
-
-    # # Ensure that 'goal_score_date' is uniquely named in df_followup_final
-    # df_followup_final = df_followup_final.rename(columns={'goal_score_date': 'goal_score_date_fu_f'})
-
-    # # Merge on 'goal_id'
-    # merged_df = pd.merge(df_initial[['goal_id', 'referral_date', 'file_closure_date', 'score_1', 'score_2', 'score_3']], 
-    #                     df_followup_final[['goal_id', 'goal_score_date_fu_f']], 
-    #                     on='goal_id', 
-    #                     how='inner')
-
-    # # Apply the criteria for paired GBOs
-    # paired_gbo_df = merged_df[(merged_df['goal_score_date_fu_f'] > merged_df['referral_date']) & 
-    #                         (merged_df['goal_score_date_fu_f'] < merged_df['file_closure_date'])]
-
-    # # Count the paired GBOs
         
     def convert_dates(df, date_columns):
         for column in date_columns:
@@ -987,6 +961,7 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
         return df_reliable_change
 
     def add_average_column(df):
+        
         # Ensure the columns exist and are not null
         if 't1_average_followup_final' in df.columns and 't2_average_followup_final' in df.columns:
             # Calculate the average of the two columns
@@ -994,18 +969,7 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
         else:
             print("Required columns are not available in the DataFrame")
         return df
-        
-        try:
-            # Assuming df is the DataFrame you are working with
-        
-            # Add the new average column to the DataFrame
-            df_with_average = add_average_column(df)
-        
-            # Now df_with_average contains the new column 'average_t1_t2'
-        except Exception as e:
-            print(f"Error in adding average column: {e}")
-            df_with_average = pd.DataFrame()
-    
+
 
 
     if row == "% of closed cases that have an initial and follow-up/final paired GBO":
@@ -1465,9 +1429,9 @@ def other_reason_for_referral_filter(df, row, dfname="empty"):
     try:
         if row in reason_map:
             if reason_map[row] is not None:
-                df_filtered = df[df['reason'] == reason_map[row]]
+                df_filtered = df[df['reason_other'] == reason_map[row]]
             elif row == "Blank (nothing selected)":
-                df_filtered = df[df['reason'].isna()]
+                df_filtered = df[df['reason_other'].isna()]
         else:
             print("Row not recognised by filters: " + row)
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows

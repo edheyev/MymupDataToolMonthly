@@ -123,13 +123,18 @@ def validate_data_files(dataframes, file_info):
     print("Validating data files...")
     for df_name, df in dataframes.items():
         if df_name in file_info:
-            correct_columns = file_info[df_name]["columns"]
-            print(f'> Checking {df_name} for {", ".join(correct_columns)}')
-            if not set(correct_columns).issubset(df.columns):
-                raise ValueError(
-                    f"DataFrame {df_name} is missing one or more of the correct columns."
-                )
+            required_columns = file_info[df_name]["columns"]
+            print(f'> Validating {df_name} for required columns: {", ".join(required_columns)}')
+            
+            # Identify missing columns
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            
+            if missing_columns:
+                missing_columns_str = ', '.join(missing_columns)
+                error_message = f"DataFrame '{df_name}' is missing the following required columns: {missing_columns_str}"
+                raise ValueError(error_message)
     return dataframes
+
 
 
 
