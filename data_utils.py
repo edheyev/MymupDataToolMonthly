@@ -1,51 +1,105 @@
-# data_utils.py
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jan  7 15:11:17 2024
+
+@author: Edloc
+"""
 
 import pandas as pd
 
-def filter_by_indices(df, indices):
-    """
-    Filter the DataFrame based on row indices.
+
+def find_dict_by_table_name(table_name, dict_array):
+    for dictionary in dict_array:
+        if dictionary.get("table_name") == table_name:
+            return dictionary
+    raise ValueError(
+        f"Dictionary with table_name '{table_name}' not found in the array."
+    )
     
-    :param df: pandas DataFrame to filter.
-    :param indices: A list of integers representing row indices.
-    :return: Filtered DataFrame.
-    """
-    if not indices:
-        return pd.DataFrame()  # Return an empty DataFrame if indices list is empty
-    return df.iloc[indices]
 
-def filter_by_isin(df, column_name, values):
-    """
-    Filter the DataFrame based on values in a specific column using the .isin() method.
+
+def calculate_percentage(numerator_df, denominator_df):
+    # Example: calculate a simple percentage
+    numerator = len(numerator_df)
+    denominator = len(denominator_df)
+
+    if denominator == 0:
+        return "0%"  # Avoid division by zero
+    else:
+        percentage = (numerator / denominator) * 100
+        return f"{percentage:.2f}%"  # Format to two decimal places
+
+def calculate_average(dataframe_and_column):
+    # Unpack the tuple into DataFrame and column name
+    dataframe, column_name = dataframe_and_column
     
-    :param df: pandas DataFrame to filter.
-    :param column_name: Name of the column to filter by.
-    :param values: List of values to filter for in the specified column.
-    :return: Filtered DataFrame.
-    """
-    if column_name not in df.columns:
-        raise ValueError(f"Column '{column_name}' not found in DataFrame.")
-    return df[df[column_name].isin(values)]
+    # Check if the column exists in the DataFrame
+    if column_name in dataframe.columns:
+        # Calculate the average of the specified column
+        average_value = dataframe[column_name].mean()
+        return f"{average_value:.2f}"  # Format to two decimal places
+    else:
+        return "n/a"
+
+def calculate_count(filtered_df):
+    count = len(filtered_df)
+    return count
 
 
+def calculate_row_total(row_dataframes):
+    # Sum up counts, skipping placeholders
+    total = sum(len(df) for df in row_dataframes if isinstance(df, pd.DataFrame))
+    return total
+
+def calculate_percentage_row_total(row_dataframes):
+    total_numerator = 0
+    total_denominator = 0
+
+    for cell in row_dataframes:
+        if cell is None or not isinstance(cell, tuple):
+            continue  # Skip None values and non-tuple values
+
+        numerator_df, denominator_df = cell
+        total_numerator += len(numerator_df)
+        total_denominator += len(denominator_df)
+
+    if total_denominator == 0:
+        return "0%"  # Avoid division by zero
+
+    total_percentage = (total_numerator / total_denominator) * 100
+    return f"{total_percentage:.2f}%"
+
+def calculate_row_average(row_dataframes):
+    # List to hold average values of each DataFrame
+    averages = []
+
+    # Iterate over each DataFrame in the list
+    for df in row_dataframes:
+        if isinstance(df, pd.DataFrame) and not df.empty:
+            # Calculate the mean of all numeric columns in the DataFrame
+            df_mean = df.mean(numeric_only=True).mean()
+            averages.append(df_mean)
+
+    # Calculate the overall average if there are valid averages in the list
+    if averages:
+        row_average = sum(averages) / len(averages)
+        return row_average
+    else:
+        return 0  # Return 0 if no valid DataFrames are present
+
+def calculate_percentage_as_number(numerator_df, denominator_df):
+    # Calculate percentage as a numeric value for summing
+    numerator = len(numerator_df)
+    denominator = len(denominator_df)
+
+    if denominator == 0:
+        return 0  # Avoid division by zero
+    else:
+        return (numerator / denominator) * 100
 
 
+def is_percentage_row(row_name):
+    return row_name.startswith('%') or row_name.startswith('Percentage')
 
-def clean_data(df):
-    try:
-        # Data cleaning steps
-        cleaned_df = df.dropna()
-        return cleaned_df
-    except Exception as e:
-        # You can log the error or handle it as needed
-        raise ValueError("Required column is missing")
-
-def aggregate_data(df, group_by_columns):
-    # Data aggregation steps
-    aggregated_df = df.groupby(group_by_columns).sum()
-    return aggregated_df
-
-def filter_data(df, filter_conditions):
-    # Data filtering steps
-    filtered_df = df.query(filter_conditions)
-    return filtered_df
+def is_average_row(row_name):
+    return row_name.startswith('average') or row_name.startswith('Average')

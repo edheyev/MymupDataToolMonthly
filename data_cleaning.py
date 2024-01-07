@@ -29,21 +29,74 @@ def remove_duplicates(dataframes):
 
 
 
-def isolate_reporting_period(dataframes, start_date, end_date, date_column):
+def isolate_reporting_period(dataframes, start_date, end_date):
     print("Isolating data within the reporting period...")
-    isolated_dataframes = {}
-    for df_name, df in dataframes.items():
-        if date_column in df.columns:
-            isolated_dataframes[df_name] = df[
-                df[date_column].between(start_date, end_date)
-            ]
-        else:
-            print(
-                f"Warning: '{date_column}' column not found in '{df_name}' dataframe."
-            )
-            isolated_dataframes[df_name] = df
-    return isolated_dataframes
 
+    # Convert start and end dates to datetime objects
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+
+    for df_name, df in dataframes.items():
+        # Check specific DataFrame and 'contact_date' column presence
+        if df_name in ["Contacts_Or_Indirects_Within_Reporting_Period", "MIB_Contacts_Or_Indirects_Within_Reporting_Period"]:
+            if 'contact_date' in df.columns:
+                initial_row_count = len(df)
+                print(f"Initial row count for '{df_name}': {initial_row_count}")
+
+                # Convert 'contact_date' to datetime, coerce errors to NaT
+                df['contact_date'] = pd.to_datetime(df['contact_date'], errors='coerce')
+                
+                # Drop rows with NaT in 'contact_date' and count them
+                na_removed_count = df['contact_date'].isna().sum()
+                df.dropna(subset=['contact_date'], inplace=True)
+                print(f"Rows dropped due to NaT in 'contact_date' for '{df_name}': {na_removed_count}")
+
+                # Filter data to include only rows within the reporting period
+                filtered_df = df[(df['contact_date'] >= start_date) & (df['contact_date'] <= end_date)]
+                period_filtered_count = initial_row_count - len(filtered_df)
+                print(f"Rows filtered out of the reporting period for '{df_name}': {period_filtered_count}")
+                dataframes[df_name] = filtered_df
+
+    return dataframes
+
+
+
+def isolate_client_ages(dataframes, low_age, high_age):
+    removed_client_ids = set()
+    removed_count_first_pass = 0
+    removed_count_second_pass = 0
+
+    # First pass: Isolate ages and collect client_ids
+    for df_name, df in dataframes.items():
+        if 'client_age' in df.columns:
+            # Find rows outside the age range
+            outside_age_range = df[(df['client_age'] < low_age) | (df['client_age'] > high_age)]
+            removed_count_first_pass += len(outside_age_range)
+            
+            # Collect client_ids
+            removed_client_ids.update(outside_age_range['client_id'].unique())
+            
+            # Remove rows outside the age range
+            dataframes[df_name] = df.drop(outside_age_range.index)
+
+    # Second pass: Remove rows with matching client_ids in all dataframes
+    for df_name, df in dataframes.items():
+        if 'client_id' in df.columns:
+            # Find rows with matching client_ids
+            rows_to_remove = df[df['client_id'].isin(removed_client_ids)]
+            removed_count_second_pass += len(rows_to_remove)
+            
+            # Remove these rows
+            dataframes[df_name] = df.drop(rows_to_remove.index)
+
+    print(f"Removed {removed_count_first_pass} rows based on age criteria.")
+    print(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
+
+    return dataframes
+
+    
+    
+    return dataframes
 
 def remove_trailing_spaces_from_values(dataframes_dict):
     """

@@ -13,7 +13,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 # Now import your local modules
-from data_config import file_info, service_info_config, table_configs
+from data_config import file_info, table_configs
 from data_cleaning import (
     clean_column_names,
     remove_duplicates,
@@ -21,9 +21,23 @@ from data_cleaning import (
     isolate_reporting_period,
     filter_mib_services,
     validate_data_files,
-    add_reason_to_file_closures
+    add_reason_to_file_closures,
+    isolate_client_ages
 )
 from QR_filters import filter_function_map, column_filter
+
+from data_utils import (
+    find_dict_by_table_name,
+    calculate_percentage,
+    calculate_average,
+    calculate_count,
+    calculate_percentage_as_number,
+    calculate_row_average,
+    calculate_row_total,
+    calculate_percentage_row_total,
+    is_percentage_row,
+    is_average_row
+    )
 
 
 # Global queue for log messages
@@ -68,10 +82,6 @@ def select_folder():
 
     return folder_path
 
-
-#todo: make sure global filtering is good
-# todo fix duplicate removal to only remove if date is also teh same
-
 def main():
     print("Begin Processing files")
     log_message("Begin Processing files")
@@ -79,7 +89,7 @@ def main():
     
     
     # Define reporting period parameters
-    start_date, end_date, date_column = "2020-04-01", "2020-06-30", "date_of_contact"
+    start_date, end_date = "2020-10-01", "2024-02-01"
 
     # Load and process data
     directory = (
@@ -94,7 +104,7 @@ def main():
 
     # Data cleaning and validation
     try:
-        cleaned_data = clean_data(raw_data, start_date, end_date, date_column)
+        cleaned_data = clean_data(raw_data, start_date, end_date)
         validated_data = validate_data_files(cleaned_data, file_info)
     except Exception as e:
         print(f"Error cleaning data: {e}")
@@ -109,6 +119,9 @@ def main():
 
     print("Report generated and saved as output_report.csv")
     return output_df
+    
+    
+#    return validated_data
 
 
 def load_data_files(directory, file_info):
@@ -145,15 +158,14 @@ def load_data_files(directory, file_info):
 
 
 
-def clean_data(dataframes, start_date, end_date, date_column):
+def clean_data(dataframes, start_date, end_date):
     print("Cleaning dataframes...")
     log_message("Cleaning dataframes...")
     cleaned_dataframes = clean_column_names(dataframes)
-    # cleaned_dataframes = isolate_reporting_period(
-    # cleaned_dataframes, start_date, end_date, date_column
-    # )
+    cleaned_dataframes = isolate_client_ages(dataframes, 3, 26) 
+    cleaned_dataframes = isolate_reporting_period(
+    cleaned_dataframes, start_date, end_date)
     # cleaned_dataframes = filter_mib_services(cleaned_dataframes)
-    # cleaned_dataframes = isolate_client_ages(3, 26) 
     cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes)
     cleaned_dataframes = remove_duplicates(cleaned_dataframes)
     cleaned_dataframes = add_reason_to_file_closures(cleaned_dataframes)
@@ -216,16 +228,10 @@ def produce_tables(dataframes):
 
 
 
-def find_dict_by_table_name(table_name, dict_array):
-    for dictionary in dict_array:
-        if dictionary.get("table_name") == table_name:
-            return dictionary
-    raise ValueError(
-        f"Dictionary with table_name '{table_name}' not found in the array."
-    )
+
     
 def filter_service_information(dataframes, config):
-    print("Generating service information table...", config["table_name"])
+    print("Generating table...", config["table_name"])
     log_message(f"Generating service information table... {config['table_name']}")
     
     row_names = config["row_names"]
@@ -302,93 +308,6 @@ def filter_service_information(dataframes, config):
 
     return result_df
 
-
-
-def calculate_percentage(numerator_df, denominator_df):
-    # Example: calculate a simple percentage
-    numerator = len(numerator_df)
-    denominator = len(denominator_df)
-
-    if denominator == 0:
-        return "0%"  # Avoid division by zero
-    else:
-        percentage = (numerator / denominator) * 100
-        return f"{percentage:.2f}%"  # Format to two decimal places
-
-def calculate_average(dataframe_and_column):
-    # Unpack the tuple into DataFrame and column name
-    dataframe, column_name = dataframe_and_column
-    
-    # Check if the column exists in the DataFrame
-    if column_name in dataframe.columns:
-        # Calculate the average of the specified column
-        average_value = dataframe[column_name].mean()
-        return f"{average_value:.2f}"  # Format to two decimal places
-    else:
-        return "n/a"
-
-def calculate_count(filtered_df):
-    count = len(filtered_df)
-    return count
-
-
-def calculate_row_total(row_dataframes):
-    # Sum up counts, skipping placeholders
-    total = sum(len(df) for df in row_dataframes if isinstance(df, pd.DataFrame))
-    return total
-
-def calculate_percentage_row_total(row_dataframes):
-    total_numerator = 0
-    total_denominator = 0
-
-    for cell in row_dataframes:
-        if cell is None or not isinstance(cell, tuple):
-            continue  # Skip None values and non-tuple values
-
-        numerator_df, denominator_df = cell
-        total_numerator += len(numerator_df)
-        total_denominator += len(denominator_df)
-
-    if total_denominator == 0:
-        return "0%"  # Avoid division by zero
-
-    total_percentage = (total_numerator / total_denominator) * 100
-    return f"{total_percentage:.2f}%"
-
-def calculate_row_average(row_dataframes):
-    # List to hold average values of each DataFrame
-    averages = []
-
-    # Iterate over each DataFrame in the list
-    for df in row_dataframes:
-        if isinstance(df, pd.DataFrame) and not df.empty:
-            # Calculate the mean of all numeric columns in the DataFrame
-            df_mean = df.mean(numeric_only=True).mean()
-            averages.append(df_mean)
-
-    # Calculate the overall average if there are valid averages in the list
-    if averages:
-        row_average = sum(averages) / len(averages)
-        return row_average
-    else:
-        return 0  # Return 0 if no valid DataFrames are present
-
-def calculate_percentage_as_number(numerator_df, denominator_df):
-    # Calculate percentage as a numeric value for summing
-    numerator = len(numerator_df)
-    denominator = len(denominator_df)
-
-    if denominator == 0:
-        return 0  # Avoid division by zero
-    else:
-        return (numerator / denominator) * 100
-
-
-def is_percentage_row(row_name):
-    return row_name.startswith('%') or row_name.startswith('Percentage')
-
-def is_average_row(row_name):
-    return row_name.startswith('average') or row_name.startswith('Average')
 
 
 
