@@ -5,6 +5,8 @@ import queue
 
 import pandas as pd
 import tkinter as tk
+import re
+
 from tkinter import filedialog
 from tkinter import scrolledtext
 
@@ -93,17 +95,15 @@ def main():
 
     # Load and process data
     directory = (
-        r"D:/OneDrive/Documents/src/python_testing/MyMupDataTool/quarterly_data_dump"
-        # r"./quarterly_data_dump"
+        r"./quarterly_data_dump"
     )
     
     
     #directory = select_folder()
-    
-    raw_data = load_data_files(directory, file_info)
 
     # Data cleaning and validation
     try:
+        raw_data = load_data_files(directory, file_info)
         cleaned_data = clean_data(raw_data, start_date, end_date)
         validated_data = validate_data_files(cleaned_data, file_info)
     except Exception as e:
@@ -120,42 +120,35 @@ def main():
     print("Report generated and saved as output_report.csv")
     return output_df
     
-    
-#    return validated_data
-
 
 def load_data_files(directory, file_info):
     print("Loading data files...")
-    log_message("Loading data files...")
     dataframes = {}
 
-    # Check if all files exist
-    missing_files = []
+    # Iterate through file_info and try to match with files in the directory
     for key, info in file_info.items():
-        full_path = os.path.join(directory, info["filename"])
-        if not os.path.exists(full_path):
-            missing_files.append(info["filename"])
+        filename_start = info["filename"].split(".")[0]  # Get the start of the filename
+        found = False
 
-    # If there are missing files, stop the function and report
-    if missing_files:
-        missing_files_str = ", ".join(missing_files)
-        raise FileNotFoundError(f"The following required files are missing: {missing_files_str}")
+        for f in os.listdir(directory):
+            if f.startswith(filename_start):
+                full_path = os.path.join(directory, f)
+                print(f"Attempting to load: {full_path}")
+                try:
+                    dataframes[key] = pd.read_csv(full_path)
+                    print(f'> Loaded {key} from {f}')
+                    found = True
+                    break
+                except Exception as e:
+                    print(f"Error loading {full_path}: {e}")
 
-    # If all files are present, proceed to load them
-    for key, info in file_info.items():
-        full_path = os.path.join(directory, info["filename"])
-        print(f"Attempting to load: {full_path}")  # Print the full path
-        log_message(f"Attempting to load: {full_path}")
-        try:
-            dataframes[key] = pd.read_csv(full_path)
-            print(f'> Loaded {key} from {info["filename"]}')
-            log_message(f'> Loaded {key} from {info["filename"]}')
-        except Exception as e:
-            print(f"Error loading {full_path}: {e}")
-            log_message(f"Error loading {full_path}: {e}")
+        if not found:
+            error_message = f"Error: Required file starting with '{filename_start}' not found in directory."
+            print(error_message)
+            log_message(error_message)
+            sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
     return dataframes
-
 
 
 def clean_data(dataframes, start_date, end_date):
