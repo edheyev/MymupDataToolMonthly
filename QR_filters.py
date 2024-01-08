@@ -404,7 +404,7 @@ def disability_category_filter(df, row, dfname="empty"):
         "Not stated (Person asked but declined to provide a response)": "Not stated (Person asked but declined to provide a response)",
         "Other": "Other (not listed)",  
         "Perception of Physical Danger": "Perception of Physical Danger",  # Not found in the data
-        "Personal, Self-Care and Continence": "Personal, Self-Care and Continence",  # Not found in the data
+        "Personal, Self-Care and Continence": "Personal, Self Care and Continence",  # Not found in the data
         "Progressive Conditions and Physical Health (such as HIV, Cancer, Multiple Sclerosis, Fits)": "Progressive Conditions and Physical Health (such as HIV, cancer, multiple sclerosis, fits etc)", 
         "Sight": "Sight",
         "Speech": "Speech",
@@ -494,7 +494,7 @@ def age_category_filter(df, row, dfname="empty"):
 def area_category_filter(df, row, dfname="empty"):
     area_map = {
         "BAILDON": "BAILDON",
-        "Bentham": "Bentham",  # Not found in the data
+        "Bentham": "Bentham",
         "BINGLEY": "BINGLEY",
         "BINGLEY RURAL": "BINGLEY RURAL",
         "BOLTON & UNDERCLIFFE": "BOLTON & UNDERCLIFFE",
@@ -503,12 +503,23 @@ def area_category_filter(df, row, dfname="empty"):
         "CITY": "CITY",
         "CLAYTON & FAIRWEATHER GREEN": "CLAYTON & FAIRWEATHER GREEN",
         "CRAVEN": "CRAVEN",
-        "Craven Ward  -Skipton North": "Craven Ward -  Skipton North",
-        "Craven Ward  -Skipton West": "Craven Ward -  Skipton West",
-        "Craven Ward -Settle Ribblebanks": "Craven Ward - Settle Ribblebanks",  # Not found in the data
-        "Craven Ward -Sutton in Craven": "Craven Ward -  Sutton-in-Craven",
-        "Carven ward -Skipton South": "Craven Ward -  Skipton South",
-        "Craven Ward -Hellifield and Long Preston": "Craven Ward - Hellifield and Long Preston",  # Not found in the data
+        "Craven Ward - Aire Valley-with-Lothersdale": "Craven Ward - Aire Valley-with-Lothersdale",
+        "Craven Ward - Barden Fell": "Craven Ward - Barden Fell",
+        "Craven Ward - Cowling": "Craven Ward - Cowling",
+        "Craven Ward - Embsay-with-Eastby": "Craven Ward - Embsay-with-Eastby",
+        "Craven Ward - Gargrave and Malhamdale": "Craven Ward - Gargrave and Malhamdale",
+        "Craven Ward - Glusburn": "Craven Ward - Glusburn",
+        "Craven Ward - Grassington": "Craven Ward - Grassington",
+        "Craven Ward - Hellifield and Long Preston": "Craven Ward - Hellifield and Long Preston",  
+        "Craven Ward - Penyghent": "Craven Ward - Penyghent",
+        "Craven Ward - Settle and Ribblebanks": "Craven Ward - Settle and Ribblebanks",
+        "Craven Ward - Skipton North": "Craven Ward -  Skipton North",
+        "Craven Ward - Skipton West": "Craven Ward -  Skipton West",
+        "Craven Ward - Skipton East": "Craven Ward -  Skipton East",
+        "Craven Ward - Skipton South": "Craven Ward -  Skipton South",
+        "Craven Ward - Sutton-in-Craven": "Craven Ward -  Sutton-in-Craven",
+        "Craven Ward - Upper Wharfedale": "Craven Ward - Upper Wharfedale",
+        "Craven Ward - West Craven": "Craven Ward - West Craven",
         "ECCLESHILL": "ECCLESHILL",
         "GREAT HORTON": "GREAT HORTON",
         "HEATON": "HEATON",
@@ -746,7 +757,7 @@ def cinp_category_filter(df, row, dfname="empty"):
         "Has never been subject to a Child in need plan": "Has never been subject to a Children In Need Plan",
         "Not known": "Not known",
         "Has previously been subject to a Child in need plan": "Has previously been subject to a Children In Need Plan",
-        "Under assessment": "Under assessment",  # Not found in your dataset
+        "Under assessment": "Under Assessment", 
         "Blank (nothing selected)": None  # Handling for blank entries
     }
     def filter_logic(mapped_value):
@@ -1195,7 +1206,7 @@ def contact_by_theme_filter(df, row, dfname="empty"):
     "Friendships":"Friendships",
     "Harm to others":"Harm to others",
     "Hearing Voices":"Hearing voices",
-    "Homelessness":"Homelessness",# not found in data
+    "Homelessness":"Homelessness",
     "Identity issues":"Identity issues",
     "Ill Health":"Ill health",
     "In Crisis/De-escalation":"In Crisis/De-escalation",
@@ -1243,11 +1254,11 @@ def contact_by_theme_filter(df, row, dfname="empty"):
 
 def source_of_referral_filter(df, row, dfname="empty"):
     reason_map = {
-        "Primary Health Care: General Medical Practitioner Practice (GP)": "Primary Health Care: General Medical Practitioner Practice",
-        "Accident And Emergency Department": "Accident And Emergency Department",
-        "CAMHS Core/Step down": "CAMHS - Core/Step Down",
-        "CAMHS Crisis Team": "CAMHS - Crisis Team (Hospital Urgents)",
-        "CAMHS Waiting List": "CAMHS - Waiting List",
+        "Primary Health Care: General Medical Practitioner Practice": "Primary Health Care: General Medical Practitioner Practice",
+        "Accident and Emergency Department": "Accident and Emergency Department",
+        "CAMHS - Core/Step Down": "CAMHS - Core/Step Down",
+        "CAMHS - Crisis Team (Hospital Urgents)": "CAMHS - Crisis Team (Hospital Urgents)",
+        "CAMHS - Waiting List": "CAMHS - Waiting List",
         "Child Health: Community-based Paediatrics": "Child Health: Community-based Paediatrics",
         "Child Health: Hospital-based Paediatrics": "Child Health: Hospital-based Paediatrics",
         "Child Health: School Nurse": "Child Health: School Nurse",
@@ -1256,8 +1267,8 @@ def source_of_referral_filter(df, row, dfname="empty"):
         "Employer: Occupational Health": "Employer: Occupational Health",
         "Family Support Worker": "Family Support Worker",
         "Improving Access to Psychological Therapies Service": "Improving Access to Psychological Therapies Service",
-        "Independent sector: Low secure Inpatients": "Independent sector: Low secure Inpatients",
-        "Independent sector: Medium secure Inpatients": "Independent sector: Medium secure Inpatients",
+        "Independent Sector: Low secure Inpatients": "Independent Sector: Low secure Inpatients",
+        "Independent Sector: Medium secure Inpatients": "Independent Sector: Medium secure Inpatients",
         "Inpatient Service Child and Adult Mental Health": "Inpatient Service Child and Adult Mental Health",
         "Inpatient Service Learning Disabilities": "Inpatient Service Learning Disabilities",
         "Internal Referral": "Internal Referral",
@@ -1275,7 +1286,7 @@ def source_of_referral_filter(df, row, dfname="empty"):
         "Other Independent Sector Mental Health Services": "Other Independent Sector Mental Health Services",
         "Other Primary Health Care": "Other Primary Health Care",
         "Other secondary care specialty": "Other secondary care specialty",
-        "Other Service or Agency": "Other SERVICE or agency",
+        "Other SERVICE or agency": "Other SERVICE or agency",
         "Other: Asylum Services": "Other: Asylum Services",
         "Other: Drug Action Team / Drug Misuse Agency": "Other: Drug Action Team / Drug Misuse Agency",
         "Other: Job Centre Plus": "Other: Job Centre Plus",
@@ -1292,6 +1303,7 @@ def source_of_referral_filter(df, row, dfname="empty"):
         "Voluntary Sector": "Voluntary Sector",
         "Blank (nothing selected)": "Blank (nothing selected)"
     }
+
 
     try:
         if row in reason_map:
@@ -1316,18 +1328,19 @@ def reason_for_referral_filter(df, row, dfname="empty"):
         "Anxiety": "Anxiety",
         "Attachment Difficulties": "Attachment Difficulties",
         "Behaviour Disorder": "Behaviour Disorder",
-        "Behaviours That Challenge due to a Learning Disability": "Behaviours That Challenge due to a Learning Disability",
+        "Behaviours that challenge due to a Learning Disability": "Behaviours that challenge due to a Learning Disability",
         "Bi-polar Disorder": "Bi-polar Disorder",
+        "Community Perinatal Mental Health Partner Assessment": "Community Perinatal Mental Health Partner Assessment",
         "Conduct Disorders": "Conduct Disorders",
         "Depression": "Depression",
-        "Diagnosed Autism Spectrum Disorder": "Diagnosed Autism",
+        "Diagnosed Autism": "Diagnosed Autism",
         "Drug and Alcohol Difficulties": "Drug and Alcohol Difficulties",
         "Eating Disorders": "Eating Disorders",
+        "Gambling disorder": "Gambling disorder",
         "Gender Discomfort Issues": "Gender Discomfort Issues",
         "In Crisis": "In Crisis",
         "Isolation": "Isolation",
-        "Neurodevelopmental Conditions, excl. ASD": "Neurodevelopmental Conditions, excluding Autism",
-        "Not Known": "Not Known",
+        "Neurodevelopmental Conditions, excluding Autism": "Neurodevelopmental Conditions, excluding Autism",
         "Obsessive Compulsive Disorder": "Obsessive Compulsive Disorder",
         "Ongoing or Recurrent Psychosis": "Ongoing or Recurrent Psychosis",
         "Organic Brain Disorder": "Organic Brain Disorder",
@@ -1341,11 +1354,12 @@ def reason_for_referral_filter(df, row, dfname="empty"):
         "Relationship Difficulties": "Relationship Difficulties",
         "Self-Care Issues": "Self-Care Issues",
         "Self-Harm Behaviours": "Self-Harm Behaviours",
-        "Suspected Autism Spectrum Disorder": "Suspected Autism",
-        "Suspected First Episode Psychosis": "Suspected First Episode Psychosis",
+        "Suspected Autism": "Suspected Autism",
+        "(Suspected) First Episode Psychosis": "(Suspected) First Episode Psychosis",
         "Unexplained Physical Symptoms": "Unexplained Physical Symptoms",
         "Blank (nothing selected)": "Blank (nothing selected)"
     }
+
     try:
         if row in reason_map:
             if reason_map[row] is not None:
@@ -1372,6 +1386,7 @@ def other_reason_for_referral_filter(df, row, dfname="empty"):
         "Community Involvement/Participation": "Community Involvement/Participation",
         "Covid 19": "Covid 19",
         "Criminal offending behaviour/or at risk of": "Criminal offending behaviour/or at risk of",
+        "Dementia": "Dementia",
         "Discrimination": "Discrimination",
         "Domestic Abuse": "Domestic Abuse",
         "Early Help": "Early Help",
@@ -1381,51 +1396,24 @@ def other_reason_for_referral_filter(df, row, dfname="empty"):
         "Family Problems/Home Life": "Family Problems/Home Life",
         "Family Support": "Family Support",
         "Financial Support": "Financial Support",
-        "Friendships": "Friendships",
-        "Harm to others": "Harm to others",
-        "Hearing Voices": "Hearing Voices",
-        "Historic domestic abuse": "Historic domestic abuse",
+        "Historic Domestic Abuse": "Historic Domestic Abuse",
         "Homelessness": "Homelessness",
         "Housing": "Housing",
-        "Identity issues": "Identity issues",
-        "Ill Health": "Ill Health",
         "In Crisis": "In Crisis",
-        "In Crisis/De-escalation": "In Crisis/De-escalation",
-        "Issues with medication": "Issues with medication",
-        "LGBTQ": "LGBTQ",
-        "Loneliness / isolation": "Loneliness / isolation",
-        "Loss Job/house": "Loss Job/house",
-        "Low confidence / self-worth": "Low confidence / self-worth",
-        "Low mood": "Low mood",
+        "LGBTQIA+ support": "LGBTQIA+ support",
         "Mental Health Support": "Mental Health Support",
-        "Neurodevelopmental issues": "Neurodevelopmental issues",
-        "OCD": "OCD",
-        "Offending behaviour": "Offending behaviour",
-        "Panic": "Panic",
         "Personal Safety": "Personal Safety",
-        "Phobias": "Phobias",
         "Physical Health": "Physical Health",
-        "Physical health / illness / disability": "Physical health / illness / disability",
-        "Psychosis / psychotic episodes": "Psychosis / psychotic episodes",
-        "PTSD": "PTSD",
-        "School / college / employment": "School / college / employment",
-        "Self-Care": "Self-Care",
-        "Self-Harm": "Self-Harm",
         "Sexual Health": "Sexual Health",
-        "Sexual Violence": "Sexual Violence",
         "Sexualised Abuse": "Sexualised Abuse",
         "Sleep Hygiene": "Sleep Hygiene",
-        "Sleep problems": "Sleep problems",
         "Social Isolation and Loneliness": "Social Isolation and Loneliness",
-        "Substance Misuse": "Substance Misuse",
-        "Suicidal Ideation": "Suicidal Ideation",
-        "Transition": "Transition",
-        "Trauma": "Trauma",
         "Victim of CSE": "Victim of CSE",
         "Wellness Health Education, Guidance and Counselling": "Wellness Health Education, Guidance and Counselling",
         "Young Carer/Adult Carer": "Young Carer/Adult Carer",
         "Blank (nothing selected)": "Blank (nothing selected)"
     }
+
     try:
         if row in reason_map:
             if reason_map[row] is not None:
