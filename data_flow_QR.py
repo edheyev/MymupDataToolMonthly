@@ -5,6 +5,9 @@ import queue
 
 import pandas as pd
 import tkinter as tk
+from tkinter import ttk  # Import ttk module for themed widgets
+from tkinter import scrolledtext
+
 import re
 
 from tkinter import filedialog
@@ -59,19 +62,83 @@ def update_text_widget(log_queue, text_widget):
         text_widget.insert(tk.END, message + '\n')
         text_widget.configure(state='disabled')
         text_widget.yview(tk.END)
-
 def create_logging_window():
-    """Create the logging window."""
+    """Create the logging window with improved layout and styling."""
     root = tk.Tk()
-    root.title("Logging Window")
+    root.title("MyMup Data Tool: Quarterly Report")
+    
+    # Set a theme
+    style = ttk.Style(root)
+    style.theme_use('clam')  # 'clam', 'alt', 'default', 'classic' are some common themes
 
-    text_widget = scrolledtext.ScrolledText(root, state='disabled', height=20)
-    text_widget.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+    # Instruction Frame
+    instruction_frame = ttk.Frame(root, padding="10 10 10 10")
+    instruction_frame.pack(fill=tk.X, expand=True)
+
+    # Instruction Text
+    instructions = (
+        "Instructions for MyMup Data Tool:\n"
+        "1. Enter the start and end dates for the reporting period.\n"
+        "2. Select a folder containing all required data files for the quarterly report.\n"
+        "3. Ensure the data files are named correctly as per the following list:\n"
+        "   * Contacts or Indirects Within Reporting Period: 'contacts_or_indirects_within_reporting_period.csv'\n"
+        "   ... [Additional file names] ...\n"
+        "4. Press the 'Start Processing' button to begin.\n"
+    )
+    instruction_text = tk.Text(instruction_frame, height=10, wrap=tk.WORD)
+    instruction_text.insert(tk.END, instructions)
+    instruction_text.config(state=tk.DISABLED)  # Make text read-only
+    instruction_text.pack(fill=tk.X, expand=True)
+
+    # Input Frame
+    input_frame = ttk.Frame(root, padding="10 10 10 10")
+    input_frame.pack(fill=tk.X, expand=True)
+
+    ttk.Label(input_frame, text="Start Date (YYYY-MM-DD):").pack(side=tk.LEFT)
+    start_date_entry = ttk.Entry(input_frame)
+    start_date_entry.insert(0, "2020-10-01")
+    start_date_entry.pack(side=tk.LEFT, padx="10 10")
+
+    ttk.Label(input_frame, text="End Date (YYYY-MM-DD):").pack(side=tk.LEFT)
+    end_date_entry = ttk.Entry(input_frame)
+    end_date_entry.insert(0, "2024-02-01")
+    end_date_entry.pack(side=tk.LEFT)
+
+    # Button Frame
+    button_frame = ttk.Frame(root, padding="10 10 10 10")
+    button_frame.pack(fill=tk.X, expand=True)
+
+    # File Selection and Start Processing Buttons
+    file_button = ttk.Button(button_frame, text="Select Containing Folder", command=lambda: select_folder(start_date_entry, end_date_entry))
+    file_button.pack(side=tk.LEFT, padx="10 10")
+
+    start_button = ttk.Button(button_frame, text="Start Processing", command=lambda: start_processing(text_widget))
+    start_button.pack(side=tk.LEFT)
+
+    # Log Frame
+    log_frame = ttk.Frame(root, padding="10 10 10 10")
+    log_frame.pack(fill=tk.BOTH, expand=True)
+
+    # Text Widget for Logs
+    text_widget = scrolledtext.ScrolledText(log_frame, state='disabled', height=20)
+    text_widget.pack(fill=tk.BOTH, expand=True)
 
     threading.Thread(target=update_text_widget, args=(log_queue, text_widget), daemon=True).start()
-    return root
 
-def select_folder():
+    return root, file_button, start_date_entry, end_date_entry
+
+
+
+def start_processing(text_widget):
+    """Function to start the main processing."""
+    # You can now use the global variable `directory` to access the selected directory
+    global directory
+    threading.Thread(target=main, args=(directory, text_widget), daemon=True).start()
+
+
+
+def select_folder(start_date_entry, end_date_entry):
+    global directory
     # Create a root window, but keep it hidden
     root = tk.Tk()
     root.withdraw()
@@ -81,10 +148,29 @@ def select_folder():
 
     # Destroy the root window after selection
     root.destroy()
+    
+    directory = folder_path  # Set the global variable
 
-    return folder_path
+    if folder_path:
+        try:
+            start_date = start_date_entry.get()
+            end_date = end_date_entry.get()
+            log_message("Directory selected: " + directory)
+            log_message(f"Start Date: {start_date}, End Date: {end_date}")
+            threading.Thread(target=load_and_clean_data, args=(folder_path, start_date, end_date), daemon=True).start()
+        except Exception as e:
+            log_message(f"Error in data processing: {e}")
+            
+            
+def load_and_clean_data(folder_path):
+    try:
+        raw_data = load_data_files(folder_path, file_info)
+        cleaned_data = clean_data(raw_data, start_date, end_date)
+        # You may store cleaned_data or pass it to another function as needed
+    except Exception as e:
+        log_message(f"Error in data processing: {e}")
 
-def main():
+def main(directory, text_widget):
     print("Begin Processing files")
     log_message("Begin Processing files")
     
@@ -94,12 +180,10 @@ def main():
     start_date, end_date = "2020-10-01", "2024-02-01"
 
     # Load and process data
-    directory = (
-        r"./quarterly_data_dump"
-    )
+    directory = (r"./quarterly_data_dump")
     
     
-    #directory = select_folder()
+    # directory = select_folder()
 
     # Data cleaning and validation
     try:
@@ -112,17 +196,20 @@ def main():
 
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
-
+    file_string = "output_csv_QR.csv"
     # Produce and save tables
-    output_df = produce_tables(validated_data)
+    output_df = produce_tables(validated_data, file_string)
 
 
-    print("Report generated and saved as output_report.csv")
+    # print("Report generated and saved as output_report.csv")
+    log_message("CSV saved. File name: " + file_string)
+
     return output_df
     
 
 def load_data_files(directory, file_info):
     print("Loading data files...")
+    log_message("Loading data files...")
     dataframes = {}
 
     # Iterate through file_info and try to match with files in the directory
@@ -166,7 +253,7 @@ def clean_data(dataframes, start_date, end_date):
     return cleaned_dataframes
 
 
-def produce_tables(dataframes):
+def produce_tables(dataframes, file_string):
     print("Producing output tables...")
     log_message("Producing output tables...")
 
@@ -197,14 +284,16 @@ def produce_tables(dataframes):
     # Append each table to the CSV file
     #for name in mylooplist:
     for name in filter_function_map.keys():
-        print(f"Processing {name}")
-        log_message(f"Processing {name}")
+        # print(f"Processing {name}")
+        # log_message(f"Processing {name}")
         thisconfig = find_dict_by_table_name(name, table_configs)
-        this_table = filter_service_information(dataframes, thisconfig)
-
+        try:
+            this_table = filter_service_information(dataframes, thisconfig)
+        except Exception as e:
+            log_message(f"Error processing filter: {e}")        
         # Check if DataFrame is not empty and write to csv
         if not this_table.empty:
-            with open("my_csv.csv", "a", newline='') as f:
+            with open(file_string, "a", newline='') as f:
                 f.write(f"{name}\n")
                 this_table.to_csv(f, header=False, index=False)
                 f.write("\n")
@@ -216,7 +305,7 @@ def produce_tables(dataframes):
         else:
             print(f"No data to write for {name}")
             log_message(f"No data to write for {name}")
-
+        
     return combined_df
 
 
@@ -225,7 +314,7 @@ def produce_tables(dataframes):
     
 def filter_service_information(dataframes, config):
     print("Generating table...", config["table_name"])
-    log_message(f"Generating service information table... {config['table_name']}")
+    log_message(f"Generating table... {config['table_name']}")
     
     row_names = config["row_names"]
     column_headings = config["column_headings"]
@@ -307,7 +396,9 @@ def filter_service_information(dataframes, config):
 
 
 if __name__ == "__main__":
-    resultdf = main()
+    # # resultdf = main()
     # logging_window = create_logging_window()
     # threading.Thread(target=main, daemon=True).start()
     # logging_window.mainloop()
+    logging_window, file_button, start_date_entry, end_date_entry = create_logging_window()
+    logging_window.mainloop()

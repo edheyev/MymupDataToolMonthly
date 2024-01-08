@@ -49,6 +49,8 @@ def column_filter(df, column, dfname="empty"):
             ]
         else:
             print("column not recognised by filters")
+            raise Exception(f"Error in reason_for_referral_filter with column {column}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()
     except Exception as e:
         print(f"Error in col_filter with column {column}: {e} . current df is {dfname} error: {e}")
@@ -340,10 +342,14 @@ def gender_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in gender_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in gender_category_filter with row {row}: {e}. Current df: {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 def ethnic_category_filter(df, row, dfname="empty"):
@@ -385,10 +391,13 @@ def ethnic_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in ethnicity_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in ethnicity_category_filter with row {row}: {e}. Current df: {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 def disability_category_filter(df, row, dfname="empty"):
@@ -424,10 +433,15 @@ def disability_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in disability_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
+        
         print(f"Error in disability_category_filter with row {row}: {e}. Current df: {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 def sexual_orientation_filter(df, row, dfname="empty"):
@@ -456,10 +470,14 @@ def sexual_orientation_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in sexual_orientation_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in sexual_orientation_filter with row {row}: {e}. Current df: {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 def age_category_filter(df, row, dfname="empty"):
@@ -484,10 +502,14 @@ def age_category_filter(df, row, dfname="empty"):
             return filter_logic(age)
         else:
             print(f"Row '{row}' not recognised in age_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in age_category_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -556,10 +578,14 @@ def area_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in area_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in area_category_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -582,10 +608,14 @@ def asylum_status_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in asylum_status_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in asylum_status_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -609,10 +639,14 @@ def sen_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in sen_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in sen_category_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 def ehcp_category_filter(df, row, dfname="empty"):
@@ -635,10 +669,14 @@ def ehcp_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in ehcp_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in ehcp_category_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -661,10 +699,14 @@ def at_risk_exploitation_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in at_risk_exploitation_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in at_risk_exploitation_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -687,10 +729,14 @@ def leaving_care_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in leaving_care_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in leaving_care_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -713,10 +759,14 @@ def lac_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in lac_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in lac_category_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -743,10 +793,14 @@ def cpp_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in cpp_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in cpp_category_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -771,10 +825,14 @@ def cinp_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in cinp_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in cinp_category_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -799,10 +857,14 @@ def young_carer_category_filter(df, row, dfname="empty"):
             return filter_logic(mapped_value)
         else:
             print(f"Row '{row}' not recognised in young_carer_category_filter. Current df: {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in young_carer_category_filter with row {row}: {e}. Current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
@@ -904,6 +966,8 @@ def attended_contacts_filter(df, row, dfname="empty"):
     
     else:
         print("Row not recognised by filters: " + row)
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     return pd.DataFrame()  # Fallback return for unexpected cases
@@ -1031,6 +1095,8 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
         
         except Exception as e:
             print(f"Error in processing paired GBO: {e}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return (pd.DataFrame(), pd.DataFrame())
 
             
@@ -1084,6 +1150,8 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             
         except Exception as e:
             print(f"Error in filtering GBOs for reliable change: {e}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             result_reliable_change = pd.DataFrame()
 
     elif row == "Average impact score of all paired goals":
@@ -1132,12 +1200,16 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             
         except Exception as e:
             print(f"Error in filtering GBOs for reliable change: {e}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             result_reliable_change = pd.DataFrame()
         
         pass
 
     else:
         print(f"Row not recognised: {row}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return "error"
 
     return "result after filtering"
@@ -1166,12 +1238,16 @@ def goal_themes_filter(df, row, dfname="empty"):
                 this_theme_df = df[df['goal_themes'].isna()]
         else:
             print("Row not recognised by filters: " + row)
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            
             return "error"
         
         return this_theme_df
 
     except Exception as e:
         print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        
         return "error"
 
 def dss_goal_filter(df, row, dfname="empty"):
@@ -1422,12 +1498,16 @@ def other_reason_for_referral_filter(df, row, dfname="empty"):
                 df_filtered = df[df['reason_other'].isna()]
         else:
             print("Row not recognised by filters: " + row)
+            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
         return df_filtered
 
     except Exception as e:
         print(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+
         return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
