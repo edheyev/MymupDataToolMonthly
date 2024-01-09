@@ -54,8 +54,8 @@ def column_filter(df, column, dfname="empty"):
         return pd.DataFrame({"error": [True]})  # Return DataFrame with an error flag
 
 def SI_row_filter(df, row, dfname="empty"):
+    mib = True if dfname.startswith("MIB") else False
     try:
-        mib = True if dfname.startswith("MIB") else False
 
         if row == "Number of unique people supported":
             if not mib:
@@ -74,7 +74,6 @@ def SI_row_filter(df, row, dfname="empty"):
                 ]
                 df_filtered = df[df["contact_approach"].isin(contact_approaches)]
                 
-                # todo filter to only include Attended contact
                 df_filtered = df_filtered[df_filtered["contact_attendance"] == "Attended"]
                 
                 
@@ -103,18 +102,15 @@ def SI_row_filter(df, row, dfname="empty"):
                     )
                 ]
                 
-                # todo filter to only include Attended contact
                 df_filtered = df_filtered[df_filtered["contact_attendance"] == "Attended"]
                 
 
                 df_filtered= df_filtered.drop_duplicates(subset='client_id')
                 return df_filtered
         elif row == "How many unique referrals":
-            # todo use referrals within reporting period (and MIB)
-            #
-            # unique clients
+            unique_clients_df = df.drop_duplicates(subset='client_id')
             
-            pass
+            return unique_clients_df
 
 
         elif row == "How many were declined by the service?":
@@ -150,7 +146,7 @@ def SI_row_filter(df, row, dfname="empty"):
             active_statuses = ["Active", "Pending", "Processing", "Waiting List"]
             df_filtered = df[df["client_status"].isin(active_statuses)]
             
-            # todo remove if latest file closure date is not empty (only open files)
+            df_filtered = df_filtered[df_filtered["latest_file_closure"].isnull()]
             return df_filtered
 
         elif row == "How many people have moved on":
@@ -227,9 +223,14 @@ def SI_row_filter(df, row, dfname="empty"):
 
             try:
                 # Define excluded file closure reasons
-                
                 # todo link file_closure reason
-                # to do remove admin contaCT
+                
+                if mib:
+                    df = df[~df["administrative"].astype(str).str.contains("Yes", na=False)]
+                else:
+                    df = df[~df["administrative"].astype(str).str.contains("Yes", na=False)]
+
+        
                 excluded_closure_reasons = [
                     'organisation cannot contact client prior to assessment',
                     'client rejects referral',
@@ -268,7 +269,7 @@ def SI_row_filter(df, row, dfname="empty"):
                 # Filter for clients whose first contact was within 21 days of referral
                 df_within_21_days = df_merged[df_merged['within_21_days'] == 'Yes']
                 
-                #todo df_merged is right
+                #todo check df_merged is right
                 
                 if df_within_21_days.empty:
                     return (pd.DataFrame(), df_merged)
@@ -1303,20 +1304,22 @@ def goal_themes_filter(df, row, dfname="empty"):
     "Improving my confidence and self-esteem":"Improving my confidence and self esteem",
     "Improving my physical wellbeing":"Improving my physical wellbeing",
     "Reducing my isolation":"Reducing my isolation",
-    "Understanding who I am":"Understanding who I am",}
+    "Understanding who I am":"Understanding who I am",
+    "Blank (nothing selected)": "Blank (nothing selected)"}
         
     try:
         if row in theme_map:
             if theme_map[row] is not None:
                 this_theme_df = df[df['goal_themes'] == theme_map[row]]
-            elif row == "Blank (nothing selected )":
+            elif row == "Blank (nothing selected)":
                 # Counting rows where 'client area' is NaN
                 this_theme_df = df[df['goal_themes'].isna()]
         else:
             print("Row not recognised by filters: " + row)
             raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         
-        # todo return unique goal ids - what percentr of these have each theme
+        this_theme_df= this_theme_df.drop_duplicates(subset='goal_id')
+
         
         return this_theme_df
 
@@ -1382,6 +1385,7 @@ def contact_by_theme_filter(df, row, dfname="empty"):
     "Suicidal Ideation":"Suicidal Ideation",
     "Transition":"Transition",
     "Trauma":"Trauma",
+    "Blank (nothing selected)": "Blank (nothing selected)"
     }
     try:
       if row in theme_map:
@@ -1640,7 +1644,7 @@ filter_function_map = {
     "yp_child_in_need_plan_config": cinp_category_filter,
     "yp_young_carer_config": young_carer_category_filter,
     "total_attended_contacts_config": attended_contacts_filter,
-    "goals_based_outcomes_config": goals_based_outcomes_filter,
+    # "goals_based_outcomes_config": goals_based_outcomes_filter,
     "average_goals_based_outcomes_config": average_goals_based_outcomes_filter,
     "goal_themes_goals_based_outcomes_config": goal_themes_filter,
     "dss_goals_based_outcomes_config": dss_goal_filter,
