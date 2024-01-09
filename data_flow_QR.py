@@ -407,9 +407,9 @@ def filter_service_information(dataframes, config):
 if __name__ == "__main__":
     # Specify the directory and date range here
     directory_path = "./quarterly_data_dump"
-    start_date = "2023-01-01"
-    end_date = "2023-03-31"
-    main(directory_path, start_date, end_date)
+    start_date = "2020-01-01"
+    end_date = "2024-03-31"
+    result = main(directory_path, start_date, end_date)
 
 
 # if __name__ == "__main__":
