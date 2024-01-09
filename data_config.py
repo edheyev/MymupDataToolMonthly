@@ -168,7 +168,7 @@ service_info_config = {
     ],
     "placeholder_rows": {
         "Number of unique people supported (old rule)": "MYMUP_URL",
-        "How many unique referrals": "MYMUP_URL",
+        "How many unique referrals": "DO THIS!!!",
         "How many new people referred": "MYMUP_URL",
         "How many were declined by the service?": "CHECK THIS",
         #"% clients with initial contact within 7 days of referral (old rule not including admin contacts)": "to do?",

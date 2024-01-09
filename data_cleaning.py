@@ -217,6 +217,9 @@ def add_reason_to_file_closures(dataframes, log_message=None):
                 print("Both DataFrames must contain a 'client_id' column.")
                 log_message("Both file_closures  and file_closures and goals must contain a 'client_id' column.")
                 continue
+            
+            # todo ALSO MATCH FILE CLOSURE DATE
+            # if if there is no reason drop row
 
             # Merge the two DataFrames on 'client_id'
             merged_df = pd.merge(df, df_file_closures[['client_id', 'reason']], 

@@ -44,15 +44,11 @@ def column_filter(df, column, dfname="empty"):
         elif column == "MIB Hospital Buddys BRI":
             return df[df[contact_service] == "Hospital Buddies BRI"]
         elif column == "SELFA (Mighty Minds)":
-            return df[
-                (df["franchise"] == "Selfa")
-                & (df[contact_service] == "Mighty Minds")
-            ]
+            return df[(df["franchise"] == "Selfa")]
         else:
             print("column not recognised by filters")
             raise Exception(f"Error in reason_for_referral_filter with column {column}: {e} . current df is {dfname}")
             
-            return pd.DataFrame()
     except Exception as e:
         print(f"Error in col_filter with column {column}: {e} . current df is {dfname} error: {e}")
         return pd.DataFrame({"error": [True]})  # Return DataFrame with an error flag
@@ -64,7 +60,9 @@ def SI_row_filter(df, row, dfname="empty"):
         if row == "Number of unique people supported":
             if not mib:
                 # exclude admin contacts
-                df = df[~df["contact_themes"].str.contains("Administrative", na=False)]
+                # df = df[~df["contact_themes"].str.contains("Administrative", na=False)]
+                df = df[~df["admin_contact"].str.contains("Yes", na=False)]
+
 
                 # contact approach face to face/ telephone/ type talk/ video/ instant messaging (synchronous) only with attendance status attended (exclude all other approaches).
                 contact_approaches = [
@@ -76,15 +74,18 @@ def SI_row_filter(df, row, dfname="empty"):
                 ]
                 df_filtered = df[df["contact_approach"].isin(contact_approaches)]
                 
+                # todo filter to only include Attended contact
+                df_filtered = df_filtered[df_filtered["contact_attendance"] == "Attended"]
+                
+                
                 df_filtered= df_filtered.drop_duplicates(subset='client_id')
 
                 return df_filtered
             else:
  
-                # Exclude rows where 'contact_themes' column contains 'Administrative'
-                df = df[~df["contact_themes"].str.contains("Administrative", na=False)]
-
-
+                # Exclude rows where 'contact_session_option' column contains 'Administrative'
+                df = df[~df["contact_session_option"].str.contains("Administrative", na=False)]
+                
                 # contact approach face to face/ telephone/ type talk/ video/ instant messaging (synchronous) only with attendance status attended (exclude all other approaches).
                 contact_approaches = [
                     "Face to Face",
@@ -102,12 +103,25 @@ def SI_row_filter(df, row, dfname="empty"):
                     )
                 ]
                 
+                # todo filter to only include Attended contact
+                df_filtered = df_filtered[df_filtered["contact_attendance"] == "Attended"]
+                
+
                 df_filtered= df_filtered.drop_duplicates(subset='client_id')
                 return df_filtered
+        elif row == "How many unique referrals":
+            # todo use referrals within reporting period (and MIB)
+            #
+            # unique clients
+            
+            pass
+
 
         elif row == "How many were declined by the service?":
             # count all unique client ids within reporting period (within file closures db)
             unique_clients_df = df.drop_duplicates(subset='client_id')
+            
+            # todo file closure reason == organisation rejects referral not suitable OR organisation rejects referral threshold too high
             
             return unique_clients_df
 
@@ -123,6 +137,7 @@ def SI_row_filter(df, row, dfname="empty"):
                 "Refused to be seen",
                 "Client rejects referral",
                 "Client not available for pre-arranged appointments",
+                "Client not available for assessment - failure to keep pre-arranged appointments",
                 "Organisation cannot contact Client prior to assessment",
                 "Client declined a service prior or during assessment",
             ]
@@ -134,6 +149,8 @@ def SI_row_filter(df, row, dfname="empty"):
             # Count clients with no file closure date and status active, pending, processing, or waiting list
             active_statuses = ["Active", "Pending", "Processing", "Waiting List"]
             df_filtered = df[df["client_status"].isin(active_statuses)]
+            
+            # todo remove if latest file closure date is not empty (only open files)
             return df_filtered
 
         elif row == "How many people have moved on":
@@ -161,8 +178,12 @@ def SI_row_filter(df, row, dfname="empty"):
                 df_contacts = df_contacts.dropna(subset=['referral_date', 'file_closure_date', 'contact_/_indirect_date'])
 
                 # Exclude clients with file closure reason "organisation cannot contact client prior to assessment"
+                
+                #todo DO NOT ICLUDE USE FILE CLOSURE REASONn "organisation cannot contact client prior to assessment"
                 df_filtered = df_contacts[df_contacts['file_closure_service_type'] != 'organisation cannot contact client prior to assessment']
-
+                
+                # todo COMPARE CONTACT/INDIRECT data WITH REFERRAL DATA MUST BE WITHIN 7 DAYS 
+                
                 # Error handling for invalid dates
                 def safe_convert_date(date_str):
                     try:
@@ -206,6 +227,9 @@ def SI_row_filter(df, row, dfname="empty"):
 
             try:
                 # Define excluded file closure reasons
+                
+                # todo link file_closure reason
+                # to do remove admin contaCT
                 excluded_closure_reasons = [
                     'organisation cannot contact client prior to assessment',
                     'client rejects referral',
@@ -215,7 +239,7 @@ def SI_row_filter(df, row, dfname="empty"):
 
                 # Define qualifying contact approaches
                 qualifying_approaches = [
-                    'Face to Face', 'Telephone', 'Talk Type', 'Video', 'Instant Messaging Synchronous'
+                    'Face to Face', 'Telephone', 'Talk Type', 'Video', 'Instant Messaging (Synchronous)'
                 ]
 
                 # Drop rows with NaN in essential columns and explicitly create a copy
@@ -233,7 +257,7 @@ def SI_row_filter(df, row, dfname="empty"):
                 df_filtered = df_filtered.dropna(subset=['file_closure_date', 'referral_date', 'contact_/_indirect_date'])
 
                 # Filter for qualifying contact approaches
-                df_filtered = df_filtered[df_filtered['contact_approach'].isin(qualifying_approaches)]
+                df_filtered = df_filtered[df_filtered['attendance_code'].isin(qualifying_approaches)]
 
                 # Group by client_id to find the first qualifying contact date
                 df_first_contact = df_filtered.groupby('client_id')['contact_/_indirect_date'].min().reset_index()
@@ -243,7 +267,9 @@ def SI_row_filter(df, row, dfname="empty"):
 
                 # Filter for clients whose first contact was within 21 days of referral
                 df_within_21_days = df_merged[df_merged['within_21_days'] == 'Yes']
-
+                
+                #todo df_merged is right
+                
                 if df_within_21_days.empty:
                     return (pd.DataFrame(), df_merged)
                 elif df_merged.empty:
@@ -273,7 +299,7 @@ def SI_row_filter(df, row, dfname="empty"):
 
                 # Define qualifying contact approaches and attendance status
                 qualifying_approaches = [
-                    'Face to Face', 'Telephone', 'Talk Type', 'Video', 'Instant Messaging Synchronous'
+                    'Face to Face', 'Telephone', 'Talk Type', 'Video', 'Instant (Messaging Synchronous)'
                 ]
                 qualifying_attendance_status = ['Attended']  # Only include 'Attended' status
 
@@ -291,8 +317,13 @@ def SI_row_filter(df, row, dfname="empty"):
                 # Drop rows with invalid dates
                 df_filtered = df_filtered.dropna(subset=['file_closure_date', 'referral_date', 'contact_/_indirect_date'])
 
+
+                if mib:
+                    df_filtered = df_filtered[df_filtered['contact_approach'].isin(qualifying_approaches) & 
+                                        df_filtered['attendance_code'].isin(qualifying_attendance_status)]
+                else:
                 # Filter for qualifying contact approaches and attendance status
-                df_filtered = df_filtered[df_filtered['contact_approach'].isin(qualifying_approaches) & 
+                    df_filtered = df_filtered[df_filtered['contact_approach'].isin(qualifying_approaches) & 
                                         df_filtered['attendance_code'].isin(qualifying_attendance_status)]
 
                 # Group by client_id to find the first qualifying contact date
@@ -827,7 +858,6 @@ def lac_category_filter(df, row, dfname="empty"):
         print(f"Error in lac_category_filter with row {row}: {e}. Current df is {dfname}")
         raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         
-        return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
 def cpp_category_filter(df, row, dfname="empty"):
@@ -860,13 +890,11 @@ def cpp_category_filter(df, row, dfname="empty"):
             print(f"Row '{row}' not recognised in cpp_category_filter. Current df: {dfname}")
             raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
             
-            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
 
     except Exception as e:
         print(f"Error in cpp_category_filter with row {row}: {e}. Current df is {dfname}")
         raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         
-        return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
 def cinp_category_filter(df, row, dfname="empty"):
@@ -962,15 +990,15 @@ def attended_contacts_filter(df, row, dfname="empty"):
         if is_mib:
             return initial_filtering[(initial_filtering['contact_session_type'] == 'Group')]
         else:
-            return initial_filtering[(initial_filtering['contact_therapy_mode'] == 'group therapy')]
+            return initial_filtering[(initial_filtering['contact_therapy_mode'] == 'Group Therapy')]
 
 
 
     elif row == "Indirect Activities":
         if is_mib:
-            df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+            df = df[~df["contact_session_option"].str.contains("Administrative", na=False)]
         else:
-            df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+            df = df[~df["admin_contact"].str.contains("Yes", na=False)]
         
         df = df[df['contact_attendance'] == 'Attended']
         # Filter for rows where 'indirect service type' is not empty or NA
@@ -981,34 +1009,33 @@ def attended_contacts_filter(df, row, dfname="empty"):
 
     elif row == "Other (email and text)":
         if is_mib:
-            df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+            df = df[~df["contact_session_option"].str.contains("Administrative", na=False)]
         else:
-            df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+            df = df[~df["admin_contact"].str.contains("Yes", na=False)]
         
         df = df[df['contact_attendance'] == 'Attended']
-        other_approachs = ["Email", "Text Message (Asynchronous)", "Chat Room (Asynchronous)","Message Board (Asynchronous)" "Chat Room (Asynchronous)", "Instant Messaging (Asynchronous)", "Other (not listed)"]
+        other_approachs = ["Email", "Text Message (Asynchronous)", "Chat Room (Asynchronous)","Message Board (Asynchronous)", "Instant Messaging (Asynchronous)", "Other (not listed)"]
         dfout = df[df['contact_approach'].isin(other_approachs)]
         return dfout
         
         
     elif row == "Admin Contacts":
         if is_mib:
-            dfout = df[df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
+            dfout = df[~df["contact_session_option"].str.contains("Administrative", na=False)]
+
         else:
-            dfout = df[df['contact_themes'].str.contains("Administrative", case=False, na=False)]
-        
+            dfout = df[~df["admin_contact"].str.contains("Yes", na=False)]
         return dfout
 
     elif row == "Total number of DNA Contacts":
         # MIB-specific or general filters
         if is_mib:
-            df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
-            df = df[df['contact_service_type'] == 'Know Your Mind'] # not sure about this
+            df = df[~df["contact_session_option"].str.contains("Administrative", na=False)]
             contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
             df = df[df['contact_approach'].isin(contact_approaches)]
             # Include additional MIB-specific filters here
         else:
-            df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+            df = df[~df["admin_contact"].str.contains("Yes", na=False)]
             contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
             df = df[df['contact_approach'].isin(contact_approaches)]
             # Include additional general filters here.
@@ -1021,13 +1048,12 @@ def attended_contacts_filter(df, row, dfname="empty"):
     elif row == "Percentage of DNA Contacts":
        # MIB-specific or general filters
         if is_mib:
-            df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
-            df = df[df['contact_service_type'] == 'Know Your Mind'] # not sure about this
+            df = df[~df["contact_session_option"].str.contains("Administrative", na=False)]
             contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
             df = df[df['contact_approach'].isin(contact_approaches)]
             # Include additional MIB-specific filters here
         else:
-            df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+            df = df[~df["admin_contact"].str.contains("Yes", na=False)]
             contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
             df = df[df['contact_approach'].isin(contact_approaches)]
             # Include additional general filters here.
@@ -1043,23 +1069,19 @@ def attended_contacts_filter(df, row, dfname="empty"):
         print("Row not recognised by filters: " + row)
         raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         
-        return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
-
-    return pd.DataFrame()  # Fallback return for unexpected cases
-
 def total_attended_contacts(df, is_mib):
     # Common filters
     df = df[df['contact_attendance'] == 'Attended']
 
     # MIB-specific or general filters
     if is_mib:
-        df = df[~df['contact_session_option'].str.contains("Administrative", case=False, na=False)]
-        df = df[df['contact_service_type'] == 'Know Your Mind'] # not sure about this
+        df = df[~df["contact_session_option"].str.contains("Administrative", na=False)]
+
         contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
         df = df[df['contact_approach'].isin(contact_approaches)]
         # Include additional MIB-specific filters here
     else:
-        df = df[~df['contact_themes'].str.contains("Administrative", case=False, na=False)]
+        df = df[~df["admin_contact"].str.contains("Yes", na=False)]
         contact_approaches = ["Face to Face", "Telephone", "Type talk", "Video", "Instant Messaging (Synchronous)"]
         df = df[df['contact_approach'].isin(contact_approaches)]
         # Include additional general filters here
@@ -1126,7 +1148,6 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
 
         try:
             
-
             # Drop rows with missing 'referral_date' or 'reason'
             df_filtered = df.dropna(subset=['referral_date', 'reason', 'goal_score_date', 'file_closure_date'])
           
@@ -1162,20 +1183,12 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             # Merge and filter paired GBOs
             df_paired_gbo = merge_and_filter_gbo(df_initial_gbo, df_followup_final_gbo)
             
-            
-            
-            
-
             return (df_paired_gbo, df_filtered)
         
         except Exception as e:
             print(f"Error in processing paired GBO: {e}")
             raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
             
-            return (pd.DataFrame(), pd.DataFrame())
-
-            
-
 
     elif row == "% of closed cases with reliable change in paired GBO":
         try:
@@ -1262,11 +1275,8 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             df_initial_gbo = df_filtered[df_filtered['initial_/_followup_/_final'] == 'Initial']
             df_followup_final_gbo = df_filtered[df_filtered['initial_/_followup_/_final'].isin(['Follow up', 'Final'])]
 
-
             # Merge and filter paired GBOs
             df_paired_gbo = merge_and_filter_gbo(df_initial_gbo, df_followup_final_gbo)
-            
-
             
             df_with_average = add_average_column(df_paired_gbo)
         
@@ -1276,18 +1286,11 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
         except Exception as e:
             print(f"Error in filtering GBOs for reliable change: {e}")
             raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
-            
-            result_reliable_change = pd.DataFrame()
-        
-        pass
 
     else:
         print(f"Row not recognised: {row}")
         raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         
-        return "error"
-
-    return "result after filtering"
 
 def goal_themes_filter(df, row, dfname="empty"):
     
@@ -1301,8 +1304,6 @@ def goal_themes_filter(df, row, dfname="empty"):
     "Improving my physical wellbeing":"Improving my physical wellbeing",
     "Reducing my isolation":"Reducing my isolation",
     "Understanding who I am":"Understanding who I am",}
-    
-    
         
     try:
         if row in theme_map:
@@ -1314,8 +1315,8 @@ def goal_themes_filter(df, row, dfname="empty"):
         else:
             print("Row not recognised by filters: " + row)
             raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
-            
-            return "error"
+        
+        # todo return unique goal ids - what percentr of these have each theme
         
         return this_theme_df
 
@@ -1323,8 +1324,6 @@ def goal_themes_filter(df, row, dfname="empty"):
         print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")
         raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         
-        return "error"
-
 def dss_goal_filter(df, row, dfname="empty"):
 
     if row == "How many unique clients have had a distress scale score in reporting period":
@@ -1395,6 +1394,8 @@ def contact_by_theme_filter(df, row, dfname="empty"):
       else:
           print("Row not recognized by filters: " + row)
           return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
+
+   # todo CHECK BLANK HANDLING
 
       return this_theme_df
   
@@ -1575,15 +1576,11 @@ def other_reason_for_referral_filter(df, row, dfname="empty"):
             print("Row not recognised by filters: " + row)
             raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
 
-            return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
-
         return df_filtered
 
     except Exception as e:
         print(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
-
-        return pd.DataFrame()  # Return empty DataFrame in case of error
 
 
 def gender_filter_end(df, row, dfname="empty"):
