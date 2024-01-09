@@ -217,7 +217,7 @@ def main(directory, start_date, end_date):
     except Exception as e:
         log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
-    
+
 
 
 def load_data_files(directory, file_info):

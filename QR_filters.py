@@ -222,14 +222,14 @@ def SI_row_filter(df, row, dfname="empty"):
                     return pd.NaT  # Not a Time (NaT) for invalid dates
 
             try:
-                # Define excluded file closure reasons
-                # todo link file_closure reason
                 
                 if mib:
                     df = df[~df["administrative"].astype(str).str.contains("Yes", na=False)]
                 else:
                     df = df[~df["administrative"].astype(str).str.contains("Yes", na=False)]
 
+                # Define excluded file closure reasons
+                # todo link file_closure reason
         
                 excluded_closure_reasons = [
                     'organisation cannot contact client prior to assessment',
@@ -1409,7 +1409,7 @@ def contact_by_theme_filter(df, row, dfname="empty"):
 
 
 def source_of_referral_filter(df, row, dfname="empty"):
-    reason_map = {
+    source_map = {
         "Primary Health Care: General Medical Practitioner Practice": "Primary Health Care: General Medical Practitioner Practice",
         "Accident and Emergency Department": "Accident and Emergency Department",
         "CAMHS - Core/Step Down": "CAMHS - Core/Step Down",
@@ -1462,11 +1462,12 @@ def source_of_referral_filter(df, row, dfname="empty"):
 
 
     try:
-        if row in reason_map:
-            if reason_map[row] is not None:
-                df_filtered = df[df['source'] == reason_map[row]]
-            elif row == "Blank (nothing selected)":
-                df_filtered = df[df['source'].isna()]
+        if row in source_map:
+            if source_map[row] != "Blank (nothing selected)":
+                df_filtered = df[df['source'] == source_map[row]]
+            else:
+                # Check for NaNs or empty strings as blank values
+                df_filtered = df[df['source'].apply(lambda x: pd.isna(x) or x == '')]
         else:
             print("Row not recognised by filters: " + row)
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
@@ -1515,13 +1516,13 @@ def reason_for_referral_filter(df, row, dfname="empty"):
         "Unexplained Physical Symptoms": "Unexplained Physical Symptoms",
         "Blank (nothing selected)": "Blank (nothing selected)"
     }
-
     try:
         if row in reason_map:
-            if reason_map[row] is not None:
+            if reason_map[row] != "Blank (nothing selected)":
                 df_filtered = df[df['reason'] == reason_map[row]]
-            elif row == "Blank (nothing selected)":
-                df_filtered = df[df['reason'].isna()]
+            else:
+                # Check for NaNs or empty strings as blank values
+                df_filtered = df[df['reason'].apply(lambda x: pd.isna(x) or x == '')]
         else:
             print("Row not recognised by filters: " + row)
             return pd.DataFrame()  # Return empty DataFrame for unrecognized rows
@@ -1575,17 +1576,17 @@ def other_reason_for_referral_filter(df, row, dfname="empty"):
             if reason_map[row] is not None:
                 df_filtered = df[df['reason_other'] == reason_map[row]]
             elif row == "Blank (nothing selected)":
-                df_filtered = df[df['reason_other'].isna()]
+                # Check for NaNs or empty strings as blank values
+                df_filtered = df[df['reason_other'].apply(lambda x: pd.isna(x) or x == '')]
         else:
             print("Row not recognised by filters: " + row)
-            raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+            raise Exception(f"Error in reason_for_referral_filter with row {row}. Current df is {dfname}")
 
         return df_filtered
 
     except Exception as e:
         print(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
-
 
 def gender_filter_end(df, row, dfname="empty"):
     return "mymupURL"
