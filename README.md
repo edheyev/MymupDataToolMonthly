@@ -66,7 +66,7 @@ If you encounter any issues, ensure that:
 
 ---
 
-# Building Executable with PyInstaller
+# Building Executable with PyInstaller (notes for me)
 
 This document explains how to create a standalone executable from a Python script using PyInstaller within a virtual environment on Windows.
 
@@ -84,3 +84,52 @@ This document explains how to create a standalone executable from a Python scrip
 
    ```bash
    source ./myenv/Scripts/activate
+   ```
+
+   You should see `(myenv)` before the command prompt, indicating that the virtual environment is active.
+
+2. **Install PyInstaller (if not already installed)**
+
+   If PyInstaller is not installed within the virtual environment, install it using pip:
+
+   ```bash
+   pip install pyinstaller
+   ```
+
+3. **Run PyInstaller**
+
+   To run PyInstaller and build your executable, use the following command:
+
+   ```bash
+   ./myenv/Scripts/python.exe -m PyInstaller your_script.spec
+   ```
+
+   Replace `your_script.spec` with the name of your PyInstaller spec file.
+
+   This command uses the Python executable from the virtual environment to run PyInstaller as a module.
+
+4. **Troubleshooting**
+
+   If you encounter the error "No module named PyInstaller", ensure that you are in the virtual environment and that PyInstaller is installed by running:
+
+   ```bash
+   pip show pyinstaller
+   ```
+
+   If PyInstaller is not listed, install it using the pip install command above.
+
+## Notes
+
+- Always ensure that the virtual environment is activated before running PyInstaller.
+- The spec file should be located in the same directory where you're running the command, or provide the relative path to it.
+- After building the executable, you can find it in the `dist` directory created by PyInstaller.
+
+Remember to deactivate your virtual environment when you're done:
+
+```bash
+deactivate
+```
+
+## Conclusion
+
+By following these steps, you can consistently build your Python application into a standalone executable using PyInstaller in a Windows environment.
