@@ -2,16 +2,15 @@ import sys
 import os
 import threading
 import queue
+import re
 
 import pandas as pd
 import tkinter as tk
 from tkinter import ttk  # Import ttk module for themed widgets
 from tkinter import scrolledtext
-
-import re
-
 from tkinter import filedialog
-from tkinter import scrolledtext
+
+
 
 # Add the directory of your script and modules to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -45,8 +44,12 @@ from data_utils import (
     )
 
 
-# Global queue for log messages
+# Global variables
 log_queue = queue.Queue()
+root = None
+
+# Global queue for cleaned data
+cleaned_data_queue = queue.Queue()
 
 def log_message(message):
     """Log a message to the Tkinter text widget."""
@@ -62,12 +65,11 @@ def update_text_widget(log_queue, text_widget):
         text_widget.insert(tk.END, message + '\n')
         text_widget.configure(state='disabled')
         text_widget.yview(tk.END)
+        
 def create_logging_window():
-    """Create the logging window with improved layout and styling."""
+    global root
     root = tk.Tk()
     root.title("MyMup Data Tool: Quarterly Report")
-    
-    # Set a theme
     style = ttk.Style(root)
     style.theme_use('clam')  # 'clam', 'alt', 'default', 'classic' are some common themes
 
@@ -78,12 +80,23 @@ def create_logging_window():
     # Instruction Text
     instructions = (
         "Instructions for MyMup Data Tool:\n"
-        "1. Enter the start and end dates for the reporting period.\n"
-        "2. Select a folder containing all required data files for the quarterly report.\n"
-        "3. Ensure the data files are named correctly as per the following list:\n"
+        "1. Select a folder containing all required data files for the quarterly report.\n"
+        "2. Ensure the data files are named correctly as per the following list:\n"
         "   * Contacts or Indirects Within Reporting Period: 'contacts_or_indirects_within_reporting_period.csv'\n"
-        "   ... [Additional file names] ...\n"
-        "4. Press the 'Start Processing' button to begin.\n"
+        "   * MIB Contacts or Indirects Within Reporting Period: 'mib_contacts_or_indirects_within_reporting_period.csv'\n"
+        "   * File Closures And Goals Within Reporting Period: 'file_closures_and_goals_within_reporting_period.csv'\n"
+        "   * MIB File Closures And Goals Within Reporting Period: 'mib_file_closures_and_goals_within_reporting_period.csv'\n"
+        "   * File Closures Within Reporting Period: 'file_closures_within_reporting_period.csv'\n"
+        "   * Initial Goals Within Reporting Period: 'initial_goals_within_reporting_period.csv'\n"
+        "   * Referrals Within Reporting Period: 'referrals_within_reporting_period.csv'\n"
+        "   * MIB Referrals Within Reporting Period: 'mib_referrals_within_reporting_period.csv'\n"
+        "   * Referrals Before End Reporting Period: 'referrals_before_end_reporting_period.csv'\n"
+        "   * MIB Referrals Before End Reporting Period: 'mib_referrals_before_end_of_reporting_period.csv'\n"
+        "   * Contacts Within Seven Days: 'contacts_within_seven_days.csv'\n"
+        "   * MIB Contacts Within Seven Days: 'mib_contacts_within_seven_days.csv'\n"
+        "   * Contacts Within Twenty One Days: 'contacts_within_twenty_one_days.csv'\n"
+        "   * MIB Contacts Within Twenty One Days: 'mib_contacts_within_twenty_one_days.csv'\n"
+        "\nEnsure the files match the specified column structure as detailed in the documentation."
     )
     instruction_text = tk.Text(instruction_frame, height=10, wrap=tk.WORD)
     instruction_text.insert(tk.END, instructions)
@@ -109,7 +122,7 @@ def create_logging_window():
     button_frame.pack(fill=tk.X, expand=True)
 
     # File Selection and Start Processing Buttons
-    file_button = ttk.Button(button_frame, text="Select Containing Folder", command=lambda: select_folder(start_date_entry, end_date_entry))
+    file_button = ttk.Button(button_frame, text="Select Containing Folder", command=lambda: select_folder(start_date_entry, end_date_entry, root))
     file_button.pack(side=tk.LEFT, padx="10 10")
 
     start_button = ttk.Button(button_frame, text="Start Processing", command=lambda: start_processing(text_widget))
@@ -137,17 +150,12 @@ def start_processing(text_widget):
 
 
 
-def select_folder(start_date_entry, end_date_entry):
+def select_folder(start_date_entry, end_date_entry, root):
     global directory
     # Create a root window, but keep it hidden
-    root = tk.Tk()
-    root.withdraw()
-
-    # Open the file dialog
+    root.withdraw()  # Hide the main window
     folder_path = filedialog.askdirectory()
-
-    # Destroy the root window after selection
-    root.destroy()
+    root.deiconify()  # Show the main window again
     
     directory = folder_path  # Set the global variable
 
@@ -162,49 +170,74 @@ def select_folder(start_date_entry, end_date_entry):
             log_message(f"Error in data processing: {e}")
             
             
-def load_and_clean_data(folder_path):
+def load_and_clean_data(folder_path, start_date, end_date):
     try:
         raw_data = load_data_files(folder_path, file_info)
         cleaned_data = clean_data(raw_data, start_date, end_date)
-        # You may store cleaned_data or pass it to another function as needed
+        # Put cleaned data into the queue
+        cleaned_data_queue.put(cleaned_data)
+        log_message("Data loaded and cleaned.")
     except Exception as e:
         log_message(f"Error in data processing: {e}")
 
 def main(directory, text_widget):
+    global root
     print("Begin Processing files")
     log_message("Begin Processing files")
     
-    
-    
-    # Define reporting period parameters
-    start_date, end_date = "2020-10-01", "2024-02-01"
-
-    # Load and process data
-    directory = (r"./quarterly_data_dump")
-    
-    
-    # directory = select_folder()
-
-    # Data cleaning and validation
+    # Wait and get cleaned data from the queue
     try:
-        raw_data = load_data_files(directory, file_info)
-        cleaned_data = clean_data(raw_data, start_date, end_date)
-        validated_data = validate_data_files(cleaned_data, file_info)
+        cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
+        # Proceed with validated data and other processing
+        validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
+        file_string = "output_csv_QR.csv"
+        output_df = produce_tables(validated_data, file_string)
+        log_message("CSV saved. File name: " + file_string)
+        return output_df
+    except queue.Empty:
+        log_message("Error: No cleaned data received within the timeout period.")
+        return None
     except Exception as e:
-        print(f"Error cleaning data: {e}")
-        log_message(f"Error cleaning data: {e}")
-
+        log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
-    file_string = "output_csv_QR.csv"
-    # Produce and save tables
-    output_df = produce_tables(validated_data, file_string)
+
+# def main(directory, text_widget):
+#     global root
+#     print("Begin Processing files")
+#     log_message("Begin Processing files")
+    
+    
+    
+#     # Define reporting period parameters
+#     start_date, end_date = "2020-10-01", "2024-02-01"
+
+#     # Load and process data
+#     # directory = (r"./quarterly_data_dump")
+    
+    
+#     # directory = select_folder()
+
+#     # Data cleaning and validation
+#     try:
+#         raw_data = load_data_files(directory, file_info)
+#         cleaned_data = clean_data(raw_data, start_date, end_date)
+#         validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
+#     except Exception as e:
+#         print(f"Error cleaning data: {e}")
+#         log_message(f"Error cleaning data: {e}")
+
+#         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
+
+#     file_string = "output_csv_QR.csv"
+#     # Produce and save tables
+#     output_df = produce_tables(validated_data, file_string)
 
 
-    # print("Report generated and saved as output_report.csv")
-    log_message("CSV saved. File name: " + file_string)
+#     # print("Report generated and saved as output_report.csv")
+#     log_message("CSV saved. File name: " + file_string)
 
-    return output_df
+#     return output_df
     
 
 def load_data_files(directory, file_info):
@@ -241,14 +274,14 @@ def load_data_files(directory, file_info):
 def clean_data(dataframes, start_date, end_date):
     print("Cleaning dataframes...")
     log_message("Cleaning dataframes...")
-    cleaned_dataframes = clean_column_names(dataframes)
-    cleaned_dataframes = isolate_client_ages(dataframes, 3, 26) 
+    cleaned_dataframes = clean_column_names(dataframes, log_message=log_message)
+    cleaned_dataframes = isolate_client_ages(dataframes, 3, 26, log_message=log_message) 
     cleaned_dataframes = isolate_reporting_period(
-    cleaned_dataframes, start_date, end_date)
+    cleaned_dataframes, start_date, end_date, log_message=log_message)
     # cleaned_dataframes = filter_mib_services(cleaned_dataframes)
-    cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes)
-    cleaned_dataframes = remove_duplicates(cleaned_dataframes)
-    cleaned_dataframes = add_reason_to_file_closures(cleaned_dataframes)
+    cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes, log_message=log_message)
+    cleaned_dataframes = remove_duplicates(cleaned_dataframes, log_message=log_message)
+    cleaned_dataframes = add_reason_to_file_closures(cleaned_dataframes, log_message=log_message)
 
     return cleaned_dataframes
 
@@ -272,7 +305,7 @@ def produce_tables(dataframes, file_string):
     ]
 
     # Write column headings to the CSV file
-    with open("my_csv.csv", "w", newline='') as f:
+    with open(file_string, "w", newline='') as f:
         f.write(",".join(column_headings) + "\n")
         
     #optionally initialise empty df
@@ -396,9 +429,6 @@ def filter_service_information(dataframes, config):
 
 
 if __name__ == "__main__":
-    # # resultdf = main()
-    # logging_window = create_logging_window()
-    # threading.Thread(target=main, daemon=True).start()
-    # logging_window.mainloop()
-    logging_window, file_button, start_date_entry, end_date_entry = create_logging_window()
-    logging_window.mainloop()
+    root, file_button, start_date_entry, end_date_entry = create_logging_window()
+    root.protocol("WM_DELETE_WINDOW", lambda: root.quit())  # Proper shutdown on window close
+    root.mainloop()

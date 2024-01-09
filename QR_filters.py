@@ -6,6 +6,7 @@ Created on Wed Dec 20 15:58:58 2023
 """
 import pandas as pd
 
+
 def column_filter(df, column, dfname="empty"):
     
     if dfname == "File_Closures_And_Goals_Within_Reporting_Period" or dfname == "MIB_File_Closures_And_Goals_Within_Reporting_Period":
