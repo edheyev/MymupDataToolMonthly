@@ -50,6 +50,60 @@ def column_filter(df, column, dfname="empty"):
     except Exception as e:
         print(f"Error in column_filter with column '{column}': {e}. Current df is '{dfname}'.")
         return pd.DataFrame({"error": [True]})  # Return DataFrame with an error flag
+    
+    
+def common_demographic_filter(df, dfname="empty"):
+    
+    mib = True if dfname.startswith("MIB") else False
+    try:
+        if not mib:
+            # exclude admin contacts
+            df = df[~df["admin_contact"].str.contains("Yes", na=False)]
+
+            # contact approach face to face/ telephone/ type talk/ video/ instant messaging (synchronous) only with attendance status attended (exclude all other approaches).
+            contact_approaches = [
+                "Face to Face",
+                "Telephone",
+                "Type talk",
+                "Video consultation",
+                "Instant Messaging (Synchronous)",
+            ]
+            df_filtered = df[df["contact_approach"].isin(contact_approaches)]
+            
+            df_filtered = df_filtered[df_filtered["contact_attendance"] == "Attended"]
+            
+            df_filtered= df_filtered.drop_duplicates(subset='client_id')
+
+            return df_filtered
+        else:
+
+            # Exclude rows where 'contact_session_option' column contains 'Administrative'
+            df = df[~df["contact_session_option"].str.contains("Administrative", na=False)]
+
+            # contact approach face to face/ telephone/ type talk/ video/ instant messaging (synchronous) only with attendance status attended (exclude all other approaches).
+            contact_approaches = [
+                "Face to Face",
+                "Telephone",
+                "Type talk",
+                "Video consultation",
+                "Instant Messaging (Synchronous)",
+            ]
+            df = df[df["contact_approach"].isin(contact_approaches)]
+
+            # contact session option must be either 'Support Session' or '24 hr call back'
+            df_filtered = df[
+                df["contact_session_option"].isin(
+                    ["Support Session", "24 hour call back"]
+                )
+            ]
+            df_filtered = df_filtered[df_filtered["contact_attendance"] == "Attended"]
+
+            df_filtered= df_filtered.drop_duplicates(subset='client_id')
+            return df_filtered
+            
+    except Exception as e:
+        print(f"Error in gender_category_filter with row {row}: {e}. Current df: {dfname}")
+        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
 
 
 def SI_row_filter(df, row, dfname="empty"):
@@ -106,6 +160,7 @@ def SI_row_filter(df, row, dfname="empty"):
 
                 df_filtered= df_filtered.drop_duplicates(subset='client_id')
                 return df_filtered
+            
         elif row == "How many unique referrals":
             unique_clients_df = df.drop_duplicates(subset='client_id')
             
@@ -231,13 +286,14 @@ def SI_row_filter(df, row, dfname="empty"):
                 # Define excluded file closure reasons
         
                 excluded_closure_reasons = [
-                    'organisation cannot contact client prior to assessment',
-                    'client rejects referral',
-                    'organisation rejects referral threshold too high',
-                    'organisation rejects referral referral not suitable pre/post assessment'
+                    'Organisation cannot contact Client prior to assessment',
+                    'Client rejects referral',
+                    'Organisation rejects referral - Threshold too high',
+                    'Organisation rejects referral - Referral not suitable pre-assessment/post-assessment'
                 ]
+
                 
-                # todo link file_closure reason
+                # exclude 
                 df = df[~df['file_closure_reason'].isin(excluded_closure_reasons)]
 
                 # Define qualifying contact approaches
@@ -248,8 +304,6 @@ def SI_row_filter(df, row, dfname="empty"):
                 # Drop rows with NaN in essential columns and explicitly create a copy
                 df_filtered = df.dropna(subset=['referral_date', 'file_closure_date', 'contact_/_indirect_date']).copy()
 
-                # Exclude clients with specified file closure reasons
-                # df_filtered = df_filtered[~df_filtered['file_closure_reason'].isin(excluded_closure_reasons)]
 
                 # Convert date strings to datetime objects, handling errors safely
                 df_filtered['file_closure_date'] = df_filtered['file_closure_date'].apply(safe_convert_date)
@@ -260,7 +314,7 @@ def SI_row_filter(df, row, dfname="empty"):
                 df_filtered = df_filtered.dropna(subset=['file_closure_date', 'referral_date', 'contact_/_indirect_date'])
 
                 # Filter for qualifying contact approaches
-                df_filtered = df_filtered[df_filtered['attendance_code'].isin(qualifying_approaches)]
+                df_filtered = df_filtered[df_filtered['contact_approach'].isin(qualifying_approaches)]
 
                 # Group by client_id to find the first qualifying contact date
                 df_first_contact = df_filtered.groupby('client_id')['contact_/_indirect_date'].min().reset_index()
@@ -294,11 +348,14 @@ def SI_row_filter(df, row, dfname="empty"):
             try:
                 # Define excluded file closure reasons
                 excluded_closure_reasons = [
-                    'organisation cannot contact client prior to assessment',
-                    'client rejects referral',
-                    'organisation rejects referral threshold too high',
-                    'organisation rejects referral referral not suitable pre/post assessment'
+                    'Organisation cannot contact Client prior to assessment',
+                    'Client rejects referral',
+                    'Organisation rejects referral - Threshold too high',
+                    'Organisation rejects referral - Referral not suitable pre-assessment/post-assessment'
                 ]
+                
+                # Exclude clients with specified file closure reasons
+                df = df[~df['file_closure_reason'].isin(excluded_closure_reasons)]
 
                 # Define qualifying contact approaches and attendance status
                 qualifying_approaches = [
@@ -308,9 +365,6 @@ def SI_row_filter(df, row, dfname="empty"):
 
                 # Explicitly create a copy of the DataFrame to avoid SettingWithCopyWarning
                 df_filtered = df.dropna(subset=['referral_date', 'file_closure_date', 'contact_/_indirect_date']).copy()
-
-                # Exclude clients with specified file closure reasons
-                # df_filtered = df_filtered[~df_filtered['file_closure_reason'].isin(excluded_closure_reasons)]
 
                 # Convert date strings to datetime objects, handling errors safely
                 df_filtered['file_closure_date'] = df_filtered['file_closure_date'].apply(safe_convert_date)
@@ -365,7 +419,8 @@ def gender_category_filter(df, row, dfname="empty"):
         "Other (not listed)": "Other (not listed)",
         "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic(mapped_value):
         if mapped_value == "Blank":
             # Filter for rows where 'client_gender' is NaN
@@ -416,6 +471,7 @@ def ethnic_category_filter(df, row, dfname="empty"):
         "White and Black Caribbean": "Mixed - White and Black Caribbean",
         "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
+    df = common_demographic_filter(df, dfname)
     
     def filter_logic(mapped_value):
         if mapped_value == "Blank":
@@ -463,7 +519,8 @@ def disability_category_filter(df, row, dfname="empty"):
         "Yes": "Yes",
         "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic(mapped_value):
         if mapped_value == "Blank":
             filtered_df = df[pd.isna(df['client_disability'])]
@@ -504,7 +561,8 @@ def sexual_orientation_filter(df, row, dfname="empty"):
         "Person asked and did not know/is unsure or undecided": "Person asked and did not know/is unsure or undecided",
         "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
-    
+    df = common_demographic_filter(df, dfname)
+        
     def filter_logic(mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_sexuality'])]
@@ -538,7 +596,8 @@ def age_category_filter(df, row, dfname="empty"):
         "Age 20": 20, "Age 21": 21, "Age 22": 22, "Age 23": 23, "Age 24": 24,
         "Age 25": 25, "Out of age Range": None
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic( age):
         if age is None:
             # Handling "Out of age Range" by filtering ages not in the specified range
@@ -621,7 +680,8 @@ def area_category_filter(df, row, dfname="empty"):
         "WYKE": "WYKE",
         "Blank (nothing selected )": None  # Special handling for blank entries
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic( mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_area'])]
@@ -656,7 +716,8 @@ def asylum_status_filter(df, row, dfname="empty"):
         "Not known": "Unknown",  
         "Blank (nothing selected )": None  
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic(mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_asylum_seeker'])]
@@ -692,7 +753,8 @@ def sen_category_filter(df, row, dfname="empty"):
         "Not applicable": "Not Applicable",
         "Blank (nothing selected )": None
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic(mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_sen'])]
@@ -727,7 +789,8 @@ def ehcp_category_filter(df, row, dfname="empty"):
         "Not applicable": "Not Applicable",
         "Blank (nothing selected )": None
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic(mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_ehcp'])]
@@ -762,7 +825,8 @@ def at_risk_exploitation_filter(df, row, dfname="empty"):
         "Yes": "Yes",
         "Blank (nothing selected )": None
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic(mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_exploitation_risk'])]
@@ -797,7 +861,8 @@ def leaving_care_filter(df, row, dfname="empty"):
         "Not Known": "Unknown",  # Adjusted to match the row name
         "Blank (nothing selected)": None  # Handling for blank entries
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic(mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_leaving_care'])]
@@ -832,7 +897,8 @@ def lac_category_filter(df, row, dfname="empty"):
         "Not known": "Not Known",
         "Blank (nothing selected)": None  # Handling for blank entries
     }
-
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic(mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_lac'])]
@@ -869,7 +935,7 @@ def cpp_category_filter(df, row, dfname="empty"):
         "Under assessment": "Under assessment",  # Not found in your dataset
         "Blank (nothing selected)": None  # Handling for blank entries
     }
-
+    df = common_demographic_filter(df, dfname)
 
     def filter_logic(mapped_value):
         if mapped_value is None:
@@ -906,6 +972,8 @@ def cinp_category_filter(df, row, dfname="empty"):
         "Under assessment": "Under Assessment", 
         "Blank (nothing selected)": None  # Handling for blank entries
     }
+    df = common_demographic_filter(df, dfname)
+    
     def filter_logic( mapped_value):
         if mapped_value is None:
             filtered_df = df[pd.isna(df['client_cinp'])]
@@ -941,7 +1009,7 @@ def young_carer_category_filter(df, row, dfname="empty"):
         "Not stated": "Not Stated (Person asked but declined to provide a response)",
         "Blank (nothing selected)": None  # Handling for blank entries
     }
-
+    df = common_demographic_filter(df, dfname)
 
     def filter_logic( mapped_value):
         if mapped_value is None:
@@ -971,8 +1039,9 @@ def young_carer_category_filter(df, row, dfname="empty"):
 
 
 def attended_contacts_filter(df, row, dfname="empty"):
+    
     is_mib = dfname.startswith("MIB")
-
+    df = common_demographic_filter(df, dfname)
     if row == "Total Number of Attended Contacts":
         return total_attended_contacts(df, is_mib)
 

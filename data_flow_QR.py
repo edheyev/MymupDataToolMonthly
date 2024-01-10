@@ -197,7 +197,7 @@ def main(directory, text_widget):
         log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
-# uncomment for headless mode
+# # uncomment for headless mode
 # def main(directory, start_date, end_date):
 #     print("Begin Processing files in directory:", directory)
 #     log_message("Begin Processing files")
@@ -401,10 +401,10 @@ if __name__ == "__main__":
     root.protocol("WM_DELETE_WINDOW", lambda: root.quit())  # Proper shutdown on window close
     root.mainloop()
     
-    # uncomment for headless mode
+#     # uncomment for headless mode
 # if __name__ == "__main__":
 #     # Specify the directory and date range here
-#     directory_path = "./quarterly_data_dump"
+#     directory_path = "./quarterly_data_dump2"
 #     start_date = "2020-01-01"
 #     end_date = "2024-03-31"
 #     result = main(directory_path, start_date, end_date)

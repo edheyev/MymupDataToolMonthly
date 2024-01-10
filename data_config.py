@@ -170,11 +170,14 @@ service_info_config = {
         "Number of unique people supported (old rule)": "MYMUP_URL",
         "How many new people referred": "MYMUP_URL",
         # "How many were declined by the service?": "TO DO ",
+        
+        # todo how many unique referrals needs to look referrals within reporting period 
     },
     "row_db_logic": {
         "How many were declined by the service?": "File_Closures_And_Goals_Within_Reporting_Period",
         "How many young people disengaged, couldn’t be contacted or rejected a referral?": "File_Closures_Within_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
+        "How many unique referrals": "Referrals_Within_Reporting_Period",
         "Active cases": "Referrals_Before_End_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
         "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":"Contacts_Within_Seven_Days",
@@ -185,6 +188,7 @@ service_info_config = {
         "How many were declined by the service?": "MIB_File_Closures_And_Goals_Within_Reporting_Period",
         "How many young people disengaged, couldn’t be contacted or rejected a referral?": "File_Closures_Within_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
+        "How many unique referrals": "MIB_Referrals_Within_Reporting_Period",
         "Active cases": "MIB_Referrals_Before_End_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
         "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":"MIB_Contacts_Within_Seven_Days",
