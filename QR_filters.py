@@ -114,10 +114,13 @@ def SI_row_filter(df, row, dfname="empty"):
 
         elif row == "How many were declined by the service?":
             # count all unique client ids within reporting period (within file closures db)
+            
+            rejection_reasons = [
+                "Organisation rejects referral - Referral not suitable pre-assessment/post-assessment",
+                "Organisation rejects referral - Threshold too high",
+            ]
+            df = df[df["file_closure_reason"].isin(rejection_reasons)]
             unique_clients_df = df.drop_duplicates(subset='client_id')
-            
-            # todo file closure reason == organisation rejects referral not suitable OR organisation rejects referral threshold too high
-            
             return unique_clients_df
 
         elif (
@@ -173,9 +176,7 @@ def SI_row_filter(df, row, dfname="empty"):
                 df_contacts = df_contacts.dropna(subset=['referral_date', 'file_closure_date', 'contact_/_indirect_date'])
 
                 # Exclude clients with file closure reason "organisation cannot contact client prior to assessment"
-                
-                #todo DO NOT ICLUDE USE FILE CLOSURE REASONn "organisation cannot contact client prior to assessment"
-                df_filtered = df_contacts[df_contacts['file_closure_service_type'] != 'organisation cannot contact client prior to assessment']
+                df_filtered = df_contacts[df_contacts['file_closure_service_type'] != 'Organisation cannot contact Client prior to assessment']
                 
                 # todo COMPARE CONTACT/INDIRECT data WITH REFERRAL DATA MUST BE WITHIN 7 DAYS 
                 
@@ -228,7 +229,6 @@ def SI_row_filter(df, row, dfname="empty"):
                     df = df[~df["administrative"].astype(str).str.contains("Yes", na=False)]
 
                 # Define excluded file closure reasons
-                # todo link file_closure reason
         
                 excluded_closure_reasons = [
                     'organisation cannot contact client prior to assessment',
@@ -236,6 +236,9 @@ def SI_row_filter(df, row, dfname="empty"):
                     'organisation rejects referral threshold too high',
                     'organisation rejects referral referral not suitable pre/post assessment'
                 ]
+                
+                # todo link file_closure reason
+                df = df[~df['file_closure_reason'].isin(excluded_closure_reasons)]
 
                 # Define qualifying contact approaches
                 qualifying_approaches = [
@@ -359,8 +362,6 @@ def gender_category_filter(df, row, dfname="empty"):
         "Non-Binary": "Non-Binary",
         "Not known (Person stated Gender Code not recorded)": "Not Known (not recorded)",
         "No Stated (patient asked but declined to provide a response)": "Not Stated (patient asked but declined to provide a response)",
-        "Prefer not to say": "Prefer not to say",
-        "Transgendered": "Transgendered",
         "Other (not listed)": "Other (not listed)",
         "Blank (nothing selected)": "Blank"  # Special handling for blank entries
     }
@@ -1146,12 +1147,12 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
 
         try:
             
-            # Drop rows with missing 'referral_date' or 'reason'
-            df_filtered = df.dropna(subset=['referral_date', 'reason', 'goal_score_date', 'file_closure_date'])
+            # Drop rows with missing 'referral_date' or 'file_closure_reason'
+            df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
           
 
             # Check for any remaining missing values
-            if df_filtered['referral_date'].isnull().any() or df_filtered['reason'].isnull().any():
+            if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
 
                 return (pd.DataFrame(), pd.DataFrame())
 
@@ -1159,7 +1160,7 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             file_closure_reason = 'Treatment completed'
 
             # Filter for the specified file closure reason
-            df_filtered = df_filtered[df_filtered['reason'] == file_closure_reason]
+            df_filtered = df_filtered[df_filtered['file_closure_reason'] == file_closure_reason]
 
             # Convert dates safely
             for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
@@ -1190,12 +1191,12 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
 
     elif row == "% of closed cases with reliable change in paired GBO":
         try:
-            # Drop rows with missing 'referral_date' or 'reason'
-            df_filtered = df.dropna(subset=['referral_date', 'reason', 'goal_score_date', 'file_closure_date'])
+            # Drop rows with missing 'referral_date' or 'file_closure_reason'
+            df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
           
 
             # Check for any remaining missing values
-            if df_filtered['referral_date'].isnull().any() or df_filtered['reason'].isnull().any():
+            if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
 
                 return (pd.DataFrame(), pd.DataFrame())
 
@@ -1203,7 +1204,7 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             file_closure_reason = 'Treatment completed'
 
             # Filter for the specified file closure reason
-            df_filtered = df_filtered[df_filtered['reason'] == file_closure_reason]
+            df_filtered = df_filtered[df_filtered['file_closure_reason'] == file_closure_reason]
 
             # Convert dates safely
             for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
@@ -1243,12 +1244,12 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
     elif row == "Average impact score of all paired goals":
         
         try:
-            # Drop rows with missing 'referral_date' or 'reason'
-            df_filtered = df.dropna(subset=['referral_date', 'reason', 'goal_score_date', 'file_closure_date'])
+            # Drop rows with missing 'referral_date' or 'file_closure_reason'
+            df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
           
 
             # Check for any remaining missing values
-            if df_filtered['referral_date'].isnull().any() or df_filtered['reason'].isnull().any():
+            if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
 
                 return (pd.DataFrame(), pd.DataFrame())
 
@@ -1256,7 +1257,7 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             file_closure_reason = 'Treatment completed'
 
             # Filter for the specified file closure reason
-            df_filtered = df_filtered[df_filtered['reason'] == file_closure_reason]
+            df_filtered = df_filtered[df_filtered['file_closure_reason'] == file_closure_reason]
 
             # Convert dates safely
             for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
@@ -1325,16 +1326,7 @@ def goal_themes_filter(df, row, dfname="empty"):
         raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
         
 def dss_goal_filter(df, row, dfname="empty"):
-
-    if row == "How many unique clients have had a distress scale score in reporting period":
-        return "to do"
-
-    elif row == "Average change score for distress scale":
-        return "to do"
-
-    else:
-        print(f"Row not recognised: {row}")
-        return "error"
+    pass
 
 def contact_by_theme_filter(df, row, dfname="empty"):
     theme_map = {        

@@ -54,11 +54,11 @@ file_info = {
     },
     "File_Closures_And_Goals_Within_Reporting_Period": {
         "filename": "file_closures_and_goals_within_reporting_period.csv",
-        "columns": ["client_id", 'referral_date', 'reason', 'goal_score_date', 'file_closure_date','initial_/_followup_/_final'],
+        "columns": ["client_id", 'referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date','initial_/_followup_/_final'],
     },
     "MIB_File_Closures_And_Goals_Within_Reporting_Period": {
         "filename": "mib_file_closures_and_goals_within_reporting_period.csv",
-        "columns": ["client_id", 'referral_date', 'reason', 'goal_score_date', 'file_closure_date','initial_/_followup_/_final'],
+        "columns": ["client_id", 'referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date','initial_/_followup_/_final'],
 
     },
     "File_Closures_Within_Reporting_Period": {
@@ -169,10 +169,10 @@ service_info_config = {
     "placeholder_rows": {
         "Number of unique people supported (old rule)": "MYMUP_URL",
         "How many new people referred": "MYMUP_URL",
-        "How many were declined by the service?": "TO DO ",
+        # "How many were declined by the service?": "TO DO ",
     },
     "row_db_logic": {
-        "How many were declined by the service?": "File_Closures_Within_Reporting_Period",
+        "How many were declined by the service?": "File_Closures_And_Goals_Within_Reporting_Period",
         "How many young people disengaged, couldn’t be contacted or rejected a referral?": "File_Closures_Within_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
         "Active cases": "Referrals_Before_End_Reporting_Period",
@@ -182,7 +182,7 @@ service_info_config = {
         "% clients attended the first contact by video/face to face/telephone within 21 days of referral":"Contacts_Within_Twenty_One_Days",
     },
     "mib_row_db_logic": {
-        "How many were declined by the service?": "File_Closures_Within_Reporting_Period",
+        "How many were declined by the service?": "MIB_File_Closures_And_Goals_Within_Reporting_Period",
         "How many young people disengaged, couldn’t be contacted or rejected a referral?": "File_Closures_Within_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
         "Active cases": "MIB_Referrals_Before_End_Reporting_Period",
@@ -203,8 +203,6 @@ yp_gender_config = {
         "Non-Binary",
         "Not known (Person stated Gender Code not recorded)",
         "No Stated (patient asked but declined to provide a response)",
-        "Prefer not to say",
-        "Transgendered",
         "Other (not listed)",
         "Blank (nothing selected)",
     ],

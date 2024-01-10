@@ -1,5 +1,7 @@
 #from data_config import yim_providers
 import pandas as pd
+import numpy as np
+
 
 def clean_column_names(dataframes, log_message=None):
     print("Standardizing column names...")
@@ -185,49 +187,6 @@ def filter_mib_services(dataframes, log_message=None):
     return filtered_dataframes
 
 
-# def add_reason_to_file_closures(dataframes, log_message=None):
-
-#     """
-#     Merges the 'reason' column from a specified file closures DataFrame into a specified file closures goals DataFrame,
-#     and handles multiple client IDs with appropriate NaN filling.
-
-#     :param dataframes: A dictionary of pandas DataFrames.
-#     :param df_file_closures_name: The name of the DataFrame containing file closures.
-#     :param df_file_closures_goals_name: The name of the DataFrame containing file closures and goals.
-#     :return: A dictionary of pandas DataFrames with the merged 'reason' column.
-#     """
-#     df_file_closures_name = 'File_Closures_Within_Reporting_Period'
-#     df_file_closures_goals_name = 'File_Closures_And_Goals_Within_Reporting_Period'
-#     MIB_df_file_closures_goals_name = 'MIB_File_Closures_And_Goals_Within_Reporting_Period'
-    
-#     filtered_dataframes = {}
-
-#     for df_name, df in dataframes.items():
-#         if df_name == df_file_closures_goals_name or df_name == MIB_df_file_closures_goals_name:
-#             # Check if the required DataFrame exists
-#             if df_file_closures_name not in dataframes:
-#                 print(f"DataFrame '{df_file_closures_name}' not found.")
-#                 log_message(f"DataFrame '{df_file_closures_name}' not found.")
-#                 continue
-
-#             df_file_closures = dataframes[df_file_closures_name]
-
-#             # Ensure 'client_id' is present in both DataFrames
-#             if 'client_id' not in df.columns or 'client_id' not in df_file_closures.columns:
-#                 print("Both DataFrames must contain a 'client_id' column.")
-#                 log_message("Both file_closures  and file_closures and goals must contain a 'client_id' column.")
-#                 continue
-
-#             # Merge the two DataFrames on 'client_id'
-#             merged_df = pd.merge(df, df_file_closures[['client_id', 'reason']], 
-#                                  on='client_id', how='left')
-#             filtered_dataframes[df_name] = merged_df
-#         else:
-#             # Keep the dataframe as is if it's not the target dataframe
-#             filtered_dataframes[df_name] = df
-
-#     return filtered_dataframes
-
 def add_reason_to_file_closures(dataframes, log_message=None):
     print("Adding 'reason' column to file_closures and file_closures_and_goals...")
     try:
@@ -274,26 +233,56 @@ def add_reason_to_file_closures(dataframes, log_message=None):
         return None
 
 
-    # for df_name, df in dataframes.items():
-    #     if df_name == df_file_closures_goals_name:
-    #         # Check if the required DataFrame exists
-    #         if df_file_closures_name not in dataframes:
-    #             print(f"DataFrame '{df_file_closures_name}' not found.")
-    #             continue
+def add_reason_to_contact(dataframes, log_message=None):
+    print("Adding 'file_closure_reason' to specified DataFrames...")
+    try:
+        df_file_closures_goals_name = 'File_Closures_And_Goals_Within_Reporting_Period'
+        target_dfs = [
+            'Contacts_Within_Twenty_One_Days',
+            'MIB_Contacts_Within_Twenty_One_Days',
+            'Contacts_Within_Seven_Days',
+            'MIB_Contacts_Within_Seven_Days'
+        ]
 
-    #         df_file_closures = dataframes[df_file_closures_name]
+        filtered_dataframes = {}
 
-    #         # Ensure 'client_id' is present in both DataFrames
-    #         if 'client_id' not in df.columns or 'client_id' not in df_file_closures.columns:
-    #             print("Both DataFrames must contain a 'client_id' column.")
-    #             continue
+        if df_file_closures_goals_name not in dataframes:
+            print(f"DataFrame '{df_file_closures_goals_name}' not found.")
+            if log_message:
+                log_message(f"DataFrame '{df_file_closures_goals_name}' not found.")
+            return None
 
-    #         # Merge the two DataFrames on 'client_id'
-    #         merged_df = pd.merge(df, df_file_closures[['client_id', 'reason']], 
-    #                              on='client_id', how='left')
-    #         filtered_dataframes[df_name] = merged_df
-    #     else:
-    #         # Keep the dataframe as is if it's not the target dataframe
-    #         filtered_dataframes[df_name] = df
+        # Preprocess 'File_Closures_And_Goals_Within_Reporting_Period' DataFrame
+        df_file_closures_goals = dataframes[df_file_closures_goals_name].copy()
+        df_file_closures_goals['client_id'] = pd.to_numeric(df_file_closures_goals['client_id'], errors='coerce')
+        df_file_closures_goals['file_closure_date'] = pd.to_datetime(df_file_closures_goals['file_closure_date'])
 
-    # return filtered_dataframes
+        for df_name, df in dataframes.items():
+            print(f"Processing DataFrame: {df_name}")  # Logging current DataFrame
+            if df_name in target_dfs:
+                df = df.copy()
+                df['client_id'] = pd.to_numeric(df['client_id'], errors='coerce')
+
+                if 'client_id' not in df.columns or 'file_closure_date' not in df.columns:
+                    print(f"DataFrame '{df_name}' must contain 'client_id' and 'file_closure_date' columns.")
+                    if log_message:
+                        log_message(f"DataFrame '{df_name}' must contain 'client_id' and 'file_closure_date' columns.")
+                    continue
+
+                df['file_closure_date'] = pd.to_datetime(df['file_closure_date'])
+
+                # Merging with 'file_closure_reason'
+                merged_df = pd.merge(df, df_file_closures_goals[['client_id', 'file_closure_date', 'file_closure_reason']], 
+                                     on=['client_id', 'file_closure_date'], how='left')
+                filtered_dataframes[df_name] = merged_df
+            else:
+                filtered_dataframes[df_name] = df
+
+        return filtered_dataframes
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        if log_message:
+            log_message(f"An error occurred: {e}")
+        return None
+

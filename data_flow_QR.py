@@ -10,8 +10,6 @@ from tkinter import ttk  # Import ttk module for themed widgets
 from tkinter import scrolledtext
 from tkinter import filedialog
 
-
-
 # Add the directory of your script and modules to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
@@ -23,9 +21,8 @@ from data_cleaning import (
     remove_duplicates,
     remove_trailing_spaces_from_values,
     isolate_reporting_period,
-    filter_mib_services,
     validate_data_files,
-    add_reason_to_file_closures,
+    add_reason_to_contact,
     isolate_client_ages
 )
 from QR_filters import filter_function_map, column_filter
@@ -35,7 +32,6 @@ from data_utils import (
     calculate_percentage,
     calculate_average,
     calculate_count,
-    calculate_percentage_as_number,
     calculate_row_average,
     calculate_row_total,
     calculate_percentage_row_total,
@@ -180,43 +176,43 @@ def load_and_clean_data(folder_path, start_date, end_date):
     except Exception as e:
         log_message(f"Error in data processing: {e}")
 
-# def main(directory, text_widget):
-#     global root
-#     print("Begin Processing files")
-#     log_message("Begin Processing files")
-    
-#     # Wait and get cleaned data from the queue
-#     try:
-#         cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
-#         # Proceed with validated data and other processing
-#         validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
-#         file_string = "output_csv_QR.csv"
-#         output_df = produce_tables(validated_data, file_string)
-#         log_message("CSV saved. File name: " + file_string)
-#         return output_df
-#     except queue.Empty:
-#         log_message("Error: No cleaned data received within the timeout period.")
-#         return None
-#     except Exception as e:
-#         log_message(f"Unexpected error: {e}")
-#         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
-
-
-def main(directory, start_date, end_date):
-    print("Begin Processing files in directory:", directory)
+def main(directory, text_widget):
+    global root
+    print("Begin Processing files")
     log_message("Begin Processing files")
-
+    
+    # Wait and get cleaned data from the queue
     try:
-        raw_data = load_data_files(directory, file_info)
-        cleaned_data = clean_data(raw_data, start_date, end_date)
+        cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
+        # Proceed with validated data and other processing
         validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
         file_string = "output_csv_QR.csv"
         output_df = produce_tables(validated_data, file_string)
         log_message("CSV saved. File name: " + file_string)
         return output_df
+    except queue.Empty:
+        log_message("Error: No cleaned data received within the timeout period.")
+        return None
     except Exception as e:
         log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
+
+# uncomment for headless mode
+# def main(directory, start_date, end_date):
+#     print("Begin Processing files in directory:", directory)
+#     log_message("Begin Processing files")
+
+#     try:
+#         raw_data = load_data_files(directory, file_info)
+#         cleaned_data = clean_data(raw_data, start_date, end_date)
+#         validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
+#         file_string = "output_csv_QR.csv"
+#         output_df = produce_tables(validated_data, file_string)
+#         log_message("CSV saved. File name: " + file_string)
+#         return output_df
+#     except Exception as e:
+#         log_message(f"Unexpected error: {e}")
+#         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
 
 
@@ -258,11 +254,9 @@ def clean_data(dataframes, start_date, end_date):
     cleaned_dataframes = isolate_client_ages(dataframes, 3, 26, log_message=log_message) 
     cleaned_dataframes = isolate_reporting_period(
     cleaned_dataframes, start_date, end_date, log_message=log_message)
-    # cleaned_dataframes = filter_mib_services(cleaned_dataframes)
     cleaned_dataframes = remove_trailing_spaces_from_values(cleaned_dataframes, log_message=log_message)
     cleaned_dataframes = remove_duplicates(cleaned_dataframes, log_message=log_message)
-    cleaned_dataframes = add_reason_to_file_closures(cleaned_dataframes, log_message=log_message)
-
+    cleaned_dataframes = add_reason_to_contact(cleaned_dataframes, log_message=log_message)
     return cleaned_dataframes
 
 
@@ -297,8 +291,6 @@ def produce_tables(dataframes, file_string):
     # Append each table to the CSV file
     #for name in mylooplist:
     for name in filter_function_map.keys():
-        # print(f"Processing {name}")
-        # log_message(f"Processing {name}")
         thisconfig = find_dict_by_table_name(name, table_configs)
         try:
             this_table = filter_service_information(dataframes, thisconfig)
@@ -405,14 +397,15 @@ def filter_service_information(dataframes, config):
 
 
 if __name__ == "__main__":
-    # Specify the directory and date range here
-    directory_path = "./quarterly_data_dump"
-    start_date = "2020-01-01"
-    end_date = "2024-03-31"
-    result = main(directory_path, start_date, end_date)
-
-
+    root, file_button, start_date_entry, end_date_entry = create_logging_window()
+    root.protocol("WM_DELETE_WINDOW", lambda: root.quit())  # Proper shutdown on window close
+    root.mainloop()
+    
+    # uncomment for headless mode
 # if __name__ == "__main__":
-#     root, file_button, start_date_entry, end_date_entry = create_logging_window()
-#     root.protocol("WM_DELETE_WINDOW", lambda: root.quit())  # Proper shutdown on window close
-#     root.mainloop()
+#     # Specify the directory and date range here
+#     directory_path = "./quarterly_data_dump"
+#     start_date = "2020-01-01"
+#     end_date = "2024-03-31"
+#     result = main(directory_path, start_date, end_date)
+
