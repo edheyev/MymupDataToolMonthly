@@ -1255,7 +1255,7 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
                 # Drop rows with invalid dates
                 df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
             else:
-                df_filtered = df
+                df_filtered = df_filtered
                 
                 
             # Check if there are rows left to process
@@ -1280,14 +1280,14 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
 
     elif row == "% of closed cases with reliable change in paired GBO":
         try:
-            # Drop rows with missing 'referral_date' or 'file_closure_reason'
-            df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
-          
-
-            # Check for any remaining missing values
-            if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
-
-                return (pd.DataFrame(), pd.DataFrame())
+            if not mib:
+                # Drop rows with missing 'referral_date' or 'file_closure_reason'
+                df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
+                # Check for any remaining missing values
+                if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
+                    return (pd.DataFrame(), pd.DataFrame())
+            else:
+                df_filtered = df
 
             # Define the file closure reason for selection
             file_closure_reason = 'Treatment completed'
@@ -1299,8 +1299,11 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
                 df_filtered.loc[:, column] = pd.to_datetime(df_filtered[column], errors='coerce')
 
-            # Drop rows with invalid dates
-            df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
+            if not mib:
+                # Drop rows with invalid dates
+                df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
+            else:
+                df_filtered = df_filtered
 
             # Check if there are rows left to process
             if df_filtered.empty:
@@ -1319,7 +1322,6 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
         
             # The filtered DataFrame for GBOs with reliable change
             result_reliable_change = df_reliable_change_gbo
-        
             
             return (result_reliable_change, df_paired_gbo)
             
@@ -1328,19 +1330,18 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             print(f"Error in filtering GBOs for reliable change: {e}")
             raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
             
-            result_reliable_change = pd.DataFrame()
-
     elif row == "Average impact score of all paired goals":
         
         try:
-            # Drop rows with missing 'referral_date' or 'file_closure_reason'
-            df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
-          
+            if not mib:
+                # Drop rows with missing 'referral_date' or 'file_closure_reason'
+                df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
+                # Check for any remaining missing values
+                if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
+                    return (pd.DataFrame(), pd.DataFrame())
+            else:
+                df_filtered = df
 
-            # Check for any remaining missing values
-            if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
-
-                return (pd.DataFrame(), pd.DataFrame())
 
             # Define the file closure reason for selection
             file_closure_reason = 'Treatment completed'
@@ -1352,8 +1353,11 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
             for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
                 df_filtered.loc[:, column] = pd.to_datetime(df_filtered[column], errors='coerce')
 
-            # Drop rows with invalid dates
-            df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
+            if not mib:
+                # Drop rows with invalid dates
+                df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
+            else:
+                df_filtered = df_filtered
 
             # Check if there are rows left to process
             if df_filtered.empty:
