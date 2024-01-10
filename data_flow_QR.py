@@ -76,8 +76,9 @@ def create_logging_window():
     # Instruction Text
     instructions = (
         "Instructions for MyMup Data Tool:\n"
-        "1. Select a folder containing all required data files for the quarterly report.\n"
-        "2. Ensure the data files are named correctly as per the following list:\n"
+        "1. Enter correct dates in the format YYYY-MM-DD \n"
+        "2. Select a folder containing all required data files for the quarterly report.\n"
+        "3. Ensure the data files are named correctly as per the following list:\n"
         "   * Contacts or Indirects Within Reporting Period: 'contacts_or_indirects_within_reporting_period.csv'\n"
         "   * MIB Contacts or Indirects Within Reporting Period: 'mib_contacts_or_indirects_within_reporting_period.csv'\n"
         "   * File Closures And Goals Within Reporting Period: 'file_closures_and_goals_within_reporting_period.csv'\n"
@@ -92,7 +93,9 @@ def create_logging_window():
         "   * MIB Contacts Within Seven Days: 'mib_contacts_within_seven_days.csv'\n"
         "   * Contacts Within Twenty One Days: 'contacts_within_twenty_one_days.csv'\n"
         "   * MIB Contacts Within Twenty One Days: 'mib_contacts_within_twenty_one_days.csv'\n"
-        "\nEnsure the files match the specified column structure as detailed in the documentation."
+        "Ensure the files match the specified column structure as detailed in the documentation. \n"
+        "Press start when files are loaded and cleaned. \n"
+        
     )
     instruction_text = tk.Text(instruction_frame, height=10, wrap=tk.WORD)
     instruction_text.insert(tk.END, instructions)
@@ -176,43 +179,43 @@ def load_and_clean_data(folder_path, start_date, end_date):
     except Exception as e:
         log_message(f"Error in data processing: {e}")
 
-# def main(directory, text_widget):
-#     global root
-#     print("Begin Processing files")
-#     log_message("Begin Processing files")
-    
-#     # Wait and get cleaned data from the queue
-#     try:
-#         cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
-#         # Proceed with validated data and other processing
-#         validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
-#         file_string = "output_csv_QR.csv"
-#         output_df = produce_tables(validated_data, file_string)
-#         log_message("CSV saved. File name: " + file_string)
-#         return output_df
-#     except queue.Empty:
-#         log_message("Error: No cleaned data received within the timeout period.")
-#         return None
-#     except Exception as e:
-#         log_message(f"Unexpected error: {e}")
-#         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
-
-# # uncomment for headless mode
-def main(directory, start_date, end_date):
-    print("Begin Processing files in directory:", directory)
+def main(directory, text_widget):
+    global root
+    print("Begin Processing files")
     log_message("Begin Processing files")
-
+    
+    # Wait and get cleaned data from the queue
     try:
-        raw_data = load_data_files(directory, file_info)
-        cleaned_data = clean_data(raw_data, start_date, end_date)
+        cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
+        # Proceed with validated data and other processing
         validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
         file_string = "output_csv_QR.csv"
         output_df = produce_tables(validated_data, file_string)
         log_message("CSV saved. File name: " + file_string)
         return output_df
+    except queue.Empty:
+        log_message("Error: No cleaned data received within the timeout period.")
+        return None
     except Exception as e:
         log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
+
+# # uncomment for headless mode
+# def main(directory, start_date, end_date):
+#     print("Begin Processing files in directory:", directory)
+#     log_message("Begin Processing files")
+
+#     try:
+#         raw_data = load_data_files(directory, file_info)
+#         cleaned_data = clean_data(raw_data, start_date, end_date)
+#         validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
+#         file_string = "output_csv_QR.csv"
+#         output_df = produce_tables(validated_data, file_string)
+#         log_message("CSV saved. File name: " + file_string)
+#         return output_df
+#     except Exception as e:
+#         log_message(f"Unexpected error: {e}")
+#         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
 
 
@@ -396,16 +399,16 @@ def filter_service_information(dataframes, config):
     return result_df
 
 
-# if __name__ == "__main__":
-#     root, file_button, start_date_entry, end_date_entry = create_logging_window()
-#     root.protocol("WM_DELETE_WINDOW", lambda: root.quit())  # Proper shutdown on window close
-#     root.mainloop()
-    
-    # uncomment for headless mode
 if __name__ == "__main__":
-    # Specify the directory and date range here
-    directory_path = "./quarterly_data_dump2"
-    start_date = "2020-01-01"
-    end_date = "2024-03-31"
-    result = main(directory_path, start_date, end_date)
+    root, file_button, start_date_entry, end_date_entry = create_logging_window()
+    root.protocol("WM_DELETE_WINDOW", lambda: root.quit())  # Proper shutdown on window close
+    root.mainloop()
+    
+#     # uncomment for headless mode
+# if __name__ == "__main__":
+#     # Specify the directory and date range here
+#     directory_path = "./quarterly_data_dump2"
+#     start_date = "2020-01-01"
+#     end_date = "2024-03-31"
+#     result = main(directory_path, start_date, end_date)
 

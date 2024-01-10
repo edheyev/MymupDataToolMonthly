@@ -101,7 +101,7 @@ This document explains how to create a standalone executable from a Python scrip
    To run PyInstaller and build your executable, use the following command:
 
    ```bash
-   ./myenv/Scripts/python.exe -m PyInstaller your_script.spec
+   ./myenv/Scripts/python.exe -m PyInstaller data_flow_qr.spec
    ```
 
    Replace `your_script.spec` with the name of your PyInstaller spec file.

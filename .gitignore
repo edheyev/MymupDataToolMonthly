@@ -29,7 +29,7 @@ share/python-wheels/
 # PyInstaller
 # Exclude the build directory and executable
 *.manifest
-*.spec
+# *.spec
 build/  # PyInstaller build folder
 dist/   # PyInstaller distribution folder
 *.exe   # Executable files
