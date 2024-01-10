@@ -2,6 +2,7 @@ import sys
 import os
 import threading
 import queue
+import datetime
 import re
 
 import pandas as pd
@@ -179,6 +180,7 @@ def load_and_clean_data(folder_path, start_date, end_date):
     except Exception as e:
         log_message(f"Error in data processing: {e}")
 
+
 def main(directory, text_widget):
     global root
     print("Begin Processing files")
@@ -189,7 +191,23 @@ def main(directory, text_widget):
         cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
         # Proceed with validated data and other processing
         validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
-        file_string = "output_csv_QR.csv"
+
+         # Format the date as DD-MM-YYYY
+        date_str = datetime.datetime.now().strftime("%d-%m-%Y")
+
+        # Start with a basic file name
+        file_string = f"output_csv_QR_{date_str}.csv"
+
+        # Initialize file counter
+        file_counter = 1
+
+        # Check if file already exists; if so, append a counter to the filename
+        if os.path.exists(os.path.join(directory, file_string)):
+            file_string = f"output_csv_QR_{date_str}_{file_counter}.csv"
+            while os.path.exists(os.path.join(directory, file_string)):
+                file_counter += 1
+                file_string = f"output_csv_QR_{date_str}_{file_counter}.csv"
+
         output_df = produce_tables(validated_data, file_string)
         log_message("CSV saved. File name: " + file_string)
         return output_df
@@ -199,6 +217,8 @@ def main(directory, text_widget):
     except Exception as e:
         log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
+
+
 
 # # uncomment for headless mode
 # def main(directory, start_date, end_date):
