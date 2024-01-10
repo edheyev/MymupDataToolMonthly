@@ -936,15 +936,16 @@ average_goals_based_outcomes_config = {
 goal_themes_goals_based_outcomes_config = {
     "table_name": "goal_themes_goals_based_outcomes_config",
     "row_names": [
-        "Being able to maintain and build positive relationships",
-        "Being able to support others",
-        "Being better at managing my emotional wellbeing",
-        "Being better at managing risks and feeling safer",
-        "Covid-19 Support",
-        "Improving my confidence and self-esteem",
-        "Improving my physical wellbeing",
-        "Reducing my isolation",
-        "Understanding who I am",
+        "% Being able to maintain and build positive relationships",
+        "% Being able to support others",
+        "% Being better at managing my emotional wellbeing",
+        "% Being better at managing risks and feeling safer",
+        "% Covid-19 Support",
+        "% Improving my confidence and self-esteem",
+        "% Improving my physical wellbeing",
+        "% Reducing my isolation",
+        "% Understanding who I am",
+        "% Blank (nothing selected)"
     ],
     "column_headings": [
         "Q1_Totals",  

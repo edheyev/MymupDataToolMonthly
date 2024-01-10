@@ -102,8 +102,8 @@ def common_demographic_filter(df, dfname="empty"):
             return df_filtered
             
     except Exception as e:
-        print(f"Error in gender_category_filter with row {row}: {e}. Current df: {dfname}")
-        raise Exception(f"Error in reason_for_referral_filter with row {row}: {e} . current df is {dfname}")
+        print(f"Error in common_demographic_filter with row : {e}. Current df: {dfname}")
+        raise Exception(f"Error in common_demographic_filter with row : {e} . current df is {dfname}")
 
 
 def SI_row_filter(df, row, dfname="empty"):
@@ -225,6 +225,7 @@ def SI_row_filter(df, row, dfname="empty"):
         
         elif row == "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":
             try:
+                # todo check this COMPARE CONTACT/INDIRECT data WITH REFERRAL DATA MUST BE WITHIN 7 DAYS 
                 df_contacts = df
                 
                 # Drop rows where any of the specified date columns have NaN values
@@ -233,7 +234,6 @@ def SI_row_filter(df, row, dfname="empty"):
                 # Exclude clients with file closure reason "organisation cannot contact client prior to assessment"
                 df_filtered = df_contacts[df_contacts['file_closure_service_type'] != 'Organisation cannot contact Client prior to assessment']
                 
-                # todo COMPARE CONTACT/INDIRECT data WITH REFERRAL DATA MUST BE WITHIN 7 DAYS 
                 
                 # Error handling for invalid dates
                 def safe_convert_date(date_str):
@@ -263,6 +263,10 @@ def SI_row_filter(df, row, dfname="empty"):
                     return (pd.DataFrame([error_message]), pd.DataFrame([error_message]))
 
                 else:
+                    df_within_7_days = df_within_7_days.drop_duplicates()
+                    df_merged = df_merged.drop_duplicates()
+                    
+                    # print(f"df_within_7_days is {len(df_within_7_days)} and df_merged is {len(df_merged)}")
                     return (df_within_7_days, df_merged)
             except Exception as e:
                 print(f"Error in row_filter with row {row}: {e} . current df is {dfname}")
@@ -331,7 +335,9 @@ def SI_row_filter(df, row, dfname="empty"):
                     return (pd.DataFrame(), df_merged)
                 elif df_merged.empty:
                     return (pd.DataFrame([error_message]), pd.DataFrame([error_message]))
-
+                
+                df_within_21_days = df_within_21_days.drop_duplicates()
+                df_merged = df_merged.drop_duplicates()
                 return (df_within_21_days, df_merged)
             except Exception as e:
                 print(f"Error in filter_clients_first_support_session_offered: {e}")
@@ -396,7 +402,9 @@ def SI_row_filter(df, row, dfname="empty"):
                     return (pd.DataFrame(), df_merged)
                 elif df_merged.empty:
                     return (pd.DataFrame([error_message]), pd.DataFrame([error_message]))
-
+                
+                df_within_21_days = df_within_21_days.drop_duplicates()
+                df_merged = df_merged.drop_duplicates()
                 return (df_within_21_days, df_merged)
             except Exception as e:
                 print(f"Error in row_filter with row {row}: {e}")
@@ -1041,7 +1049,7 @@ def young_carer_category_filter(df, row, dfname="empty"):
 def attended_contacts_filter(df, row, dfname="empty"):
     
     is_mib = dfname.startswith("MIB")
-    df = common_demographic_filter(df, dfname)
+    # df = common_demographic_filter(df, dfname)
     if row == "Total Number of Attended Contacts":
         return total_attended_contacts(df, is_mib)
 
@@ -1161,26 +1169,35 @@ def goals_based_outcomes_filter(df, row, dfname="empty"):
 
 def average_goals_based_outcomes_filter(df, row, dfname="empty"):
     
-    is_mib = dfname.startswith("MIB")
+    mib = dfname.startswith("MIB")
     
         
     def convert_dates(df, date_columns):
         for column in date_columns:
             df[column] = pd.to_datetime(df[column], errors='coerce')
         return df.dropna(subset=date_columns)
-    
+
+
     def merge_and_filter_gbo(df_initial, df_followup_final):
         # Merging the initial and follow-up/final GBOs on client_id and goal_id
         df_paired_gbo = pd.merge(df_initial, df_followup_final, on=['client_id', 'goal_id'], suffixes=('_initial', '_followup_final'))
         
-        # Filtering the paired GBOs based on the date criteria
-        df_paired_gbo = df_paired_gbo[
-            (df_paired_gbo['goal_score_date_initial'] >= df_paired_gbo['referral_date_initial']) & 
-            (df_paired_gbo['goal_score_date_initial'] <= df_paired_gbo['file_closure_date_initial']) &
-            (df_paired_gbo['goal_score_date_followup_final'] <= df_paired_gbo['file_closure_date_followup_final'])
-        ]
+        # Applying the date filters
+        # Apply referral date filter only if referral_date_initial is not NaN
+        filter_referral_date = (df_paired_gbo['goal_score_date_initial'] >= df_paired_gbo['referral_date_initial']) | pd.isna(df_paired_gbo['referral_date_initial'])
+        
+        # Apply other filters
+        filter_file_closure_date_initial = (df_paired_gbo['goal_score_date_initial'] <= df_paired_gbo['file_closure_date_initial'])
+        filter_file_closure_date_followup = (df_paired_gbo['goal_score_date_followup_final'] <= df_paired_gbo['file_closure_date_followup_final'])
+    
+        # Combining filters
+        combined_filter = filter_referral_date & filter_file_closure_date_initial & filter_file_closure_date_followup
+        
+        # Filtering the paired GBOs
+        df_paired_gbo = df_paired_gbo[combined_filter]
         
         return df_paired_gbo
+
     
     def filter_for_reliable_change(df_paired_gbo):
         """
@@ -1214,30 +1231,33 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
 
     if row == "% of closed cases that have an initial and follow-up/final paired GBO":
 
+        # todo mind in bradford dont have referral_date so dont use this for a qualifier (for these three and mib)
         try:
-            
-            # Drop rows with missing 'referral_date' or 'file_closure_reason'
-            df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
-          
-
-            # Check for any remaining missing values
-            if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
-
-                return (pd.DataFrame(), pd.DataFrame())
+            if not mib:
+                # Drop rows with missing 'referral_date' or 'file_closure_reason'
+                df_filtered = df.dropna(subset=['referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date'])
+                # Check for any remaining missing values
+                if df_filtered['referral_date'].isnull().any() or df_filtered['file_closure_reason'].isnull().any():
+                    return (pd.DataFrame(), pd.DataFrame())
+            else:
+                df_filtered = df
 
             # Define the file closure reason for selection
             file_closure_reason = 'Treatment completed'
-
             # Filter for the specified file closure reason
             df_filtered = df_filtered[df_filtered['file_closure_reason'] == file_closure_reason]
 
             # Convert dates safely
             for column in ['goal_score_date', 'referral_date', 'file_closure_date']:
                 df_filtered.loc[:, column] = pd.to_datetime(df_filtered[column], errors='coerce')
-
-            # Drop rows with invalid dates
-            df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
-
+                
+            if not mib:
+                # Drop rows with invalid dates
+                df_filtered = df_filtered.dropna(subset=['goal_score_date', 'referral_date', 'file_closure_date'])
+            else:
+                df_filtered = df
+                
+                
             # Check if there are rows left to process
             if df_filtered.empty:
 
@@ -1363,16 +1383,16 @@ def average_goals_based_outcomes_filter(df, row, dfname="empty"):
 def goal_themes_filter(df, row, dfname="empty"):
     
     theme_map = {
-    "Being able to maintain and build positive relationships":"Being able to maintain and build positive relationships",
-    "Being able to support others":"Being able to support others",
-    "Being better at managing my emotional wellbeing":"Being better at managing my emotional wellbeing",
-    "Being better at managing risks and feeling safer":"Being better at managing risks and feeling safer",
-    "Covid-19 Support":"Covid-19 Support",
-    "Improving my confidence and self-esteem":"Improving my confidence and self esteem",
-    "Improving my physical wellbeing":"Improving my physical wellbeing",
-    "Reducing my isolation":"Reducing my isolation",
-    "Understanding who I am":"Understanding who I am",
-    "Blank (nothing selected)": "Blank (nothing selected)"}
+    "% Being able to maintain and build positive relationships":"Being able to maintain and build positive relationships",
+    "% Being able to support others":"Being able to support others",
+    "% Being better at managing my emotional wellbeing":"Being better at managing my emotional wellbeing",
+    "% Being better at managing risks and feeling safer":"Being better at managing risks and feeling safer",
+    "% Covid-19 Support":"Covid-19 Support",
+    "% Improving my confidence and self-esteem":"Improving my confidence and self esteem",
+    "% Improving my physical wellbeing":"Improving my physical wellbeing",
+    "% Reducing my isolation":"Reducing my isolation",
+    "% Understanding who I am":"Understanding who I am",
+    "% Blank (nothing selected)": "Blank (nothing selected)"}
         
     try:
         if row in theme_map:
@@ -1388,7 +1408,7 @@ def goal_themes_filter(df, row, dfname="empty"):
         this_theme_df= this_theme_df.drop_duplicates(subset='goal_id')
 
         
-        return this_theme_df
+        return (this_theme_df, df)
 
     except Exception as e:
         print(f"Error in area_category_filter with row {row}: {e} . current df is {dfname}")

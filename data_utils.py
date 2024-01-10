@@ -6,6 +6,7 @@ Created on Sun Jan  7 15:11:17 2024
 """
 
 import pandas as pd
+import numpy as np
 
 
 def find_dict_by_table_name(table_name, dict_array):
@@ -70,22 +71,22 @@ def calculate_percentage_row_total(row_dataframes):
     return f"{total_percentage:.2f}%"
 
 def calculate_row_average(row_dataframes):
-    # List to hold average values of each DataFrame
     averages = []
 
-    # Iterate over each DataFrame in the list
-    for df in row_dataframes:
-        if isinstance(df, pd.DataFrame) and not df.empty:
-            # Calculate the mean of all numeric columns in the DataFrame
-            df_mean = df.mean(numeric_only=True).mean()
-            averages.append(df_mean)
+    for dataframe_and_column in row_dataframes:
+        # Use calculate_average function to get the average for each column
+        average_value = calculate_average(dataframe_and_column)
+
+        # Check if the returned value is numeric and add it to the list of averages
+        if average_value.replace('.', '', 1).isdigit():
+            averages.append(float(average_value))
 
     # Calculate the overall average if there are valid averages in the list
     if averages:
-        row_average = sum(averages) / len(averages)
-        return row_average
+        return round(sum(averages) / len(averages), 2)
     else:
-        return 0  # Return 0 if no valid DataFrames are present
+        return "n/a"
+
 
 def calculate_percentage_as_number(numerator_df, denominator_df):
     # Calculate percentage as a numeric value for summing
