@@ -1,4 +1,4 @@
-#from data_config import yim_providers
+# from data_config import yim_providers
 import pandas as pd
 import numpy as np
 
@@ -39,8 +39,6 @@ def remove_duplicates(dataframes, log_message=None):
     return cleaned_dataframes
 
 
-
-
 def isolate_reporting_period(dataframes, start_date, end_date, log_message=None):
     print("Isolating data within the reporting period...")
     log_message("Isolating data within the reporting period...")
@@ -51,28 +49,41 @@ def isolate_reporting_period(dataframes, start_date, end_date, log_message=None)
 
     for df_name, df in dataframes.items():
         # Check specific DataFrame and 'contact_date' column presence
-        if df_name in ["Contacts_Or_Indirects_Within_Reporting_Period", "MIB_Contacts_Or_Indirects_Within_Reporting_Period"]:
-            if 'contact_date' in df.columns:
+        if df_name in [
+            "Contacts_Or_Indirects_Within_Reporting_Period",
+            "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+        ]:
+            if "contact_date" in df.columns:
                 initial_row_count = len(df)
                 print(f"Initial row count for '{df_name}': {initial_row_count}")
                 log_message(f"Initial row count for '{df_name}': {initial_row_count}")
                 # Convert 'contact_date' to datetime, coerce errors to NaT
-                df['contact_date'] = pd.to_datetime(df['contact_date'], errors='coerce')
-                
+                df["contact_date"] = pd.to_datetime(df["contact_date"], errors="coerce")
+
                 # Drop rows with NaT in 'contact_date' and count them
-                na_removed_count = df['contact_date'].isna().sum()
-                df.dropna(subset=['contact_date'], inplace=True)
-                print(f"Rows dropped due to NaT in 'contact_date' for '{df_name}': {na_removed_count}")
-                log_message(f"Rows dropped due to NaT in 'contact_date' for '{df_name}': {na_removed_count}")
+                na_removed_count = df["contact_date"].isna().sum()
+                df.dropna(subset=["contact_date"], inplace=True)
+                print(
+                    f"Rows dropped due to NaT in 'contact_date' for '{df_name}': {na_removed_count}"
+                )
+                log_message(
+                    f"Rows dropped due to NaT in 'contact_date' for '{df_name}': {na_removed_count}"
+                )
                 # Filter data to include only rows within the reporting period
-                filtered_df = df[(df['contact_date'] >= start_date) & (df['contact_date'] <= end_date)]
+                filtered_df = df[
+                    (df["contact_date"] >= start_date)
+                    & (df["contact_date"] <= end_date)
+                ]
                 period_filtered_count = initial_row_count - len(filtered_df)
-                print(f"Rows filtered out of the reporting period for '{df_name}': {period_filtered_count}")
-                log_message(f"Rows filtered out of the reporting period for '{df_name}': {period_filtered_count}")
+                print(
+                    f"Rows filtered out of the reporting period for '{df_name}': {period_filtered_count}"
+                )
+                log_message(
+                    f"Rows filtered out of the reporting period for '{df_name}': {period_filtered_count}"
+                )
                 dataframes[df_name] = filtered_df
 
     return dataframes
-
 
 
 def isolate_client_ages(dataframes, low_age, high_age, log_message=None):
@@ -82,36 +93,41 @@ def isolate_client_ages(dataframes, low_age, high_age, log_message=None):
 
     # First pass: Isolate ages and collect client_ids
     for df_name, df in dataframes.items():
-        if 'client_age' in df.columns:
+        if "client_age" in df.columns:
             # Find rows outside the age range
-            outside_age_range = df[(df['client_age'] < low_age) | (df['client_age'] > high_age)]
+            outside_age_range = df[
+                (df["client_age"] < low_age) | (df["client_age"] > high_age)
+            ]
             removed_count_first_pass += len(outside_age_range)
-            
+
             # Collect client_ids
-            removed_client_ids.update(outside_age_range['client_id'].unique())
-            
+            removed_client_ids.update(outside_age_range["client_id"].unique())
+
             # Remove rows outside the age range
             dataframes[df_name] = df.drop(outside_age_range.index)
 
     # Second pass: Remove rows with matching client_ids in all dataframes
     for df_name, df in dataframes.items():
-        if 'client_id' in df.columns:
+        if "client_id" in df.columns:
             # Find rows with matching client_ids
-            rows_to_remove = df[df['client_id'].isin(removed_client_ids)]
+            rows_to_remove = df[df["client_id"].isin(removed_client_ids)]
             removed_count_second_pass += len(rows_to_remove)
-            
+
             # Remove these rows
             dataframes[df_name] = df.drop(rows_to_remove.index)
 
     print(f"Removed {removed_count_first_pass} rows based on age criteria.")
     log_message(f"Removed {removed_count_first_pass} rows based on age criteria.")
-    print(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
-    log_message(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
+    print(
+        f"Removed an additional {removed_count_second_pass} rows based on matching client_ids."
+    )
+    log_message(
+        f"Removed an additional {removed_count_second_pass} rows based on matching client_ids."
+    )
     return dataframes
 
-    
-    
     return dataframes
+
 
 def remove_trailing_spaces_from_values(dataframes_dict, log_message=None):
     """
@@ -140,19 +156,21 @@ def validate_data_files(dataframes, file_info, log_message=None):
     for df_name, df in dataframes.items():
         if df_name in file_info:
             required_columns = file_info[df_name]["columns"]
-            print(f'> Validating {df_name} for required columns: {", ".join(required_columns)}')
-            log_message(f'> Validating {df_name} for required columns: {", ".join(required_columns)}')
+            print(
+                f'> Validating {df_name} for required columns: {", ".join(required_columns)}'
+            )
+            log_message(
+                f'> Validating {df_name} for required columns: {", ".join(required_columns)}'
+            )
             # Identify missing columns
             missing_columns = [col for col in required_columns if col not in df.columns]
-            
+
             if missing_columns:
-                missing_columns_str = ', '.join(missing_columns)
+                missing_columns_str = ", ".join(missing_columns)
                 error_message = f"DataFrame '{df_name}' is missing the following required columns: {missing_columns_str}"
                 log_message(error_message)
                 raise ValueError(error_message)
     return dataframes
-
-
 
 
 def filter_mib_services(dataframes, log_message=None):
@@ -171,7 +189,7 @@ def filter_mib_services(dataframes, log_message=None):
     filtered_dataframes = {}
 
     for df_name, df in dataframes.items():
-        if df_name.lower().startswith('mib'):
+        if df_name.lower().startswith("mib"):
             filtered_df = df
             filtered_dataframes[df_name] = filtered_df
             # Process dataframes whose names start with 'mib'
@@ -180,7 +198,7 @@ def filter_mib_services(dataframes, log_message=None):
             # else:
             #     filtered_dataframes[df_name] = df
         else:
-        #     # If the required columns are not present, keep the dataframe as is
+            #     # If the required columns are not present, keep the dataframe as is
             filtered_df = df
             filtered_dataframes[df_name] = filtered_df
 
@@ -190,15 +208,20 @@ def filter_mib_services(dataframes, log_message=None):
 def add_reason_to_file_closures(dataframes, log_message=None):
     print("Adding 'reason' column to file_closures and file_closures_and_goals...")
     try:
-        df_file_closures_name = 'File_Closures_Within_Reporting_Period'
-        df_file_closures_goals_name = 'File_Closures_And_Goals_Within_Reporting_Period'
-        MIB_df_file_closures_goals_name = 'MIB_File_Closures_And_Goals_Within_Reporting_Period'
-        
+        df_file_closures_name = "File_Closures_Within_Reporting_Period"
+        df_file_closures_goals_name = "File_Closures_And_Goals_Within_Reporting_Period"
+        MIB_df_file_closures_goals_name = (
+            "MIB_File_Closures_And_Goals_Within_Reporting_Period"
+        )
+
         filtered_dataframes = {}
 
         for df_name, df in dataframes.items():
             print(f"Processing DataFrame: {df_name}")  # Logging current DataFrame
-            if df_name in [df_file_closures_goals_name, MIB_df_file_closures_goals_name]:
+            if df_name in [
+                df_file_closures_goals_name,
+                MIB_df_file_closures_goals_name,
+            ]:
                 # Check if the required DataFrame exists
                 if df_file_closures_name not in dataframes:
                     print(f"DataFrame '{df_file_closures_name}' not found.")
@@ -209,17 +232,32 @@ def add_reason_to_file_closures(dataframes, log_message=None):
                 df = df.copy()
                 df_file_closures = dataframes[df_file_closures_name].copy()
 
-                if 'client_id' not in df.columns or 'client_id' not in df_file_closures.columns or 'file_closure_date' not in df.columns or 'file_closure_date' not in df_file_closures.columns:
-                    print("Both DataFrames must contain 'client_id' and 'file_closure_date' columns.")
+                if (
+                    "client_id" not in df.columns
+                    or "client_id" not in df_file_closures.columns
+                    or "file_closure_date" not in df.columns
+                    or "file_closure_date" not in df_file_closures.columns
+                ):
+                    print(
+                        "Both DataFrames must contain 'client_id' and 'file_closure_date' columns."
+                    )
                     if log_message:
-                        log_message("Both file_closures and file_closures and goals must contain 'client_id' and 'file_closure_date' columns.")
+                        log_message(
+                            "Both file_closures and file_closures and goals must contain 'client_id' and 'file_closure_date' columns."
+                        )
                     continue
 
-                df.loc[:, 'file_closure_date'] = pd.to_datetime(df['file_closure_date'])
-                df_file_closures.loc[:, 'file_closure_date'] = pd.to_datetime(df_file_closures['file_closure_date'])
+                df.loc[:, "file_closure_date"] = pd.to_datetime(df["file_closure_date"])
+                df_file_closures.loc[:, "file_closure_date"] = pd.to_datetime(
+                    df_file_closures["file_closure_date"]
+                )
 
-                merged_df = pd.merge(df, df_file_closures[['client_id', 'file_closure_date', 'reason']], 
-                                     on=['client_id', 'file_closure_date'], how='left')
+                merged_df = pd.merge(
+                    df,
+                    df_file_closures[["client_id", "file_closure_date", "reason"]],
+                    on=["client_id", "file_closure_date"],
+                    how="left",
+                )
                 filtered_dataframes[df_name] = merged_df
             else:
                 filtered_dataframes[df_name] = df.copy()
@@ -236,12 +274,12 @@ def add_reason_to_file_closures(dataframes, log_message=None):
 def add_reason_to_contact(dataframes, log_message=None):
     print("Adding 'file_closure_reason' to specified DataFrames...")
     try:
-        df_file_closures_goals_name = 'File_Closures_And_Goals_Within_Reporting_Period'
+        df_file_closures_goals_name = "File_Closures_And_Goals_Within_Reporting_Period"
         target_dfs = [
-            'Contacts_Within_Twenty_One_Days',
-            'MIB_Contacts_Within_Twenty_One_Days',
-            'Contacts_Within_Seven_Days',
-            'MIB_Contacts_Within_Seven_Days'
+            "Contacts_Within_Twenty_One_Days",
+            "MIB_Contacts_Within_Twenty_One_Days",
+            "Contacts_Within_Seven_Days",
+            "MIB_Contacts_Within_Seven_Days",
         ]
 
         filtered_dataframes = {}
@@ -254,26 +292,43 @@ def add_reason_to_contact(dataframes, log_message=None):
 
         # Preprocess 'File_Closures_And_Goals_Within_Reporting_Period' DataFrame
         df_file_closures_goals = dataframes[df_file_closures_goals_name].copy()
-        df_file_closures_goals['client_id'] = pd.to_numeric(df_file_closures_goals['client_id'], errors='coerce')
-        df_file_closures_goals['file_closure_date'] = pd.to_datetime(df_file_closures_goals['file_closure_date'])
+        df_file_closures_goals["client_id"] = pd.to_numeric(
+            df_file_closures_goals["client_id"], errors="coerce"
+        )
+        df_file_closures_goals["file_closure_date"] = pd.to_datetime(
+            df_file_closures_goals["file_closure_date"]
+        )
 
         for df_name, df in dataframes.items():
             print(f"Processing DataFrame: {df_name}")  # Logging current DataFrame
             if df_name in target_dfs:
                 df = df.copy()
-                df['client_id'] = pd.to_numeric(df['client_id'], errors='coerce')
+                df["client_id"] = pd.to_numeric(df["client_id"], errors="coerce")
 
-                if 'client_id' not in df.columns or 'file_closure_date' not in df.columns:
-                    print(f"DataFrame '{df_name}' must contain 'client_id' and 'file_closure_date' columns.")
+                if (
+                    "client_id" not in df.columns
+                    or "file_closure_date" not in df.columns
+                ):
+                    print(
+                        f"DataFrame '{df_name}' must contain 'client_id' and 'file_closure_date' columns."
+                    )
                     if log_message:
-                        log_message(f"DataFrame '{df_name}' must contain 'client_id' and 'file_closure_date' columns.")
+                        log_message(
+                            f"DataFrame '{df_name}' must contain 'client_id' and 'file_closure_date' columns."
+                        )
                     continue
 
-                df['file_closure_date'] = pd.to_datetime(df['file_closure_date'])
+                df["file_closure_date"] = pd.to_datetime(df["file_closure_date"])
 
                 # Merging with 'file_closure_reason'
-                merged_df = pd.merge(df, df_file_closures_goals[['client_id', 'file_closure_date', 'file_closure_reason']], 
-                                     on=['client_id', 'file_closure_date'], how='left')
+                merged_df = pd.merge(
+                    df,
+                    df_file_closures_goals[
+                        ["client_id", "file_closure_date", "file_closure_reason"]
+                    ],
+                    on=["client_id", "file_closure_date"],
+                    how="left",
+                )
                 filtered_dataframes[df_name] = merged_df
             else:
                 filtered_dataframes[df_name] = df
@@ -285,4 +340,3 @@ def add_reason_to_contact(dataframes, log_message=None):
         if log_message:
             log_message(f"An error occurred: {e}")
         return None
-

@@ -16,7 +16,6 @@ def find_dict_by_table_name(table_name, dict_array):
     raise ValueError(
         f"Dictionary with table_name '{table_name}' not found in the array."
     )
-    
 
 
 def calculate_percentage(numerator_df, denominator_df):
@@ -30,10 +29,11 @@ def calculate_percentage(numerator_df, denominator_df):
         percentage = (numerator / denominator) * 100
         return f"{percentage:.2f}%"  # Format to two decimal places
 
+
 def calculate_average(dataframe_and_column):
     # Unpack the tuple into DataFrame and column name
     dataframe, column_name = dataframe_and_column
-    
+
     # Check if the column exists in the DataFrame
     if column_name in dataframe.columns:
         # Calculate the average of the specified column
@@ -41,6 +41,7 @@ def calculate_average(dataframe_and_column):
         return f"{average_value:.2f}"  # Format to two decimal places
     else:
         return "n/a"
+
 
 def calculate_count(filtered_df):
     count = len(filtered_df)
@@ -51,6 +52,7 @@ def calculate_row_total(row_dataframes):
     # Sum up counts, skipping placeholders
     total = sum(len(df) for df in row_dataframes if isinstance(df, pd.DataFrame))
     return total
+
 
 def calculate_percentage_row_total(row_dataframes):
     total_numerator = 0
@@ -70,6 +72,7 @@ def calculate_percentage_row_total(row_dataframes):
     total_percentage = (total_numerator / total_denominator) * 100
     return f"{total_percentage:.2f}%"
 
+
 def calculate_row_average(row_dataframes):
     averages = []
 
@@ -78,7 +81,7 @@ def calculate_row_average(row_dataframes):
         average_value = calculate_average(dataframe_and_column)
 
         # Check if the returned value is numeric and add it to the list of averages
-        if average_value.replace('.', '', 1).isdigit():
+        if average_value.replace(".", "", 1).isdigit():
             averages.append(float(average_value))
 
     # Calculate the overall average if there are valid averages in the list
@@ -100,7 +103,8 @@ def calculate_percentage_as_number(numerator_df, denominator_df):
 
 
 def is_percentage_row(row_name):
-    return row_name.startswith('%') or row_name.startswith('Percentage')
+    return row_name.startswith("%") or row_name.startswith("Percentage")
+
 
 def is_average_row(row_name):
-    return row_name.startswith('average') or row_name.startswith('Average')
+    return row_name.startswith("average") or row_name.startswith("Average")

@@ -1,69 +1,84 @@
 file_info = {
     "Contacts_Or_Indirects_Within_Reporting_Period": {
         "filename": "contacts_or_indirects_within_reporting_period.csv",
-        "columns": ["client_id", 
-                    "franchise", 
-                    "contact_service_type", 
-                    "contact_themes", 
-                    "contact_approach", 
-                    "client_gender",
-                    "client_ethnicity",
-                    "client_disability",
-                    "client_sexuality",
-                    "client_age",
-                    "client_area",
-                    "client_asylum_seeker",
-                    "client_sen",
-                    "client_ehcp",
-                    "client_exploitation_risk",
-                    "client_leaving_care",
-                    "client_lac",
-                    "client_cpp",
-                    "client_cinp",
-                    "client_young_carer",
-                    "contact_attendance",
-                    "contact_themes",
-                    ],
+        "columns": [
+            "client_id",
+            "franchise",
+            "contact_service_type",
+            "contact_themes",
+            "contact_approach",
+            "client_gender",
+            "client_ethnicity",
+            "client_disability",
+            "client_sexuality",
+            "client_age",
+            "client_area",
+            "client_asylum_seeker",
+            "client_sen",
+            "client_ehcp",
+            "client_exploitation_risk",
+            "client_leaving_care",
+            "client_lac",
+            "client_cpp",
+            "client_cinp",
+            "client_young_carer",
+            "contact_attendance",
+            "contact_themes",
+        ],
     },
     "MIB_Contacts_Or_Indirects_Within_Reporting_Period": {
         "filename": "mib_contacts_or_indirects_within_reporting_period.csv",
-        "columns": ["client_id", 
-                    "franchise", 
-                    "contact_service_type", 
-                    "contact_themes", 
-                    "contact_approach", 
-                    "client_gender",
-                    "client_ethnicity",
-                    "client_disability",
-                    "client_sexuality",
-                    "client_age",
-                    "client_area",
-                    "client_asylum_seeker",
-                    "client_sen",
-                    "client_ehcp",
-                    "client_exploitation_risk",
-                    "client_leaving_care",
-                    "client_lac",
-                    "client_cpp",
-                    "client_cinp",
-                    "client_young_carer",
-                    "contact_attendance",
-                    "contact_session_option",
-                    "contact_themes",
-                    ],
+        "columns": [
+            "client_id",
+            "franchise",
+            "contact_service_type",
+            "contact_themes",
+            "contact_approach",
+            "client_gender",
+            "client_ethnicity",
+            "client_disability",
+            "client_sexuality",
+            "client_age",
+            "client_area",
+            "client_asylum_seeker",
+            "client_sen",
+            "client_ehcp",
+            "client_exploitation_risk",
+            "client_leaving_care",
+            "client_lac",
+            "client_cpp",
+            "client_cinp",
+            "client_young_carer",
+            "contact_attendance",
+            "contact_session_option",
+            "contact_themes",
+        ],
     },
     "File_Closures_And_Goals_Within_Reporting_Period": {
         "filename": "file_closures_and_goals_within_reporting_period.csv",
-        "columns": ["client_id", 'referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date','initial_/_followup_/_final'],
+        "columns": [
+            "client_id",
+            "referral_date",
+            "file_closure_reason",
+            "goal_score_date",
+            "file_closure_date",
+            "initial_/_followup_/_final",
+        ],
     },
     "MIB_File_Closures_And_Goals_Within_Reporting_Period": {
         "filename": "mib_file_closures_and_goals_within_reporting_period.csv",
-        "columns": ["client_id", 'referral_date', 'file_closure_reason', 'goal_score_date', 'file_closure_date','initial_/_followup_/_final'],
-
+        "columns": [
+            "client_id",
+            "referral_date",
+            "file_closure_reason",
+            "goal_score_date",
+            "file_closure_date",
+            "initial_/_followup_/_final",
+        ],
     },
     "File_Closures_Within_Reporting_Period": {
         "filename": "file_closures_within_reporting_period.csv",
-        "columns": ["client_id","reason"],
+        "columns": ["client_id", "reason"],
     },
     "Initial_Goals_Within_Reporting_Period": {
         "filename": "initial_goals_within_reporting_period.csv",
@@ -71,35 +86,59 @@ file_info = {
     },
     "Referrals_Within_Reporting_Period": {
         "filename": "referrals_within_reporting_period.csv",
-        "columns": ["client_id","source","reason","reason_other"],
+        "columns": ["client_id", "source", "reason", "reason_other"],
     },
     "MIB_Referrals_Within_Reporting_Period": {
         "filename": "mib_referrals_within_reporting_period.csv",
-        "columns": ["client_id","source","reason","reason_other"],
+        "columns": ["client_id", "source", "reason", "reason_other"],
     },
     "Referrals_Before_End_Reporting_Period": {
         "filename": "referrals_before_end_reporting_period.csv",
-        "columns": ["client_id","client_status"],
+        "columns": ["client_id", "client_status"],
     },
     "MIB_Referrals_Before_End_Reporting_Period": {
         "filename": "mib_referrals_before_end_of_reporting_period.csv",
-        "columns": ["client_id","client_status"],
+        "columns": ["client_id", "client_status"],
     },
     "Contacts_Within_Seven_Days": {
         "filename": "contacts_within_seven_days.csv",
-        "columns": ["client_id", "file_closure_service_type",'referral_date', 'file_closure_date', 'contact_/_indirect_date'],
+        "columns": [
+            "client_id",
+            "file_closure_service_type",
+            "referral_date",
+            "file_closure_date",
+            "contact_/_indirect_date",
+        ],
     },
     "MIB_Contacts_Within_Seven_Days": {
         "filename": "mib_contacts_within_seven_days.csv",
-        "columns": ["client_id", "file_closure_service_type",'referral_date', 'file_closure_date', 'contact_/_indirect_date'],
+        "columns": [
+            "client_id",
+            "file_closure_service_type",
+            "referral_date",
+            "file_closure_date",
+            "contact_/_indirect_date",
+        ],
     },
     "Contacts_Within_Twenty_One_Days": {
         "filename": "contacts_within_twenty_one_days.csv",
-        "columns": ["client_id", "file_closure_service_type",'referral_date', 'file_closure_date', 'contact_/_indirect_date'],
+        "columns": [
+            "client_id",
+            "file_closure_service_type",
+            "referral_date",
+            "file_closure_date",
+            "contact_/_indirect_date",
+        ],
     },
     "MIB_Contacts_Within_Twenty_One_Days": {
         "filename": "mib_contacts_within_twenty_one_days.csv",
-        "columns": ["client_id", "file_closure_service_type",'referral_date', 'file_closure_date', 'contact_/_indirect_date'],
+        "columns": [
+            "client_id",
+            "file_closure_service_type",
+            "referral_date",
+            "file_closure_date",
+            "contact_/_indirect_date",
+        ],
     },
     # "Attended_Contacts_Within_Twenty_One_Days": {
     #     "filename": "attended_contacts_within_twenty_one_days.csv",
@@ -170,8 +209,7 @@ service_info_config = {
         "Number of unique people supported (old rule)": "MYMUP_URL",
         "How many new people referred": "MYMUP_URL",
         # "How many were declined by the service?": "TO DO ",
-        
-        # todo how many unique referrals needs to look referrals within reporting period 
+        # todo how many unique referrals needs to look referrals within reporting period
     },
     "row_db_logic": {
         "How many were declined by the service?": "File_Closures_And_Goals_Within_Reporting_Period",
@@ -180,9 +218,9 @@ service_info_config = {
         "How many unique referrals": "Referrals_Within_Reporting_Period",
         "Active cases": "Referrals_Before_End_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
-        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":"Contacts_Within_Seven_Days",
-        "% clients who had the first support session offered within 21 days of referral":"Contacts_Within_Twenty_One_Days",
-        "% clients attended the first contact by video/face to face/telephone within 21 days of referral":"Contacts_Within_Twenty_One_Days",
+        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)": "Contacts_Within_Seven_Days",
+        "% clients who had the first support session offered within 21 days of referral": "Contacts_Within_Twenty_One_Days",
+        "% clients attended the first contact by video/face to face/telephone within 21 days of referral": "Contacts_Within_Twenty_One_Days",
     },
     "mib_row_db_logic": {
         "How many were declined by the service?": "MIB_File_Closures_And_Goals_Within_Reporting_Period",
@@ -191,12 +229,12 @@ service_info_config = {
         "How many unique referrals": "MIB_Referrals_Within_Reporting_Period",
         "Active cases": "MIB_Referrals_Before_End_Reporting_Period",
         "How many people have moved on": "File_Closures_Within_Reporting_Period",
-        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)":"MIB_Contacts_Within_Seven_Days",
-        "% clients who had the first support session offered within 21 days of referral":"MIB_Contacts_Within_Twenty_One_Days",
-        "% clients attended the first contact by video/face to face/telephone within 21 days of referral":"MIB_Contacts_Within_Twenty_One_Days",
+        "% clients with initial contact within 7 days of referral (old rule not including admin contacts)": "MIB_Contacts_Within_Seven_Days",
+        "% clients who had the first support session offered within 21 days of referral": "MIB_Contacts_Within_Twenty_One_Days",
+        "% clients attended the first contact by video/face to face/telephone within 21 days of referral": "MIB_Contacts_Within_Twenty_One_Days",
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_gender_config = {
@@ -245,9 +283,8 @@ yp_gender_config = {
         "Other (not listed)": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected)": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
-    'mib_row_db_default:': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
-    
+    "mib_row_db_default:": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default:": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_ethnicity_config = {
@@ -296,8 +333,8 @@ yp_ethnicity_config = {
     "mib_row_db_logic": {
         # row: "MIB_Contacts_Or_Indirects_Within_Reporting_Period" for row in row_names
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',  # Removed colon
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',  # Removed colon
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",  # Removed colon
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",  # Removed colon
 }
 
 yp_disabilty_config = {
@@ -340,8 +377,8 @@ yp_disabilty_config = {
     "mib_row_db_logic": {
         # row: "MIB_Contacts_Or_Indirects_Within_Reporting_Period" for row in row_names
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',  # Removed colon
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',  # Removed colon
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",  # Removed colon
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",  # Removed colon
 }
 
 yp_sexual_orientation_config = {
@@ -382,9 +419,8 @@ yp_sexual_orientation_config = {
         "Bisexual": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         # ... (and so on for each row name)
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',  
-    
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_age_config = {
@@ -437,66 +473,64 @@ yp_age_config = {
         "Age 3": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         # ... (and so on for each age)
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-    
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_area_config = {
     "table_name": "yp_area_config",
     "row_names": [
-    "BAILDON",
-    "Bentham",
-    "BINGLEY",
-    "BINGLEY RURAL",
-    "BOLTON & UNDERCLIFFE",
-    "BOWLING & BARKEREND",
-    "BRADFORD MOOR",
-    "CITY",
-    "CLAYTON & FAIRWEATHER GREEN",
-    "CRAVEN",
-    "Craven Ward - Aire Valley-with-Lothersdale",
-    "Craven Ward - Barden Fell",
-    "Craven Ward - Cowling",
-    "Craven Ward - Embsay-with-Eastby",
-    "Craven Ward - Gargrave and Malhamdale",
-    "Craven Ward - Glusburn",
-    "Craven Ward - Grassington",
-    "Craven Ward - Hellifield and Long Preston",
-    "Craven Ward - Penyghent",
-    "Craven Ward - Settle and Ribblebanks",
-    "Craven Ward - Skipton East",
-    "Craven Ward - Skipton North",
-    "Craven Ward - Skipton South",
-    "Craven Ward - Skipton West",
-    "Craven Ward - Sutton-in-Craven",
-    "Craven Ward - Upper Wharfedale",
-    "Craven Ward - West Craven",
-    "ECCLESHILL",
-    "GREAT HORTON",
-    "HEATON",
-    "IDLE & THACKLEY",
-    "ILKLEY",
-    "KEIGHLEY CENTRAL",
-    "KEIGHLEY EAST",
-    "KEIGHLEY WEST",
-    "LITTLE HORTON",
-    "MANNINGHAM",
-    "OUT OF AREA",
-    "QUEENSBURY",
-    "ROYDS",
-    "SHIPLEY",
-    "THORNTON & ALLERTON",
-    "TOLLER",
-    "TONG",
-    "WHARFEDALE",
-    "WIBSEY",
-    "WINDHILL & WROSE",
-    "WORTH VALLEY",
-    "WYKE",
-    "Blank (nothing selected )"
-]
-,
+        "BAILDON",
+        "Bentham",
+        "BINGLEY",
+        "BINGLEY RURAL",
+        "BOLTON & UNDERCLIFFE",
+        "BOWLING & BARKEREND",
+        "BRADFORD MOOR",
+        "CITY",
+        "CLAYTON & FAIRWEATHER GREEN",
+        "CRAVEN",
+        "Craven Ward - Aire Valley-with-Lothersdale",
+        "Craven Ward - Barden Fell",
+        "Craven Ward - Cowling",
+        "Craven Ward - Embsay-with-Eastby",
+        "Craven Ward - Gargrave and Malhamdale",
+        "Craven Ward - Glusburn",
+        "Craven Ward - Grassington",
+        "Craven Ward - Hellifield and Long Preston",
+        "Craven Ward - Penyghent",
+        "Craven Ward - Settle and Ribblebanks",
+        "Craven Ward - Skipton East",
+        "Craven Ward - Skipton North",
+        "Craven Ward - Skipton South",
+        "Craven Ward - Skipton West",
+        "Craven Ward - Sutton-in-Craven",
+        "Craven Ward - Upper Wharfedale",
+        "Craven Ward - West Craven",
+        "ECCLESHILL",
+        "GREAT HORTON",
+        "HEATON",
+        "IDLE & THACKLEY",
+        "ILKLEY",
+        "KEIGHLEY CENTRAL",
+        "KEIGHLEY EAST",
+        "KEIGHLEY WEST",
+        "LITTLE HORTON",
+        "MANNINGHAM",
+        "OUT OF AREA",
+        "QUEENSBURY",
+        "ROYDS",
+        "SHIPLEY",
+        "THORNTON & ALLERTON",
+        "TOLLER",
+        "TONG",
+        "WHARFEDALE",
+        "WIBSEY",
+        "WINDHILL & WROSE",
+        "WORTH VALLEY",
+        "WYKE",
+        "Blank (nothing selected )",
+    ],
     "column_headings": [
         "Q1_Totals",
         "Barnardos (Wrap)",
@@ -520,9 +554,8 @@ yp_area_config = {
         "BAILDON": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         # ... (and so on for each area)
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-    
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_asylum_status_config = {
@@ -553,9 +586,8 @@ yp_asylum_status_config = {
         "Not known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected )": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-    
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_special_ed_needs_config = {
@@ -580,13 +612,10 @@ yp_special_ed_needs_config = {
         "SELFA (Mighty Minds)",
     ],
     "placeholder_rows": {},
-    "row_db_logic": {
-    },
-    "mib_row_db_logic": {
-    },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-    
+    "row_db_logic": {},
+    "mib_row_db_logic": {},
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_ed_health_care_plan_config = {
@@ -625,9 +654,8 @@ yp_ed_health_care_plan_config = {
         "Not applicable": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected )": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-    
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_at_risk_exploitation_config = {
@@ -658,9 +686,8 @@ yp_at_risk_exploitation_config = {
         "Not known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected )": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-    
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_leaving_care_config = {
@@ -691,9 +718,8 @@ yp_leaving_care_config = {
         "Not Known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected)": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-    
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_looked_after_child_config = {
@@ -724,10 +750,9 @@ yp_looked_after_child_config = {
         "Not known": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
         "Blank (nothing selected)": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
     },
-    'row_db_default:': 'Contacts_Or_Indirects_Within_Reporting_Period',
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-
+    "row_db_default:": "Contacts_Or_Indirects_Within_Reporting_Period",
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_child_protection_plan_config = {
@@ -760,9 +785,8 @@ yp_child_protection_plan_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
-    
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_child_in_need_plan_config = {
@@ -774,7 +798,7 @@ yp_child_in_need_plan_config = {
         "Not known",
         "Has previously been subject to a Child in need plan",
         "Under assessment",  # Not found in your dataset
-        "Blank (nothing selected)" # Handling for blank entries
+        "Blank (nothing selected)",  # Handling for blank entries
     ],
     "column_headings": [
         "Q1_Totals",
@@ -795,8 +819,8 @@ yp_child_in_need_plan_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 yp_young_carer_config = {
@@ -806,7 +830,7 @@ yp_young_carer_config = {
         "No",
         "Not known",
         "Not stated",
-        "Blank (nothing selected)" # Handling for blank entries
+        "Blank (nothing selected)",  # Handling for blank entries
     ],
     "column_headings": [
         "Q1_Totals",
@@ -827,8 +851,8 @@ yp_young_carer_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 
@@ -842,7 +866,7 @@ total_attended_contacts_config = {
         "Other (email and text)",
         "Admin Contacts",
         "Total number of DNA Contacts",
-        "Percentage of DNA Contacts"
+        "Percentage of DNA Contacts",
     ],
     "column_headings": [
         "Q1_Totals",
@@ -863,8 +887,8 @@ total_attended_contacts_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each row, if needed
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period', 
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 # goals_based_outcomes_config = {
@@ -875,7 +899,7 @@ total_attended_contacts_config = {
 #         "% of GBOs demonstrating reliable change",
 #     ],
 #     "column_headings": [
-#         "Q1_Totals",  
+#         "Q1_Totals",
 #         "Barnardos (Wrap)",
 #         "BYS All",
 #         "Brathay Magic",
@@ -909,7 +933,7 @@ average_goals_based_outcomes_config = {
         "Average impact score of all paired goals",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -920,17 +944,16 @@ average_goals_based_outcomes_config = {
         "MIB Hospital Buddys BRI",
         "SELFA (Mighty Minds)",
     ],
-    "placeholder_rows": {        
-        #"% of closed cases with reliable change in paired GBO":"todo",
-        #"Average impact score of all paired goals":"todo",
-        },
-    "row_db_logic": {
+    "placeholder_rows": {
+        # "% of closed cases with reliable change in paired GBO":"todo",
+        # "Average impact score of all paired goals":"todo",
     },
+    "row_db_logic": {},
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_File_Closures_And_Goals_Within_Reporting_Period',
-    'row_db_default': 'File_Closures_And_Goals_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_File_Closures_And_Goals_Within_Reporting_Period",
+    "row_db_default": "File_Closures_And_Goals_Within_Reporting_Period",
 }
 
 goal_themes_goals_based_outcomes_config = {
@@ -945,10 +968,10 @@ goal_themes_goals_based_outcomes_config = {
         "% Improving my physical wellbeing",
         "% Reducing my isolation",
         "% Understanding who I am",
-        "% Blank (nothing selected)"
+        "% Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -966,8 +989,8 @@ goal_themes_goals_based_outcomes_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'Initial_Goals_Within_Reporting_Period',
-    'row_db_default': 'Initial_Goals_Within_Reporting_Period',
+    "mib_row_db_default": "Initial_Goals_Within_Reporting_Period",
+    "row_db_default": "Initial_Goals_Within_Reporting_Period",
 }
 
 dss_goals_based_outcomes_config = {
@@ -977,7 +1000,7 @@ dss_goals_based_outcomes_config = {
         "Average change score for distress scale",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -989,17 +1012,17 @@ dss_goals_based_outcomes_config = {
         "SELFA (Mighty Minds)",
     ],
     "placeholder_rows": {
-        "How many unique clients have had a distress scale score in reporting period":"MIB_MasEx",
-        "Average change score for distress scale":"MIB_MasEx",
-        },
+        "How many unique clients have had a distress scale score in reporting period": "MIB_MasEx",
+        "Average change score for distress scale": "MIB_MasEx",
+    },
     "row_db_logic": {
         # Logic mappings for each status
     },
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_File_Closures_And_Goals_Within_Reporting_Period',
-    'row_db_default': 'File_Closures_And_Goals_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_File_Closures_And_Goals_Within_Reporting_Period",
+    "row_db_default": "File_Closures_And_Goals_Within_Reporting_Period",
 }
 
 contacts_by_theme_config = {
@@ -1051,7 +1074,7 @@ contacts_by_theme_config = {
         "Trauma",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1069,65 +1092,65 @@ contacts_by_theme_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 
 source_of_referral_config = {
     "table_name": "source_of_referral_config",
-   "row_names" : [
-    "Primary Health Care: General Medical Practitioner Practice",
-    "Accident and Emergency Department",
-    "CAMHS - Core/Step Down",
-    "CAMHS - Crisis Team (Hospital Urgents)",
-    "CAMHS - Waiting List",
-    "Child Health: Community-based Paediatrics",
-    "Child Health: Hospital-based Paediatrics",
-    "Child Health: School Nurse",
-    "Community Mental Health Team (Adult Mental Health)",
-    "Employer",
-    "Employer: Occupational Health",
-    "Family Support Worker",
-    "Improving Access to Psychological Therapies Service",
-    "Independent Sector: Low secure Inpatients",
-    "Independent Sector: Medium secure Inpatients",
-    "Inpatient Service Child and Adult Mental Health",
-    "Inpatient Service Learning Disabilities",
-    "Internal Referral",
-    "Justice System: Court Liaison and Diversion Service",
-    "Justice System: Courts",
-    "Justice System: Police",
-    "Justice System: Prison",
-    "Justice System: Probation",
-    "Justice System: Youth Offending Team",
-    "Local Authority and Other Public Services: Education Service / Educational Establishment",
-    "Local Authority and Other Public Services: Housing Service",
-    "Local Authority and Other Public Services: Social Services",
-    "Mental Health Drop In Service",
-    "Not Known",
-    "Other Independent Sector Mental Health Services",
-    "Other Primary Health Care",
-    "Other secondary care specialty",
-    "Other SERVICE or agency",
-    "Other: Asylum Services",
-    "Other: Drug Action Team / Drug Misuse Agency",
-    "Other: Job Centre Plus",
-    "Other: Out of Area Agency",
-    "Other: Single Point of Access Service",
-    "Other: Urgent and Emergency Care Ambulance Service",
-    "Permanent Transfer from Another Mental Health Trust",
-    "Primary Health Care: Health Visitor",
-    "Primary Health Care: Maternity Service",
-    "Self-Referral :Self",
-    "Self-Referral: Carer/Relative",
-    "Temporary Transfer from Another Mental Health Trust",
-    "Transfer by Graduation from CAMHS to Adult Mental Health Services",
-    "Voluntary Sector",
-    "Blank (nothing selected)"
-],
+    "row_names": [
+        "Primary Health Care: General Medical Practitioner Practice",
+        "Accident and Emergency Department",
+        "CAMHS - Core/Step Down",
+        "CAMHS - Crisis Team (Hospital Urgents)",
+        "CAMHS - Waiting List",
+        "Child Health: Community-based Paediatrics",
+        "Child Health: Hospital-based Paediatrics",
+        "Child Health: School Nurse",
+        "Community Mental Health Team (Adult Mental Health)",
+        "Employer",
+        "Employer: Occupational Health",
+        "Family Support Worker",
+        "Improving Access to Psychological Therapies Service",
+        "Independent Sector: Low secure Inpatients",
+        "Independent Sector: Medium secure Inpatients",
+        "Inpatient Service Child and Adult Mental Health",
+        "Inpatient Service Learning Disabilities",
+        "Internal Referral",
+        "Justice System: Court Liaison and Diversion Service",
+        "Justice System: Courts",
+        "Justice System: Police",
+        "Justice System: Prison",
+        "Justice System: Probation",
+        "Justice System: Youth Offending Team",
+        "Local Authority and Other Public Services: Education Service / Educational Establishment",
+        "Local Authority and Other Public Services: Housing Service",
+        "Local Authority and Other Public Services: Social Services",
+        "Mental Health Drop In Service",
+        "Not Known",
+        "Other Independent Sector Mental Health Services",
+        "Other Primary Health Care",
+        "Other secondary care specialty",
+        "Other SERVICE or agency",
+        "Other: Asylum Services",
+        "Other: Drug Action Team / Drug Misuse Agency",
+        "Other: Job Centre Plus",
+        "Other: Out of Area Agency",
+        "Other: Single Point of Access Service",
+        "Other: Urgent and Emergency Care Ambulance Service",
+        "Permanent Transfer from Another Mental Health Trust",
+        "Primary Health Care: Health Visitor",
+        "Primary Health Care: Maternity Service",
+        "Self-Referral :Self",
+        "Self-Referral: Carer/Relative",
+        "Temporary Transfer from Another Mental Health Trust",
+        "Transfer by Graduation from CAMHS to Adult Mental Health Services",
+        "Voluntary Sector",
+        "Blank (nothing selected)",
+    ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1145,13 +1168,13 @@ source_of_referral_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_Referrals_Within_Reporting_Period',
-    'row_db_default': 'Referrals_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Referrals_Within_Reporting_Period",
+    "row_db_default": "Referrals_Within_Reporting_Period",
 }
 
 reason_for_referral_config = {
     "table_name": "reason_for_referral_config",
-    "row_names" : [
+    "row_names": [
         "Adjustment to Health Issues",
         "Anxiety",
         "Attachment Difficulties",
@@ -1185,10 +1208,10 @@ reason_for_referral_config = {
         "Suspected Autism",
         "(Suspected) First Episode Psychosis",
         "Unexplained Physical Symptoms",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1206,13 +1229,13 @@ reason_for_referral_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_Referrals_Within_Reporting_Period',
-    'row_db_default': 'Referrals_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Referrals_Within_Reporting_Period",
+    "row_db_default": "Referrals_Within_Reporting_Period",
 }
 
 other_reason_for_referral_config = {
     "table_name": "other_reason_for_referral_config",
-    "row_names" : [
+    "row_names": [
         "Anti-Social Behaviour",
         "At risk of CSE",
         "Bereavement",
@@ -1245,10 +1268,10 @@ other_reason_for_referral_config = {
         "Victim of CSE",
         "Wellness Health Education, Guidance and Counselling",
         "Young Carer/Adult Carer",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1266,13 +1289,13 @@ other_reason_for_referral_config = {
     "mib_row_db_logic": {
         # MIB-specific logic mappings for each status
     },
-    'mib_row_db_default': 'MIB_Referrals_Within_Reporting_Period',
-    'row_db_default': 'Referrals_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Referrals_Within_Reporting_Period",
+    "row_db_default": "Referrals_Within_Reporting_Period",
 }
 
 
 #
-# 
+#
 gender_config = {
     "table_name": "gender_config",
     "row_names": [
@@ -1284,10 +1307,10 @@ gender_config = {
         "Prefer not to say",
         "Transgendered",
         "Other (not listed)",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1307,12 +1330,12 @@ gender_config = {
         "Prefer not to say": "MUMUP_URL",
         "Transgendered": "MUMUP_URL",
         "Other (not listed)": "MUMUP_URL",
-        "Blank (nothing selected)": "MUMUP_URL"
-        },
+        "Blank (nothing selected)": "MUMUP_URL",
+    },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 ethnicity_config = {
@@ -1340,10 +1363,10 @@ ethnicity_config = {
         "White and Asian",
         "White and Black African",
         "White and Black Caribbean",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1377,12 +1400,12 @@ ethnicity_config = {
         "White and Asian": "MUMUP_URL",
         "White and Black African": "MUMUP_URL",
         "White and Black Caribbean": "MUMUP_URL",
-        "Blank (nothing selected)": "MUMUP_URL"
-        },
+        "Blank (nothing selected)": "MUMUP_URL",
+    },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 disability_config = {
@@ -1404,10 +1427,10 @@ disability_config = {
         "Sight",
         "Speech",
         "Yes",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1435,12 +1458,12 @@ disability_config = {
         "Sight": "MUMUP_URL",
         "Speech": "MUMUP_URL",
         "Yes": "MUMUP_URL",
-        "Blank (nothing selected)": "MUMUP_URL"
-        },
+        "Blank (nothing selected)": "MUMUP_URL",
+    },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 sexual_orientation_config = {
@@ -1455,10 +1478,10 @@ sexual_orientation_config = {
         "Not stated (Person asked but declined to provide a response)",
         "Other",
         "Person asked and did not know/is unsure or undecided",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1479,12 +1502,12 @@ sexual_orientation_config = {
         "Not stated (Person asked but declined to provide a response)": "MUMUP_URL",
         "Other": "MUMUP_URL",
         "Person asked and did not know/is unsure or undecided": "MUMUP_URL",
-        "Blank (nothing selected)": "MUMUP_URL"
-        },
+        "Blank (nothing selected)": "MUMUP_URL",
+    },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 asylum_seeker_refugee_status_config = {
@@ -1494,10 +1517,10 @@ asylum_seeker_refugee_status_config = {
         "Yes",
         "No",
         "Not known",
-        "Blank (nothing selected )"
+        "Blank (nothing selected )",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1513,12 +1536,12 @@ asylum_seeker_refugee_status_config = {
         "Yes": "MUMUP_URL",
         "No": "MUMUP_URL",
         "Not known": "MUMUP_URL",
-        "Blank (nothing selected )": "MUMUP_URL"
+        "Blank (nothing selected )": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 special_educational_needs_config = {
@@ -1529,10 +1552,10 @@ special_educational_needs_config = {
         "Not known",
         "Yes",
         "Not applicable",
-        "Blank (nothing selected )"
+        "Blank (nothing selected )",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1549,12 +1572,12 @@ special_educational_needs_config = {
         "Not known": "MUMUP_URL",
         "Yes": "MUMUP_URL",
         "Not applicable": "MUMUP_URL",
-        "Blank (nothing selected )": "MUMUP_URL"
+        "Blank (nothing selected )": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 education_health_care_plan_config = {
@@ -1565,10 +1588,10 @@ education_health_care_plan_config = {
         "No",
         "Not known",
         "Not applicable",
-        "Blank (nothing selected )"
+        "Blank (nothing selected )",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1585,12 +1608,12 @@ education_health_care_plan_config = {
         "No": "MUMUP_URL",
         "Not known": "MUMUP_URL",
         "Not applicable": "MUMUP_URL",
-        "Blank (nothing selected )": "MUMUP_URL"
+        "Blank (nothing selected )": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 at_risk_of_exploitation_config = {
@@ -1600,10 +1623,10 @@ at_risk_of_exploitation_config = {
         "Yes",
         "No",
         "Not known",
-        "Blank (nothing selected )"
+        "Blank (nothing selected )",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1619,26 +1642,20 @@ at_risk_of_exploitation_config = {
         "Yes": "MUMUP_URL",
         "No": "MUMUP_URL",
         "Not known": "MUMUP_URL",
-        "Blank (nothing selected )": "MUMUP_URL"
+        "Blank (nothing selected )": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 
 leaving_care_config = {
     "table_name": "leaving_care_config",
-    "row_names": [
-        "Leaving Care",
-        "Yes",
-        "No",
-        "Not Known",
-        "Blank (nothing selected)"
-    ],
+    "row_names": ["Leaving Care", "Yes", "No", "Not Known", "Blank (nothing selected)"],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1654,12 +1671,12 @@ leaving_care_config = {
         "Yes": "MUMUP_URL",
         "No": "MUMUP_URL",
         "Not Known": "MUMUP_URL",
-        "Blank (nothing selected)": "MUMUP_URL"
+        "Blank (nothing selected)": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 looked_after_child_config = {
@@ -1669,10 +1686,10 @@ looked_after_child_config = {
         "Yes",
         "No",
         "Not known",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1688,12 +1705,12 @@ looked_after_child_config = {
         "Yes": "MUMUP_URL",
         "No": "MUMUP_URL",
         "Not known": "MUMUP_URL",
-        "Blank (nothing selected)": "MUMUP_URL"
+        "Blank (nothing selected)": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 
@@ -1707,10 +1724,10 @@ child_protection_plan_config = {
         "Has been previously subject to a plan",
         "Is currently subject to a plan",
         "Under assessment",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1729,12 +1746,12 @@ child_protection_plan_config = {
         "Has been previously subject to a plan": "MUMUP_URL",
         "Is currently subject to a plan": "MUMUP_URL",
         "Under assessment": "MUMUP_URL",
-        "Blank (nothing selected)": "MUMUP_URL"
+        "Blank (nothing selected)": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 child_in_need_plan_config = {
@@ -1747,10 +1764,10 @@ child_in_need_plan_config = {
         "Not known",
         "Has previously been subject to a Child in need plan",
         "Under assessment",
-        "Blank (nothing selected)"
+        "Blank (nothing selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1769,12 +1786,12 @@ child_in_need_plan_config = {
         "Not known": "MUMUP_URL",
         "Has previously been subject to a Child in need plan": "MUMUP_URL",
         "Under assessment": "MUMUP_URL",
-        "Blank (nothing selected)": "MUMUP_URL"
+        "Blank (nothing selected)": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 young_carer_config = {
@@ -1785,10 +1802,10 @@ young_carer_config = {
         "No",
         "Not known",
         "Not stated",
-        "Blank (nothing Selected)"
+        "Blank (nothing Selected)",
     ],
     "column_headings": [
-        "Q1_Totals",  
+        "Q1_Totals",
         "Barnardos (Wrap)",
         "BYS All",
         "Brathay Magic",
@@ -1805,12 +1822,12 @@ young_carer_config = {
         "No": "MUMUP_URL",
         "Not known": "MUMUP_URL",
         "Not stated": "MUMUP_URL",
-        "Blank (nothing Selected)": "MUMUP_URL"
+        "Blank (nothing Selected)": "MUMUP_URL",
     },
     "row_db_logic": {},
     "mib_row_db_logic": {},
-    'mib_row_db_default': 'MIB_Contacts_Or_Indirects_Within_Reporting_Period',
-    'row_db_default': 'Contacts_Or_Indirects_Within_Reporting_Period',
+    "mib_row_db_default": "MIB_Contacts_Or_Indirects_Within_Reporting_Period",
+    "row_db_default": "Contacts_Or_Indirects_Within_Reporting_Period",
 }
 
 
