@@ -26,7 +26,7 @@ from data_cleaning import (
     add_reason_to_contact,
     isolate_client_ages,
 )
-from QR_filters import filter_function_map, column_filter
+from MR_filters import filter_function_map, column_filter
 
 from data_utils import (
     find_dict_by_table_name,
@@ -51,6 +51,7 @@ cleaned_data_queue = queue.Queue()
 
 def log_message(message):
     """Log a message to the Tkinter text widget."""
+    # print("l ", message)
     log_queue.put(message)
 
 
@@ -189,7 +190,7 @@ def select_folder(start_date_entry, end_date_entry, root):
 def load_and_clean_data(folder_path, start_date, end_date):
     try:
         raw_data = load_data_files(folder_path, file_info)
-        cleaned_data = clean_data(raw_data, start_date, end_date)
+        cleaned_data = clean_data(raw_data, start_date, end_date, log_message)
         # Put cleaned data into the queue
         cleaned_data_queue.put(cleaned_data)
         log_message("Data loaded and cleaned.")
@@ -244,11 +245,13 @@ def main(directory, start_date, end_date):
 
     try:
         raw_data = load_data_files(directory, file_info)
-        cleaned_data = clean_data(raw_data, start_date, end_date)
-        validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
+        cleaned_data = clean_data(raw_data, start_date, end_date, log_message)
+        validated_data = validate_data_files(
+            cleaned_data, file_info, log_message=log_message
+        )
         file_string = "output_csv_QR.csv"
         output_df = produce_tables(validated_data, file_string)
-        log_message("CSV saved. File name: " + file_string)
+        # log_message("CSV saved. File name: " + file_string)
         return output_df
     except Exception as e:
         log_message(f"Unexpected error: {e}")
@@ -259,6 +262,10 @@ def load_data_files(directory, file_info):
     print("Loading data files...")
     log_message("Loading data files...")
     dataframes = {}
+    
+    # Check if the directory is empty
+    if not os.listdir(directory):
+        raise ValueError(f"The directory {directory} is empty")
 
     # Iterate through file_info and try to match with files in the directory
     for key, info in file_info.items():
@@ -266,6 +273,7 @@ def load_data_files(directory, file_info):
         found = False
 
         for f in os.listdir(directory):
+            
             if f.startswith(filename_start):
                 full_path = os.path.join(directory, f)
                 print(f"Attempting to load: {full_path}")
@@ -280,6 +288,7 @@ def load_data_files(directory, file_info):
         if not found:
             error_message = f"Error: Required file starting with '{filename_start}' not found in directory."
             print(error_message)
+            print("error_message")
             log_message(error_message)
             sys.exit(
                 1
@@ -288,23 +297,41 @@ def load_data_files(directory, file_info):
     return dataframes
 
 
-def clean_data(dataframes, start_date, end_date):
-    print("Cleaning dataframes...")
-    log_message("Cleaning dataframes...")
-    # todo concatenate similar csv files
-    # cleaned_dataframes = clean_column_names(dataframes, log_message=log_message)
-    # cleaned_dataframes = isolate_client_ages(dataframes, 3, 26, log_message=log_message)
-    # cleaned_dataframes = isolate_reporting_period(
-    #     cleaned_dataframes, start_date, end_date, log_message=log_message
-    # )
-    # cleaned_dataframes = remove_trailing_spaces_from_values(
-    #     cleaned_dataframes, log_message=log_message
-    # )
-    # cleaned_dataframes = remove_duplicates(cleaned_dataframes, log_message=log_message)
-    # cleaned_dataframes = add_reason_to_contact(
-    #     cleaned_dataframes, log_message=log_message
-    # )
+def clean_data(dataframes, start_date, end_date, log_message=None):
+    print(f"log_message is callable: {callable(log_message)}")
+
+    if log_message and not callable(log_message):
+        print("here")
+        raise ValueError("log_message should be a callable function")
+
+    try:
+        print("Cleaning dataframes...")
+        
+        if log_message:
+            log_message("Cleaning dataframes...")
+
+        # Perform each cleaning step inside a try-except block
+        cleaned_dataframes = clean_column_names(dataframes, log_message=log_message)
+        
+        # Here you're passing the original 'dataframes' instead of 'cleaned_dataframes' to the next function
+        # It should probably be 'cleaned_dataframes' if you want to apply the cleaning steps sequentially
+        cleaned_dataframes = isolate_client_ages(cleaned_dataframes, 3, 26, log_message=log_message)
+        
+        # Uncomment and continue with the other cleaning functions as needed
+        # cleaned_dataframes = isolate_reporting_period(
+        #     cleaned_dataframes, start_date, end_date, log_message=log_message
+        # )
+        # ...
+
+    except Exception as e:
+        error_message = f"An error occurred while cleaning dataframes: {e}"
+        print(error_message)
+        if log_message:
+            log_message(error_message)
+        raise  # Re-raise the exception after logging it
+
     return cleaned_dataframes
+
 
 
 def produce_tables(dataframes, file_string):

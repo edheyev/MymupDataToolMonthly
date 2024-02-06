@@ -15,6 +15,8 @@ def clean_column_names(dataframes, log_message=None):
                 col = "contact_service_type"
             # elif col == "file_closure_service_type":
             #      col = "contact_service_type"
+            if col == "userid":
+                col = "client_id"
             new_columns.append(col)
         df.columns = new_columns
         cleaned_dataframes[df_name] = df
@@ -87,46 +89,53 @@ def isolate_reporting_period(dataframes, start_date, end_date, log_message=None)
 
 
 def isolate_client_ages(dataframes, low_age, high_age, log_message=None):
+    print("Isolating client ages...")
+    log_message("Isolating client ages...")
+    if log_message and not callable(log_message):
+        raise ValueError("log_message should be a callable function")
+
     removed_client_ids = set()
     removed_count_first_pass = 0
     removed_count_second_pass = 0
-
-    # First pass: Isolate ages and collect client_ids
     for df_name, df in dataframes.items():
-        if "client_age" in df.columns:
-            # Find rows outside the age range
-            outside_age_range = df[
-                (df["client_age"] < low_age) | (df["client_age"] > high_age)
-            ]
-            removed_count_first_pass += len(outside_age_range)
+        
+        if not isinstance(df, pd.DataFrame):
+            raise ValueError(f"The item {df_name} is not a pandas DataFrame.")
 
-            # Collect client_ids
-            removed_client_ids.update(outside_age_range["client_id"].unique())
+        if "age" in df.columns:
+            try:
+                outside_age_range = df[(df["age"] < low_age) | (df["age"] > high_age)]
+                removed_count_first_pass += len(outside_age_range)
+                removed_client_ids.update(outside_age_range["client_id"].unique())
+                dataframes[df_name] = df.drop(outside_age_range.index)
+            except KeyError as e:
+                raise KeyError(f"Column not found: {e}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                if log_message:
+                    log_message(f"An error occurred: {e}")
+                continue
 
-            # Remove rows outside the age range
-            dataframes[df_name] = df.drop(outside_age_range.index)
-
-    # Second pass: Remove rows with matching client_ids in all dataframes
     for df_name, df in dataframes.items():
         if "client_id" in df.columns:
-            # Find rows with matching client_ids
-            rows_to_remove = df[df["client_id"].isin(removed_client_ids)]
-            removed_count_second_pass += len(rows_to_remove)
+            try:
+                rows_to_remove = df[df["client_id"].isin(removed_client_ids)]
+                removed_count_second_pass += len(rows_to_remove)
+                dataframes[df_name] = df.drop(rows_to_remove.index)
+            except KeyError as e:
+                raise KeyError(f"Column not found: {e}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                if log_message:
+                    log_message(f"An error occurred: {e}")
+                continue
 
-            # Remove these rows
-            dataframes[df_name] = df.drop(rows_to_remove.index)
-
-    print(f"Removed {removed_count_first_pass} rows based on age criteria.")
-    log_message(f"Removed {removed_count_first_pass} rows based on age criteria.")
-    print(
-        f"Removed an additional {removed_count_second_pass} rows based on matching client_ids."
-    )
-    log_message(
-        f"Removed an additional {removed_count_second_pass} rows based on matching client_ids."
-    )
+    if log_message:
+        log_message(f"Removed {removed_count_first_pass} rows based on age criteria.")
+        log_message(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
+    
     return dataframes
 
-    return dataframes
 
 
 def remove_trailing_spaces_from_values(dataframes_dict, log_message=None):

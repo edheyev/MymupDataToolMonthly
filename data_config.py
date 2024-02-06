@@ -1,6 +1,42 @@
 file_info = {
-    "Contacts_Or_Indirects_Within_Reporting_Period": {
-        "filename": "cypmh_clients_all_1705881601.csv",
+    "CYPMH_Clients_All": {
+        "filename": "cypmh_clients_all",
+        "columns": [],
+    },
+    "CYPMH_Contacts_All": {
+        "filename": "cypmh_contacts_all",
+        "columns": [],
+    },
+    "CYPMH_File_Closures_All": {
+        "filename": "cypmh_file_closures_all",
+        "columns": [],
+    },
+    "CYPMH_Goal_Themes_All": {
+        "filename": "cypmh_goal_themes_all",
+        "columns": [],
+    },
+    "CYPMH_Plans_And_Goals_All": {
+        "filename": "cypmh_plans_and_goals_all",
+        "columns": [],
+    },
+    "CYPMH_Referral_Rejections_All": {
+        "filename": "cypmh_referral_rejections_all",
+        "columns": [],
+    },
+    "CYPMH_Referrals": {
+        "filename": "cypmh_referrals",
+        "columns": [],
+    },
+    "CYPMH_Referrals_MIB": {
+        "filename": "cypmh_referrals_mib",
+        "columns": [],
+    },
+    "CYPMH_Two_Contacts": {
+        "filename": "cypmh_two_contacts",
+        "columns": [],
+    },
+    "CYPMH_Two_Contacts_MIB": {
+        "filename": "cypmh_two_contacts_mib",
         "columns": [],
     },
 }
