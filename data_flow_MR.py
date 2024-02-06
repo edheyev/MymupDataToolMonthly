@@ -26,7 +26,7 @@ from data_cleaning import (
     add_reason_to_contact,
     isolate_client_ages,
 )
-from MR_filters import filter_function_map, column_filter
+from MR_filters import filter_function_map
 
 from data_utils import (
     find_dict_by_table_name,
@@ -251,7 +251,7 @@ def main(directory, start_date, end_date):
         )
         file_string = "output_csv_QR.csv"
         output_df = produce_tables(validated_data, file_string)
-        # log_message("CSV saved. File name: " + file_string)
+        log_message("CSV saved. File name: " + file_string)
         return output_df
     except Exception as e:
         log_message(f"Unexpected error: {e}")
@@ -313,15 +313,11 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
         # Perform each cleaning step inside a try-except block
         cleaned_dataframes = clean_column_names(dataframes, log_message=log_message)
         
-        # Here you're passing the original 'dataframes' instead of 'cleaned_dataframes' to the next function
-        # It should probably be 'cleaned_dataframes' if you want to apply the cleaning steps sequentially
         cleaned_dataframes = isolate_client_ages(cleaned_dataframes, 3, 26, log_message=log_message)
         
-        # Uncomment and continue with the other cleaning functions as needed
         # cleaned_dataframes = isolate_reporting_period(
         #     cleaned_dataframes, start_date, end_date, log_message=log_message
         # )
-        # ...
 
     except Exception as e:
         error_message = f"An error occurred while cleaning dataframes: {e}"
@@ -332,61 +328,34 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
 
     return cleaned_dataframes
 
-
-
 def produce_tables(dataframes, file_string):
     print("Producing output tables...")
     log_message("Producing output tables...")
 
-    column_headings = [
-        "Row Name",
-        "Q1_Totals",
-        "Barnardos (Wrap)",
-        "BYS All",
-        "Brathay Magic",
-        "INCIC (CYP)",
-        "MIB Know Your Mind",
-        "MIB Know Your Mind +",
-        "MIB Hospital Buddys Airedale General",
-        "MIB Hospital Buddys BRI",
-        "SELFA (Mighty Minds)",
-    ]
-
-    # Write column headings to the CSV file
     with open(file_string, "w", newline="") as f:
-        f.write(",".join(column_headings) + "\n")
-
-    # optionally initialise empty df
-    combined_df = pd.DataFrame(columns=column_headings)
-
-    #   mylooplist = [list(filter_function_map.keys())[i] for i in [0, 18, 19, 20]]#,  19, 20]]
-
-    # Append each table to the CSV file
-    # for name in mylooplist:
-    for name in filter_function_map.keys():
-        thisconfig = find_dict_by_table_name(name, table_configs)
-        try:
-            this_table = filter_service_information(dataframes, thisconfig)
-        except Exception as e:
-            log_message(f"Error processing filter: {e}")
-        # Check if DataFrame is not empty and write to csv
-        if not this_table.empty:
-            with open(file_string, "a", newline="") as f:
+        for name in filter_function_map.keys():
+            try:
+                this_table = filter_service_information(dataframes, find_dict_by_table_name(name, table_configs))
+                
+                # Write the table name on its own line
                 f.write(f"{name}\n")
-                this_table.to_csv(f, header=False, index=False)
+                
+                if not this_table.empty:
+                    # Iterate over DataFrame rows and columns to write the entire table
+                    for index, row in this_table.iterrows():
+                        # Join all column values in a row into a single string separated by commas
+                        row_str = ','.join(str(value) for value in row)
+                        f.write(f"{row_str}\n")
+                else:
+                    print(f"No data to write for {name}")
+                    log_message(f"No data to write for {name}")
+                
+                # Add a newline after the table has been added for separation
                 f.write("\n")
-
-            # Creating a row with the name and merging it with this_table
-            name_row = pd.DataFrame(
-                [[name] + [None] * (len(column_headings) - 1)], columns=column_headings
-            )
-            combined_row = pd.concat([name_row, this_table], ignore_index=True)
-            combined_df = pd.concat([combined_df, combined_row], ignore_index=True)
-        else:
-            print(f"No data to write for {name}")
-            log_message(f"No data to write for {name}")
-
-    return combined_df
+                
+            except Exception as e:
+                log_message(f"Error processing filter for {name}: {e}")
+                continue  # Skip to the next iteration if there's an error
 
 
 def filter_service_information(dataframes, config):
@@ -394,97 +363,49 @@ def filter_service_information(dataframes, config):
     log_message(f"Generating table... {config['table_name']}")
 
     row_names = config["row_names"]
-    column_headings = config["column_headings"]
-    placeholder_rows = config["placeholder_rows"]
+    placeholder_rows = config.get("placeholder_text", {})
     default_db_key = config.get("row_db_default", "Default Logic")
     mib_default_db_key = config.get("mib_row_db_default", "MIB Default Logic")
 
-    # Create the result DataFrame with the specified column headings
-    result_df = pd.DataFrame(columns=["Row Name"] + column_headings)
-
+    result_list = []
     filter_func = filter_function_map.get(config["table_name"])
     if not filter_func:
         raise ValueError(f"No filter function found for table {config['table_name']}")
 
-    # Loop through each row
     for row in row_names:
-        new_row = {"Row Name": row}
-        row_dataframes = []  # Store DataFrames or tuples of DataFrames for each row
-
-        # Loop through each column
-        for column in column_headings:
-            if column == "Q1_Totals":
-                continue
+        try:
             if row in placeholder_rows:
-                new_row[column] = placeholder_rows[row]
-                row_dataframes.append(None)  # Add a marker for placeholder
+                # Append placeholder text directly
+                result_list.append({"Row Name": row, "Q1_Totals": placeholder_rows[row]})
                 continue
 
-            try:
-                # overwrite df with exceptions if they exist in the config
-                if column.startswith("MIB"):
-                    dataframe_key = config["mib_row_db_logic"].get(
-                        row, mib_default_db_key
-                    )
-                else:
-                    dataframe_key = config["row_db_logic"].get(row, default_db_key)
+            dataframe_key = default_db_key
+            this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
+            filtered_data = filter_func(this_row_dataframe, row, dfname=dataframe_key)
 
-                this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-                this_row_dataframe = column_filter(
-                    this_row_dataframe, column, dataframe_key
-                )  # Apply column filter
-                filtered_df = filter_func(this_row_dataframe, row, dfname=dataframe_key)
+            if isinstance(filtered_data, str):
+                # If filtered_data is a string, append it directly
+                result_list.append({"Row Name": row, "Q1_Totals": filtered_data})
+            elif is_percentage_row(row):
+                numerator, denominator = filtered_data
+                percentage = calculate_percentage(numerator, denominator)
+                result_list.append({"Row Name": row, "Q1_Totals": percentage})
+            elif is_average_row(row):
+                average = calculate_average(filtered_data)
+                result_list.append({"Row Name": row, "Q1_Totals": average})
+            else:
+                # Assuming filtered_data is numerical data for counts
+                count = calculate_count(filtered_data)
+                result_list.append({"Row Name": row, "Q1_Totals": count})
 
-                if is_percentage_row(row):
-                    assert isinstance(
-                        filtered_df, tuple
-                    ), "Expected a tuple for percentage row"
-                    numerator_df, denominator_df = filtered_df
-                    new_row[column] = calculate_percentage(
-                        numerator_df, denominator_df
-                    )  # Calculate and add percentage
-                    row_dataframes.append(filtered_df)
-                elif is_average_row(row):
-                    assert isinstance(
-                        filtered_df, tuple
-                    ), "Expected a tuple for percentage row"
-                    new_row[column] = calculate_average(
-                        filtered_df
-                    )  # Calculate and add percentage
-                    row_dataframes.append(filtered_df)
-                else:
-                    assert isinstance(
-                        filtered_df, pd.DataFrame
-                    ), "Expected a DataFrame for count row"
-                    new_row[column] = calculate_count(
-                        filtered_df
-                    )  # Calculate and add count
-                    row_dataframes.append(filtered_df)
+        except Exception as e:
+            print(f"Error processing row: {row}, dfkey: {dataframe_key} Error: {e}")
+            log_message(f"Error processing row: {row}, dfkey: {dataframe_key} Error: {e}")
+            result_list.append({"Row Name": row, "Q1_Totals": f"Error: {e}"})
 
-            except Exception as e:
-                print(
-                    f"Error processing row: {row}, column: {column}, dfkey: {dataframe_key} Error: {e}"
-                )
-                log_message(
-                    f"Error processing row: {row}, column: {column}, dfkey: {dataframe_key} Error: {e}"
-                )
-                error_message = f"Error: {e}"
-                new_row[column] = error_message  # Add the error message to the cell
-                row_dataframes.append(None)  # Append None to maintain structure
+    return pd.DataFrame(result_list)
 
-        # Calculate total for the row
-        if is_percentage_row(row):
-            new_row["Q1_Totals"] = calculate_percentage_row_total(row_dataframes)
-        elif is_average_row(row):
-            new_row["Q1_Totals"] = calculate_row_average(row_dataframes)
-        else:
-            new_row["Q1_Totals"] = calculate_row_total(row_dataframes)
 
-        # Create DataFrame for the row and append
-        new_row_df = pd.DataFrame([new_row])
-        result_df = pd.concat([result_df, new_row_df], ignore_index=True)
-
-    return result_df
 
 
 # if __name__ == "__main__":

@@ -6,15 +6,29 @@ Created on Tues Feb 06 15:58:58 2023
 """
 import pandas as pd
 
-def OCR_filter():
-    return "hello"
-    
+def OCR_filter(df, row, dfname="empty"):
+    try:
+        if row == "Number referrals":
+            return df
+        return "row not caught"
+    except Exception as e:
+        print(
+            f"Error in common_demographic_filter with row : {e}. Current df: {dfname}"
+        )
+        raise Exception(
+            f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
+        )
+        
+        
+def CIC_CLA_caseload_and_referrals_filter(df, row, dfname="empty"):
+
+    return "not yet implemented"
 
 
 
 filter_function_map = {
     "Overall_caseload_and_referrals":OCR_filter,
-    # "CIC_CLA_caseload_and_referrals":,
+    "CIC_CLA_caseload_and_referrals":CIC_CLA_caseload_and_referrals_filter,
     # "SEN_caseload_and_referrals":,
     # "EHCP_caseload_and_referrals":,
     # "CRAVEN_caseload_and_referrals":,

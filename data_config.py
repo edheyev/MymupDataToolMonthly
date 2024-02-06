@@ -42,8 +42,8 @@ file_info = {
 }
 
 Overall_caseload_and_referrals = {
-    "sheet_name": "Case Status Split",
-    "table_name": "Overall caseload and referrals",
+    "sheet_name": "Case_Status_Split",
+    "table_name": "Overall_caseload_and_referrals",
     "row_names": [
         "Number referrals",
         "Number unique referrals",
@@ -53,18 +53,20 @@ Overall_caseload_and_referrals = {
         "Number closed cases",
     ],
     "placeholder_text": {
-        "Number referrals": "todo",
+        # "Number referrals": "todo",
         "Number unique referrals": "todo",
         "Referrals accepted": "todo",
         "Referrals refused": "todo",
         "Number open cases": "todo",
         "Number closed cases": "todo",
     },
+    "mib_row_db_default": "CYPMH_Clients_All",
+    "row_db_default": "CYPMH_Clients_All",
 }
 
 CIC_CLA_caseload_and_referrals = {
-    "sheet_name": "Case Status Split",
-    "table_name": "CIC/CLA caseload and referrals",
+    "sheet_name": "Case_Status_Split",
+    "table_name": "CIC_CLA_caseload_and_referrals",
     "row_names": [
         "Number referrals",
         "Number unique referrals",
@@ -74,7 +76,7 @@ CIC_CLA_caseload_and_referrals = {
         "Number closed cases",
     ],
     "placeholder_text": {
-        "Number referrals": "todo",
+        # "Number referrals": "todo",
         "Number unique referrals": "todo",
         "Referrals accepted": "todo",
         "Referrals refused": "todo",
