@@ -36,6 +36,8 @@ def BRADFORD_FILTER(df, df_name="empty"):
     return filtered_df
     
 
+# referalls sheet
+
 def OCR_filter(df, row, dfname="empty"):
     # isolate active month TODO
     try:
@@ -97,6 +99,8 @@ def BRADFORD_DISTRICT_caseload_and_referrals_filter(df, row, dfname="empty"):
 
     return filtered_df
 
+# demographics sheet
+
 def All_Referrals_by_demographics_filter(df, row, dfname="empty"):
     try:
         # List for age categories
@@ -154,13 +158,14 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty"):
             }
             # Check if the row corresponds to a gender category and fetch the mapped value
             if row in gender_map:
-                mapped_gender = gender_map[row]
-                # Filter df for rows matching the mapped gender
-                filtered_df = df[df['gender_name'] == mapped_gender]
-            else:
+                mapped_value = gender_map[row]
+                if mapped_value == "Blank":
+                    # Filter for rows where 'client_ethnicity' is NaN
+                    filtered_df = df[pd.isna(df["gender_name"])]
+                else:
+                    filtered_df = df[df['gender_name'] == mapped_value]
                 
-                # If the row does not represent a gender category, you can choose to return the df as is or handle differently
-                return df  # Or: return "Row does not represent a gender category"
+                return filtered_df  # Or: return "Row does not represent a gender category"
 
         elif row in ethnicity_categories:
             ethnic_map = {
@@ -210,8 +215,7 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty"):
         raise Exception(
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
-        
-        
+              
 def All_CIC_CLA_Referrals_by_demographics_filter(df, row, dfname="empty"):
     
     initial_filtered_df = CIC_FILTER(df, dfname)
@@ -247,6 +251,197 @@ def BRADFORD_DISTRICT_Referrals_by_demographics_filter(df, row, dfname="empty"):
 
     return filtered_df
 
+# referral source sheet
+
+def Source_of_All_Referrals_filter(df, row, dfname="empty"):
+    try:
+        # Mapping from 'row_names' to 'referral_source' column values in the dataframe
+        source_map = {
+            "GP services": "Primary Health Care: General Medical Practitioner Practice",
+            "Primary care": "Primary care",  # Assuming 'Primary care' fits here
+            "Other Primary Health Care": "Other Primary Health Care",
+            "Self Referral": "Self-Referral: Self",
+            "Self": "Self",
+            "Carer": "Self-Referral: Carer/Relative",
+            "Social Services": "Local Authority and Other Public Services: Social Services",
+            "Education Service": "Local Authority and Other Public Services: Education Service / Educational Establishment",
+            "Housing Service": "Local Authority and Other Public Services: Housing Service",
+            "Police": "Justice System: Police",
+            "Youth Offending Service": "Justice System: Youth Offending Team",
+            "School Nurse": "Child Health: School Nurse",
+            "Hospital-based Paediatrics": "Child Health: Hospital-based Paediatrics",
+            "Community-based Paediatrics": "Child Health: Community-based Paediatrics",
+            "Voluntary Sector": "Voluntary Sector",
+            "Accident And Emergency Department": "Accident and Emergency Department",
+            "Other secondary care specialty": "Other secondary care specialty",
+            "Out of Area Agency": "Other: Out of Area Agency",
+            "Drug Action Team / Drug Misuse Agency": "Other: Drug Action Team / Drug Misuse Agency",
+            "Other service or agency": "Other SERVICE or agency",
+            "Single Point of Access Service": "Other: Single Point of Access Service",
+            "Internal Referral": "Internal Referral",
+            "CAMHS Core/Step down": "CAMHS - Core/Step Down",
+            "CAMHS Waiting List": "CAMHS - Waiting List",
+            "CAMHS Crisis": "CAMHS - Crisis Team (Hospital Urgents)",
+            "Transfer by graduation from Child Adolescent Mental Health Services to Adult": "Transfer by Graduation from CAMHS to Adult Mental Health Services",
+            "VCS": "Voluntary Sector",
+            "Unknown": "Not Known",
+
+            # Adding missing entries from the old source_map
+            "Community Mental Health Team (Adult Mental Health)": "Community Mental Health Team (Adult Mental Health)",
+            "Employer": "Employer",
+            "Employer: Occupational Health": "Employer: Occupational Health",
+            "Family Support Worker": "Family Support Worker",
+            "Improving Access to Psychological Therapies Service": "Improving Access to Psychological Therapies Service",
+            "Independent Sector: Low secure Inpatients": "Independent Sector: Low secure Inpatients",
+            "Independent Sector: Medium secure Inpatients": "Independent Sector: Medium secure Inpatients",
+            "Inpatient Service Child and Adult Mental Health": "Inpatient Service Child and Adult Mental Health",
+            "Inpatient Service Learning Disabilities": "Inpatient Service Learning Disabilities",
+            "Justice System: Court Liaison and Diversion Service": "Justice System: Court Liaison and Diversion Service",
+            "Justice System: Courts": "Justice System: Courts",
+            "Justice System: Police": "Justice System: Police",
+            "Justice System: Prison": "Justice System: Prison",
+            "Justice System: Probation": "Justice System: Probation",
+            "Justice System: Youth Offending Team": "Justice System: Youth Offending Team",
+            "Local Authority and Other Public Services: Education Service / Educational Establishment": "Local Authority and Other Public Services: Education Service / Educational Establishment",
+            "Local Authority and Other Public Services: Housing Service": "Local Authority and Other Public Services: Housing Service",
+            "Local Authority and Other Public Services: Social Services": "Local Authority and Other Public Services: Social Services",
+            "Mental Health Drop In Service": "Mental Health Drop In Service",
+            "Not Known": "Not Known",
+            "Other Independent Sector Mental Health Services": "Other Independent Sector Mental Health Services",
+            "Other: Asylum Services": "Other: Asylum Services",
+            "Other: Job Centre Plus": "Other: Job Centre Plus",
+            "Other: Single Point of Access Service": "Other: Single Point of Access Service",
+            "Other: Urgent and Emergency Care Ambulance Service": "Other: Urgent and Emergency Care Ambulance Service",
+            "Permanent Transfer from Another Mental Health Trust": "Permanent Transfer from Another Mental Health Trust",
+            "Primary Health Care: Health Visitor": "Primary Health Care: Health Visitor",
+            "Primary Health Care: Maternity Service": "Primary Health Care: Maternity Service",
+            "Temporary Transfer from Another Mental Health Trust": "Temporary Transfer from Another Mental Health Trust",
+            "Blank (nothing selected)": "Blank (nothing selected)",
+        }
+
+        # Get the mapped value from the source_map; use a placeholder if the row is not found
+        mapped_value = source_map.get(row, "Placeholder for unmapped row")
+
+        # Filter the dataframe based on the referral_source column
+        if mapped_value != "Placeholder for unmapped row" and mapped_value != "Blank (nothing selected)":
+            # Filter for rows where referral_source matches mapped_value
+            filtered_df = df[df['referral_source'] == mapped_value]
+        elif mapped_value == "Blank (nothing selected)":
+            # Filter for rows where referral_source is NaN or blank
+            filtered_df = df[df['referral_source'].isna() | (df['referral_source'] == '')]
+        else:
+            # If we have a placeholder value, it means the row was not in source_map
+            print(f"Row '{row}' not found in source_map. Using unfiltered dataframe.")
+            filtered_df = df
+
+        return filtered_df
+    except Exception as e:
+        print(f"Error in referral_source_filter with row: {row}, {e}. Current df: {dfname}")
+        raise Exception(f"Error in referral_source_filter with row: {row}, {e}. Current df is {dfname}")
+
+def Source_of_Referrals___CIC_CLA_filter(df, row, dfname="empty"):
+    
+    initial_filtered_df = CIC_FILTER(df, dfname)
+    filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
+
+    return filtered_df
+
+def Source_of_Referrals___SEN_filter(df, row, dfname="empty"):
+    
+    initial_filtered_df = SEN_FILTER(df, dfname)
+    filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
+
+    return filtered_df
+
+def Source_of_Referrals___EHCP_filter(df, row, dfname="empty"):
+    
+    initial_filtered_df = EHCP_FILTER(df, dfname)
+    filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
+
+    return filtered_df
+
+def Source_of_Referrals___CRAVEN_filter(df, row, dfname="empty"):
+    
+    initial_filtered_df = CRAVEN_FILTER(df, dfname)
+    filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
+
+    return filtered_df
+
+def Source_of_Referrals___BRADFORD_DISTRICT_filter(df, row, dfname="empty"):
+    
+    initial_filtered_df = BRADFORD_FILTER(df, dfname)
+    filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
+
+    return filtered_df
+
+# two attended contacts sheet
+
+def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter(df, row, dfname="empty"):
+    # TODO some extra data cleaning - check pad
+    
+    try:
+        if row == "All":
+            return df
+        elif row == "CIC/CLA":
+            return CIC_FILTER(df, dfname)
+        elif row == "SEN":
+            return SEN_FILTER(df, dfname)
+        elif row == "EHCP":
+            return EHCP_FILTER(df, dfname)
+        elif row == "CRAVEN":
+            return CRAVEN_FILTER(df, dfname)
+        elif row == "BRADFORD DISTRICT":
+            return BRADFORD_FILTER(df, dfname)
+        
+        return "row not caught"
+    except Exception as e:
+        print(
+            f"Error in common_demographic_filter with row : {e}. Current df: {dfname}"
+        )
+        raise Exception(
+            f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
+        )
+    
+# dna and cancellations sheet
+
+def DNAs_and_cancellations_filter(df, row, dfname="empty"):
+    # isolate active month TODO
+    # Initial filter based on the category
+    if "CIC/CLA" in row:
+        df = CIC_FILTER(df, dfname)
+    elif "SEN" in row:
+        df = SEN_FILTER(df, dfname)
+    elif "EHCP" in row:
+        df = EHCP_FILTER(df, dfname)
+    elif "CRAVEN" in row:
+        df = CRAVEN_FILTER(df, dfname)
+    elif "BRADFORD DISTRICT" in row:
+        df = BRADFORD_FILTER(df, dfname)
+    
+    # Now filter based on the type of appointment
+    try:
+        if "DNA Appointments" in row:
+            filtered_df = df[df['attendance'] == "Did not Attend"]
+        elif "Cancelled by patient" in row:
+            filtered_df = df[df['attendance'] == "Cancelled by Patient"]  # Placeholder, replace with actual value
+        elif "Cancelled by Provider" in row:
+            filtered_df = df[df['attendance'] == "Cancelled by Provider"]  # Placeholder, replace with actual value
+        else:
+            # Return the df as is if the row doesn't match the expected patterns
+            # This might need adjustment based on your specific needs
+            return df
+        
+        return filtered_df
+
+        
+    except Exception as e:
+        print(
+            f"Error in common_demographic_filter with row : {e}. Current df: {dfname}"
+        )
+        raise Exception(
+            f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
+        )
+
 filter_function_map = {
     "Overall_caseload_and_referrals":OCR_filter,
     "CIC_CLA_caseload_and_referrals":CIC_CLA_caseload_and_referrals_filter,
@@ -260,14 +455,14 @@ filter_function_map = {
     "All_EHCP_Referrals_by_demographics":All_EHCP_Referrals_by_demographics_filter,
     "All_CRAVEN_Referrals_by_demographics":All_CRAVEN_Referrals_by_demographics_filter,
     "BRADFORD_DISTRICT_Referrals_by_demographics":BRADFORD_DISTRICT_Referrals_by_demographics_filter,
-    # "Source_of_All_Referrals":,
-    # "Source_of_Referrals___CIC_CLA":,
-    # "Source_of_Referrals___SEN":,
-    # "Source_of_Referrals___EHCP":,
-    # "Source_of_Referrals___CRAVEN":,
-    # "Source_of_Referrals___BRADFORD_DISTRICT":,
-    # "No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_":,
-    # "DNAs_and_cancellations":,
+    "Source_of_All_Referrals":Source_of_All_Referrals_filter,
+    "Source_of_Referrals_CIC_CLA":Source_of_Referrals___CIC_CLA_filter,
+    "Source_of_Referrals_SEN":Source_of_Referrals___SEN_filter,
+    "Source_of_Referrals_EHCP":Source_of_Referrals___EHCP_filter,
+    "Source_of_Referrals_CRAVEN":Source_of_Referrals___CRAVEN_filter,
+    "Source_of_Referrals_BRADFORD_DISTRICT":Source_of_Referrals___BRADFORD_DISTRICT_filter,
+    "No_of_CYP_receiving_a_second_attended_contact_with_mental_health_services": No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter,
+    "DNAs_and_cancellations":DNAs_and_cancellations_filter,
     # "Goals_Based_Outcomes":,
     # "All_Goal_Themes":,
     # "CIC_Goal_Themes":,

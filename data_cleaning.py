@@ -15,6 +15,10 @@ def clean_column_names(dataframes, log_message=None):
                 col = "contact_service_type"
             elif col == "userid":
                 col = "client_id"
+            elif col == "sen":
+                col = "special_education_needs"
+            elif col == "postcode":
+                col = "post_code"
             new_columns.append(col)
 
         df.columns = new_columns
