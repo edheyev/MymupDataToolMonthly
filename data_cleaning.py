@@ -10,20 +10,20 @@ def clean_column_names(dataframes, log_message=None):
     for df_name, df in dataframes.items():
         new_columns = []
         for col in df.columns:
-            col = col.replace(" ", "_").lower()
+            col = col.replace(" ", "_").lower().strip("_")  # Added strip("_") here
             if col == "service_type":
                 col = "contact_service_type"
-            # elif col == "file_closure_service_type":
-            #      col = "contact_service_type"
-            if col == "userid":
+            elif col == "userid":
                 col = "client_id"
             new_columns.append(col)
+
         df.columns = new_columns
         cleaned_dataframes[df_name] = df
     return cleaned_dataframes
 
 
 def remove_duplicates(dataframes, log_message=None):
+    print("removing duplicates")
     if log_message:
         log_message("Removing duplicates...")
     else:
@@ -35,6 +35,7 @@ def remove_duplicates(dataframes, log_message=None):
         cleaned_dataframes[df_name] = cleaned_df
         duplicates_removed = original_row_count - cleaned_df.shape[0]
         if log_message:
+            print(f"Removed {duplicates_removed} duplicates from {df_name}.")
             log_message(f"Removed {duplicates_removed} duplicates from {df_name}.")
         else:
             print(f"Removed {duplicates_removed} duplicates from {df_name}.")
@@ -88,53 +89,173 @@ def isolate_reporting_period(dataframes, start_date, end_date, log_message=None)
     return dataframes
 
 
-def isolate_client_ages(dataframes, low_age, high_age, log_message=None):
-    print("Isolating client ages...")
-    log_message("Isolating client ages...")
-    if log_message and not callable(log_message):
-        raise ValueError("log_message should be a callable function")
+def remove_invalid_rows(dataframes, log_message=None):
+    # TODO
+    return dataframes
+    
+def remove_closure_cols(dataframes, log_message=None):
+    # Columns to be removed are now stored within the function
+    columns_to_remove = ['file_closure', 'referral_closure']
+    removed_count = 0  # Initialize a counter for removed columns
+    
+    for key, df in dataframes.items():
+        # Iterate over each column to remove; if it exists in the DataFrame, drop it
+        for column in columns_to_remove:
+            if column in df.columns:
+                df.drop(column, axis=1, inplace=True)
+                print(f"Removed column '{column}' from DataFrame '{key}'.")
+                removed_count += 1
+                
+    # Report how many columns were removed in total
+    print(f"Total columns removed: {removed_count}")
+    return dataframes
 
-    removed_client_ids = set()
-    removed_count_first_pass = 0
-    removed_count_second_pass = 0
+import pandas as pd
+
+def isolate_client_ages(dataframes, yim_providers, log_message=None):
+    """
+    Removes clients from the dataframe that are not in the correct age categories.
+    
+    For entries from the yim_providers list in the 'franchise' column, removes ages 26 and up.
+    For those that are not yim_providers, also removes ages 19-25.
+    """
+    removal_ids = set()
+
+    print(f"isolating client ages...")
     for df_name, df in dataframes.items():
-        
-        if not isinstance(df, pd.DataFrame):
-            raise ValueError(f"The item {df_name} is not a pandas DataFrame.")
+        if "age" in df.columns and "franchise" in df.columns:
+            is_yim_provider = df["franchise"].isin(yim_providers)
+            keep_rows = ((is_yim_provider & (df["age"] < 26)) | (~is_yim_provider & (df["age"] < 19)))
 
-        if "age" in df.columns:
-            try:
-                outside_age_range = df[(df["age"] < low_age) | (df["age"] > high_age)]
-                removed_count_first_pass += len(outside_age_range)
-                removed_client_ids.update(outside_age_range["client_id"].unique())
-                dataframes[df_name] = df.drop(outside_age_range.index)
-            except KeyError as e:
-                raise KeyError(f"Column not found: {e}")
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                if log_message:
-                    log_message(f"An error occurred: {e}")
-                continue
+            removal_ids.update(df[~keep_rows]["client_id"].unique())
+
+            df_filtered = df[keep_rows].reset_index(drop=True)
+            dataframes[df_name] = df_filtered
+
 
     for df_name, df in dataframes.items():
         if "client_id" in df.columns:
-            try:
-                rows_to_remove = df[df["client_id"].isin(removed_client_ids)]
-                removed_count_second_pass += len(rows_to_remove)
-                dataframes[df_name] = df.drop(rows_to_remove.index)
-            except KeyError as e:
-                raise KeyError(f"Column not found: {e}")
-            except Exception as e:
-                print(f"An error occurred: {e}")
-                if log_message:
-                    log_message(f"An error occurred: {e}")
-                continue
+            df_final = df[~df['client_id'].isin(removal_ids)].reset_index(drop=True)
+            dataframes[df_name] = df_final
+
+    return dataframes
+
+
+
+# def isolate_client_ages(dataframes, yim_providers, log_message=None):
+#     print("Isolating client ages...")
+#     if log_message:
+#         log_message("Isolating client ages...")
+#     if log_message and not callable(log_message):
+#         raise ValueError("log_message should be a callable function")
+
+#     removed_client_ids = set()
+#     removed_count_first_pass = 0
+
+#     for df_name, df in dataframes.items():
+#         if not isinstance(df, pd.DataFrame):
+#             raise ValueError(f"The item {df_name} is not a pandas DataFrame.")
+
+#         if "age" in df.columns and "client_id" in df.columns:
+#             # Apply different removal criteria based on the 'franchise' column
+#             try:
+#                 # Conditions for YiM and non-YiM providers
+#                 yim_condition = (df["age"] >= 26) & df["franchise"].isin(yim_providers)
+#                 non_yim_condition = ((df["age"] >= 26) | ((df["age"] >= 19) & (df["age"] <= 25))) & ~df["franchise"].isin(yim_providers)
+                
+#                 # Identify rows to remove
+#                 rows_to_remove = df[yim_condition | non_yim_condition]
+#                 removed_count_first_pass += len(rows_to_remove)
+                
+#                 # Update set of client IDs to remove
+#                 removed_client_ids.update(rows_to_remove["client_id"].unique())
+                
+#                 # Drop the identified rows
+#                 dataframes[df_name] = df.drop(index=rows_to_remove.index).reset_index(drop=True)
+
+#             except KeyError as e:
+#                 if log_message:
+#                     log_message(f"Column not found in {df_name}: {e}")
+#                 continue  # Continue to next DataFrame if there's an error
+
+#     # Second pass: remove all rows with client_ids marked for removal in any dataframe
+#     removed_count_second_pass = 0
+#     for df_name, df in dataframes.items():
+#         if "client_id" in df.columns:
+#             initial_len = len(df)
+#             # Keep rows where 'client_id' is not in 'removed_client_ids'
+#             dataframes[df_name] = df[~df["client_id"].isin(removed_client_ids)]
+#             removed_count_second_pass += initial_len - len(dataframes[df_name])
+
+#     if log_message:
+#         log_message(f"Removed {removed_count_first_pass} rows based on age criteria.")
+#         log_message(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
+#         print(f"Removed {removed_count_first_pass} rows based on age criteria.")
+#         print(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
+
+#     return dataframes
+
+def filter_post_codes_add_craven(dataframes, log_message=None):
+    print("Filtering postcodes and adding Craven column...")
+    if log_message:
+        log_message("Filtering postcodes and adding Craven column...")
+    
+    # Initialization
+    removed_client_ids_due_to_no_postcode = set()
+    total_rows_before = 0
+    total_rows_after = 0
+    total_craven_marked = 0
+
+    # Sets for postcode prefixes
+    bradford_prefixes = {"BD1", "BD10", "BD11", "BD12", "BD13", "BD14", "BD15", "BD16", "BD17", "BD18", "BD2", "BD20", "BD21", "BD22", "BD23", "BD3", "BD4", "BD5", "BD6", "BD7", "BD8", "BD9", "BD98", "BD99", "HD6", "HX2", "HX3", "HX7", "LS12", "LS19", "LS20", "LS21", "LS28", "LS29"}
+    craven_prefixes = {"BD20", "LS29"}
+
+    def extract_postcode_prefix(postcode):
+        # Convert any input to string and remove spaces
+        cleaned_postcode = ''.join(filter(str.isalnum, str(postcode).upper()))
+        
+        # Determine the prefix based on the length after removing spaces
+        # For postcodes with 6 characters (without spaces), the prefix is the first 3 characters
+        # For postcodes with 7 characters (without spaces), the prefix is the first 4 characters
+        if len(cleaned_postcode) == 6:
+            return cleaned_postcode[:3]
+        elif len(cleaned_postcode) == 7:
+            return cleaned_postcode[:4]
+        else:
+            # Handle other lengths conservatively, defaulting to the first 3 characters
+            return cleaned_postcode[:3]
+
+
+
+    # Loop through each dataframe
+    for df_name, df in dataframes.items():
+        if 'post_code' in df.columns:
+            # Initial count
+            total_rows_before += len(df)
+
+            # Standardize and extract prefixes
+            df['postcode_prefix'] = df['post_code'].apply(extract_postcode_prefix)
+            
+            # Marking Craven
+            df['craven'] = df['postcode_prefix'].isin(craven_prefixes)
+            total_craven_marked += df['craven'].sum()
+
+            # Apply filtering
+            df_filtered = df[df['postcode_prefix'].isin(bradford_prefixes.union(craven_prefixes))]
+            total_rows_after += len(df_filtered)
+
+            # Update dataframe without the temporary column
+            df_final = df_filtered.drop(columns=['postcode_prefix'])
+            dataframes[df_name] = df_final
+
+    # Reporting
+    print(f"Total rows before filtering: {total_rows_before}, after filtering: {total_rows_after}, Craven marked: {total_craven_marked}")
 
     if log_message:
-        log_message(f"Removed {removed_count_first_pass} rows based on age criteria.")
-        log_message(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
-    
+        log_message(f"Completed postcode filtering. Rows before: {total_rows_before}, after: {total_rows_after}, Craven marked: {total_craven_marked}")
+
     return dataframes
+
 
 
 

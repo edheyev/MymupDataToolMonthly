@@ -9,6 +9,48 @@ import pandas as pd
 import numpy as np
 
 
+import pandas as pd
+import os
+
+def load_data_files(directory, file_info, log_message=None):
+    print("Loading data files...")
+    # log_message("Loading data files...")
+    dataframes = {}
+    
+    if not os.listdir(directory):
+        raise ValueError(f"The directory {directory} is empty")
+
+    for key, info in file_info.items():
+        matching_files = [f for f in os.listdir(directory) if f.startswith(info["filename"].split(".")[0])]
+        
+        if not matching_files:
+            error_message = f"Error: Required file starting with '{info['filename'].split('.')[0]}' not found in directory."
+            print(error_message)
+            log_message(error_message)
+            sys.exit(1)  # Exit with an error code if files are missing
+        
+        combined_df_list = []
+        for file_name in matching_files:
+            full_path = os.path.join(directory, file_name)
+            try:
+                df = pd.read_csv(full_path)
+                combined_df_list.append(df)
+                print(f"> Loaded {key} from {file_name}")
+            except Exception as e:
+                print(f"Error loading {full_path}: {e}")
+                # log_message(f"Error loading {full_path}: {e}")
+                continue  # Optionally continue to try loading other files even if one fails
+        
+        # Combine all matching DataFrames into one DataFrame for this key
+        if combined_df_list:
+            dataframes[key] = pd.concat(combined_df_list, ignore_index=True)
+        else:
+            print(f"No dataframes were loaded for {key}, likely due to errors.")
+            log_message(f"No dataframes were loaded for {key}, likely due to errors.")
+    
+    return dataframes
+
+
 def find_dict_by_table_name(table_name, dict_array):
     for dictionary in dict_array:
         if dictionary.get("table_name") == table_name:

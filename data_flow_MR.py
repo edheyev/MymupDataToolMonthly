@@ -16,7 +16,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 # Now import your local modules
-from data_config import file_info, table_configs
+from data_config import file_info, table_configs, yim_providers, other_vcse
 from data_cleaning import (
     clean_column_names,
     remove_duplicates,
@@ -25,6 +25,9 @@ from data_cleaning import (
     validate_data_files,
     add_reason_to_contact,
     isolate_client_ages,
+    remove_invalid_rows,
+    remove_closure_cols,
+    filter_post_codes_add_craven
 )
 from MR_filters import filter_function_map
 
@@ -38,12 +41,15 @@ from data_utils import (
     calculate_percentage_row_total,
     is_percentage_row,
     is_average_row,
+    load_data_files
 )
 
 
 # Global variables
 log_queue = queue.Queue()
 root = None
+IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
+
 
 # Global queue for cleaned data
 cleaned_data_queue = queue.Queue()
@@ -189,7 +195,7 @@ def select_folder(start_date_entry, end_date_entry, root):
 
 def load_and_clean_data(folder_path, start_date, end_date):
     try:
-        raw_data = load_data_files(folder_path, file_info)
+        raw_data = load_data_files(folder_path, file_info, log_message=log_message)
         cleaned_data = clean_data(raw_data, start_date, end_date, log_message)
         # Put cleaned data into the queue
         cleaned_data_queue.put(cleaned_data)
@@ -198,103 +204,88 @@ def load_and_clean_data(folder_path, start_date, end_date):
         log_message(f"Error in data processing: {e}")
 
 
-# def main(directory, text_widget):
-#     global root
-#     print("Begin Processing files")
-#     log_message("Begin Processing files")
+def main_gui():
+    global root
+    root, file_button, start_date_entry, end_date_entry = create_logging_window()
+    root.protocol("WM_DELETE_WINDOW", lambda: root.quit())  # Proper shutdown on window close
+    root.mainloop()
 
-#     # Wait and get cleaned data from the queue
-#     try:
-#         cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
-#         # Proceed with validated data and other processing
-#         validated_data = validate_data_files(
-#             cleaned_data, file_info, log_message=log_message
-#         )
+    try:
+        # Wait and get cleaned data from the queue
+        cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
+        # Proceed with validated data and other processing
+        validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
 
-#         # Format the date as DD-MM-YYYY
-#         date_str = datetime.datetime.now().strftime("%d-%m-%Y")
+        # Define your franchise lists for each CSV
+        yim_providers = [
+            "Barnardos",
+            "Bradford Youth Service (BYS)",
+            "Brathay -MAGIC service type only",
+            "INCIC -service type CYP only",
+            "Mind in Bradford (MiB) service type Know Your Mind, Know Your Mind plus, Hospital Buddies BRI and Hospital Buddies AGH only",
+            "SELFA"
+        ]
 
-#         # Start with a basic file name
-#         file_string = f"output_csv_QR_{date_str}.csv"
+        other_vcse = [
+            "All Star Youth Entertainment",
+            "Bradford Counselling Service",
+            "Bradford Bereavement Support",
+            "Family Action Bradford",
+            "Roshnighar",
+            "STEP 2",
+            "The Cellar Trust"
+        ]
+        # Generate filenames based on the current date
+        date_str = datetime.datetime.now().strftime("%d-%m-%Y")
+        file_string_1 = f"output_csv_QR_{date_str}_franchise_group_1.csv"
+        file_string_2 = f"output_csv_QR_{date_str}_franchise_group_2.csv"
 
-#         # Initialize file counter
-#         file_counter = 1
+        # Generate CSV files for each franchise list
+        produce_tables(validated_data, file_string_1, yim_providers)
+        log_message("CSV saved. File name: " + file_string_1)
 
-#         # Check if file already exists; if so, append a counter to the filename
-#         if os.path.exists(os.path.join(directory, file_string)):
-#             file_string = f"output_csv_QR_{date_str}_{file_counter}.csv"
-#             while os.path.exists(os.path.join(directory, file_string)):
-#                 file_counter += 1
-#                 file_string = f"output_csv_QR_{date_str}_{file_counter}.csv"
+        produce_tables(validated_data, file_string_2, other_vcse)
+        log_message("CSV saved. File name: " + file_string_2)
 
-#         output_df = produce_tables(validated_data, file_string)
-#         log_message("CSV saved. File name: " + file_string)
-#         return output_df
-#     except queue.Empty:
-#         log_message("Error: No cleaned data received within the timeout period.")
-#         return None
-#     except Exception as e:
-#         log_message(f"Unexpected error: {e}")
-#         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
+        # Optionally update the GUI with completion status
+        text_widget.insert(tk.END, "CSV files have been successfully generated.\n")
+
+    except queue.Empty:
+        log_message("Error: No cleaned data received within the timeout period.")
+        text_widget.insert(tk.END, "Error: No cleaned data received within the timeout period.\n")
+    except Exception as e:
+        log_message(f"Unexpected error: {e}")
+        text_widget.insert(tk.END, f"Unexpected error: {e}\n")
+        sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
 
-# uncomment for headless mode
-def main(directory, start_date, end_date):
+def main_headless(directory, start_date, end_date):
+    print("Running in headless mode...")
     print("Begin Processing files in directory:", directory)
     log_message("Begin Processing files")
 
     try:
         raw_data = load_data_files(directory, file_info)
         cleaned_data = clean_data(raw_data, start_date, end_date, log_message)
-        validated_data = validate_data_files(
-            cleaned_data, file_info, log_message=log_message
-        )
-        file_string = "output_csv_QR.csv"
-        output_df = produce_tables(validated_data, file_string)
-        log_message("CSV saved. File name: " + file_string)
-        return output_df
+        validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
+
+        # File names for each franchise list
+        file_string_1 = "output_csv_QR_franchise_YIM.csv"
+        file_string_2 = "output_csv_QR_franchise_other_VCSE.csv"
+        
+        # Generate CSV files for each franchise list
+        output_df_1 = produce_tables(validated_data, file_string_1, yim_providers)
+        log_message("CSV saved. File name: " + file_string_1)
+        
+        output_df_2 = produce_tables(validated_data, file_string_2, other_vcse)
+        log_message("CSV saved. File name: " + file_string_2)
+        
+        # Return both DataFrames if needed, or adjust return statement as required
+        return output_df_1, output_df_2
+        
     except Exception as e:
         log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
-
-
-def load_data_files(directory, file_info):
-    print("Loading data files...")
-    log_message("Loading data files...")
-    dataframes = {}
-    
-    # Check if the directory is empty
-    if not os.listdir(directory):
-        raise ValueError(f"The directory {directory} is empty")
-
-    # Iterate through file_info and try to match with files in the directory
-    for key, info in file_info.items():
-        filename_start = info["filename"].split(".")[0]  # Get the start of the filename
-        found = False
-
-        for f in os.listdir(directory):
-            
-            if f.startswith(filename_start):
-                full_path = os.path.join(directory, f)
-                print(f"Attempting to load: {full_path}")
-                try:
-                    dataframes[key] = pd.read_csv(full_path)
-                    print(f"> Loaded {key} from {f}")
-                    found = True
-                    break
-                except Exception as e:
-                    print(f"Error loading {full_path}: {e}")
-
-        if not found:
-            error_message = f"Error: Required file starting with '{filename_start}' not found in directory."
-            print(error_message)
-            print("error_message")
-            log_message(error_message)
-            sys.exit(
-                1
-            )  # Exit the program with a non-zero exit code to indicate an error
-
-    return dataframes
 
 
 def clean_data(dataframes, start_date, end_date, log_message=None):
@@ -310,14 +301,22 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
         if log_message:
             log_message("Cleaning dataframes...")
 
-        # Perform each cleaning step inside a try-except block
-        cleaned_dataframes = clean_column_names(dataframes, log_message=log_message)
+        cleaned_dataframes = remove_invalid_rows(dataframes, log_message=log_message)
+
+        cleaned_dataframes = clean_column_names(cleaned_dataframes, log_message=log_message)
         
-        cleaned_dataframes = isolate_client_ages(cleaned_dataframes, 3, 26, log_message=log_message)
+        cleaned_dataframes = isolate_client_ages(cleaned_dataframes, yim_providers, log_message=log_message)
+        
+        cleaned_dataframes = remove_closure_cols(cleaned_dataframes, log_message=log_message)
+        
+        cleaned_dataframes = filter_post_codes_add_craven(cleaned_dataframes, log_message)
+        
+        cleaned_dataframes = remove_duplicates(cleaned_dataframes, log_message=log_message)
         
         # cleaned_dataframes = isolate_reporting_period(
         #     cleaned_dataframes, start_date, end_date, log_message=log_message
         # )
+        
 
     except Exception as e:
         error_message = f"An error occurred while cleaning dataframes: {e}"
@@ -328,22 +327,60 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
 
     return cleaned_dataframes
 
-def produce_tables(dataframes, file_string):
+
+# def produce_tables(dataframes, file_string, franchise_list):
+#     print("Producing output tables...")
+#     log_message("Producing output tables...")
+
+#     with open(file_string, "w", newline="") as f:
+#         for name in filter_function_map.keys():
+#             try:
+#                 this_table = filter_service_information(dataframes, find_dict_by_table_name(name, table_configs), franchise_list)
+                
+#                 # Write the table name on its own line
+#                 f.write(f"{name}\n")
+                
+#                 if not this_table.empty:
+#                     # Iterate over DataFrame rows and columns to write the entire table
+#                     for index, row in this_table.iterrows():
+#                         # Join all column values in a row into a single string separated by commas
+#                         row_str = ','.join(str(value) for value in row)
+#                         f.write(f"{row_str}\n")
+#                 else:
+#                     print(f"No data to write for {name}")
+#                     log_message(f"No data to write for {name}")
+                
+#                 # Add a newline after the table has been added for separation
+#                 f.write("\n")
+                
+#             except Exception as e:
+#                 log_message(f"Error processing filter for {name}: {e}")
+#                 continue  # Skip to the next iteration if there's an error
+            
+def produce_tables(dataframes, file_string, franchise_list):
     print("Producing output tables...")
     log_message("Producing output tables...")
 
+    last_sheet_name = None  # Initialize variable to track the last processed sheet name
+
     with open(file_string, "w", newline="") as f:
         for name in filter_function_map.keys():
-            try:
-                this_table = filter_service_information(dataframes, find_dict_by_table_name(name, table_configs))
-                
+            config = find_dict_by_table_name(name, table_configs)
+            this_table = filter_service_information(dataframes, config, franchise_list)
+
+            # Check if the sheet name has changed (or if it's the first table being processed)
+            if config["sheet_name"] != last_sheet_name:
+                # Print the sheet name if it's the first table in the sheet or if the sheet name has changed
+                f.write(f"{config['sheet_name']}\n")
+                last_sheet_name = config["sheet_name"]  # Update the last processed sheet name
+
+            try:                
                 # Write the table name on its own line
                 f.write(f"{name}\n")
                 
                 if not this_table.empty:
                     # Iterate over DataFrame rows and columns to write the entire table
                     for index, row in this_table.iterrows():
-                        # Join all column values in a row into a single string separated by commas
                         row_str = ','.join(str(value) for value in row)
                         f.write(f"{row_str}\n")
                 else:
@@ -358,7 +395,7 @@ def produce_tables(dataframes, file_string):
                 continue  # Skip to the next iteration if there's an error
 
 
-def filter_service_information(dataframes, config):
+def filter_service_information(dataframes, config, franchise_list):
     print("Generating table...", config["table_name"])
     log_message(f"Generating table... {config['table_name']}")
 
@@ -380,7 +417,10 @@ def filter_service_information(dataframes, config):
                 continue
 
             dataframe_key = default_db_key
+            # Filter the dataframe by franchise before applying further processing
             this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
+            
+            this_row_dataframe = this_row_dataframe[this_row_dataframe['franchise'].isin(franchise_list)]
             filtered_data = filter_func(this_row_dataframe, row, dfname=dataframe_key)
 
             if isinstance(filtered_data, str):
@@ -406,19 +446,12 @@ def filter_service_information(dataframes, config):
     return pd.DataFrame(result_list)
 
 
-
-
-# if __name__ == "__main__":
-#     root, file_button, start_date_entry, end_date_entry = create_logging_window()
-#     root.protocol(
-#         "WM_DELETE_WINDOW", lambda: root.quit()
-#     )  # Proper shutdown on window close
-#     root.mainloop()
-
-#     # uncomment for headless mode
 if __name__ == "__main__":
-    # Specify the directory and date range here
-    directory_path = "./data"
-    start_date = "2020-01-01"
-    end_date = "2024-03-31"
-    result = main(directory_path, start_date, end_date)
+    if IS_HEADLESS:
+        # Specify the directory and date range for headless mode
+        directory_path = "./data"
+        start_date = "2020-01-01"
+        end_date = "2024-03-31"
+        main_headless(directory_path, start_date, end_date)
+    else:
+        main_gui()
