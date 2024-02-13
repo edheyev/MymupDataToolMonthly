@@ -73,7 +73,10 @@ def calculate_percentage(numerator_df, denominator_df):
 
 
 def calculate_average(dataframe_and_column):
-    # Unpack the tuple into DataFrame and column name
+    # Ensure the input is actually a DataFrame and column tuple
+    if not isinstance(dataframe_and_column, tuple) or not hasattr(dataframe_and_column[0], 'columns'):
+        raise TypeError("Expected a tuple with a DataFrame and column name")
+    
     dataframe, column_name = dataframe_and_column
 
     # Check if the column exists in the DataFrame

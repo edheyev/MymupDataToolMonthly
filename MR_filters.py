@@ -5,6 +5,7 @@ Created on Tues Feb 06 15:58:58 2023
 @author: Ed Heywood-Everett
 """
 import pandas as pd
+import numpy as np
 
 def isolate_active_month(df, column, active_month):
     return df
@@ -442,6 +443,223 @@ def DNAs_and_cancellations_filter(df, row, dfname="empty"):
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
 
+def Goals_Based_Outcomes_filter(df, row, dfname="empty"):
+    
+    def calculate_average_scores(df):
+        # Ensure you're working on a copy of the DataFrame to avoid affecting the original data
+        df_copy = df.copy()
+
+        # Convert score columns to numeric, treating non-numeric values as NaN
+        for column in ['score_1', 'score_2', 'score_3']:
+            df_copy.loc[:, column] = pd.to_numeric(df_copy[column], errors='coerce')
+
+        # Calculate the average of the score columns, ignoring NaN values
+        df_copy.loc[:, 'average_score'] = df_copy[['score_1', 'score_2', 'score_3']].mean(axis=1, skipna=True)
+
+        return df_copy
+
+
+    try:
+        # First, filter based on the category
+        if "CIC/CLA" in row:
+            df = CIC_FILTER(df, dfname)
+        elif "SEN" in row:
+            df = SEN_FILTER(df, dfname)
+        elif "EHCP" in row:
+            df = EHCP_FILTER(df, dfname)
+        elif "CRAVEN" in row:
+            df = CRAVEN_FILTER(df, dfname)
+        elif "BRADFORD DISTRICT" in row:
+            df = BRADFORD_FILTER(df, dfname)
+        
+        # Now, filter based on the specific goal outcome type
+        if "Initials completed" in row:
+            # Assuming there's a way to determine if initials are completed (placeholder condition)
+            filtered_df = df[df['initial_or_follow_up'] == "Initial"]
+        elif "Follow ups completed" in row:
+            # Assuming there's a way to determine if follow-ups are completed (placeholder condition)
+            filtered_df = df[df['initial_or_follow_up'] == "Follow  up"]
+            
+            
+        elif "Initial score" in row:
+            filtered_df = df[df['initial_or_follow_up'] == "Initial"]
+            df_with_average = calculate_average_scores(filtered_df)
+            return(df_with_average, 'average_score')
+            
+            
+        elif"Follow up score" in row:
+            filtered_df = df[df['initial_or_follow_up'] == "Follow  up"]
+            df_with_average = calculate_average_scores(filtered_df)
+            return(df_with_average, 'average_score')
+            
+            
+        else:
+            # If the row doesn't match any expected pattern
+            return df
+        
+        return filtered_df
+    
+    except Exception as e:
+        print(f"Error in Goals_Based_Outcomes_filter with row: {row}, {e}. Current df: {dfname}")
+        raise Exception(f"Error in Goals_Based_Outcomes_filter with row: {row}, {e}. Current df is {dfname}")
+
+#goal themes sheet
+def All_Goal_Themes_filter(df, row, dfname="empty"):
+    # TODO ADD percentages to ting
+    try:
+        # Filter based on goal theme
+        if row in [
+            "Being able to maintain and build positive relationships",
+            "Being able to support others",
+            "Being better at managing my emotional wellbeing",
+            "Being better at managing risks and feeling safer",
+            "Covid-19 Support",
+            "Improving my confidence and self esteem",
+            "Improving my physical wellbeing",
+            "Reducing my isolation",
+            "Understanding who I am",
+        ]:
+            # Assuming 'goal_theme' is the column where these themes are listed
+            df_filtered = df[df['goal_theme'] == row]
+            return df_filtered
+
+        elif row == "TOTAL":
+            # Assuming 'TOTAL' requires a different type of calculation, e.g., counting all themes
+            # This could be a sum of counts for each theme, or a unique count of cases, etc.
+            # Adjust this logic based on what 'TOTAL' means in your context
+            # Example: return the count of all non-empty 'goal_theme' entries
+            total_count = df['goal_theme'].notnull().sum()
+            return f"Total Goal Themes: {total_count}"
+
+        else:
+            return "row not caught"
+
+    except Exception as e:
+        print(f"Error in All_Goal_Themes_filter with row: {row}, {e}. Current df: {dfname}")
+        raise Exception(f"Error in All_Goal_Themes_filter with row: {row}, {e}. Current df is {dfname}")
+
+def CIC_Goal_Themes_filter(df, row, dfname="empty"):
+    initial_filter = CIC_FILTER(df, dfname)
+    filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def SEN_Goal_Themes_filter(df, row, dfname="empty"):
+    initial_filter = SEN_FILTER(df, dfname)
+    filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def EHCP_Goal_Themes_filter(df, row, dfname="empty"):
+    initial_filter = EHCP_FILTER(df, dfname)
+    filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def CRAVEN_Goal_Themes_filter(df, row, dfname="empty"):
+    initial_filter = CRAVEN_FILTER(df, dfname)
+    filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def Bradford_District_Goal_Themes_filter(df, row, dfname="empty"):
+    initial_filter = BRADFORD_FILTER(df, dfname)
+    filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
+    return filtered_df
+
+# Discharge Data sheet
+
+def Overall_Discharges_filter(df, row, dfname="empty"):
+    # Mapping unique closure reasons to broader categories
+    closure_reason_map = {
+        "Planned ending met outcomes at Review Point": "Number completed treatment",
+        "Planned ending met outcomes at Assessment Point": "Number completed treatment",
+        "Admitted elsewhere (at the same or other Health Care Provider)": "Number signposted to another CCG provider",
+        "Treatment completed": "Number completed treatment",
+        "Planned ending without review": "Number completed treatment",
+        "Client disengages": "Number disengaged",
+        "Client did not attend": "Number who could not be contacted",
+        "Client requested discharge": "Number completed treatment",
+        "Client rejects referral": "Number inappropriate referrals",
+        "Refused to be seen": "Number inappropriate referrals",
+        "Client declined a service prior to or during assessment": "Number inappropriate referrals",
+        "Moved out of the area": "Number signposted to another CCG provider",
+        "No further treatment required": "Number completed treatment",
+        "Organisation cannot contact Client prior to assessment": "Number who could not be contacted",
+        "Organisation rejects referral - Threshold too high": "Number inappropriate referrals",
+        "Open access ended": "Number completed treatment",
+        "Organisation rejects referral - Referral not suitable pre-assessment/post-assessment": "Number inappropriate referrals",
+        "Client not available for pre-arranged appointments": "Number who could not be contacted",
+        "Decision made at review": "Number completed treatment",
+        "Referred to other speciality/service (at the same or other Health Care Provider)": "Number signposted to another CCG provider",
+    }
+
+    try:
+        # Filter DataFrame based on the broader category
+        filtered_reasons = {value: key for key, value in closure_reason_map.items() if value == row}
+        if row in ["Number completed treatment", "Number inappropriate referrals", "Number who could not be contacted", "Number disengaged", "Number signposted to another CCG provider"]:
+            df_filtered = df[df['file_closure_reason'].map(closure_reason_map) == row]
+        elif row == "Not Disclosed":
+            # Assuming "Not Disclosed" means missing or unspecified closure reasons
+            df_filtered = df[pd.isnull(df['file_closure_reason']) | (df['file_closure_reason'] == "Not Disclosed")]
+
+        return df_filtered
+
+    except Exception as e:
+        print(f"Error in file_closure_reason_filter with row: {row}, {e}. Current df: {dfname}")
+        raise Exception(f"Error in file_closure_reason_filter with row: {row}, {e}. Current df is {dfname}")
+
+def Discharges_CIC_CLA_filter(df, row, dfname = 'empty'):
+    initial_filter = CIC_FILTER(df, dfname)
+    filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def Discharges_SEN_filter(df, row, dfname = 'empty'):
+    initial_filter = SEN_FILTER(df, dfname)
+    filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def Discharges_EHCP_filter(df, row, dfname = 'empty'):
+    initial_filter = EHCP_FILTER(df, dfname)
+    filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def Discharges_CRAVEN_filter(df, row, dfname = 'empty'):
+    initial_filter = CRAVEN_FILTER(df, dfname)
+    filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def Discharges_BRADFORD_DISTRICT_filter(df, row, dfname = 'empty'):
+    initial_filter = BRADFORD_FILTER(df, dfname)
+    filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
+    return filtered_df
+
+# wait list data sheet
+
+def Overall_Number_on_Waiting_list_filter(df, row, dfname = 'empty'):
+    
+    
+    try:
+        # filter all currently on waiting list
+        df = df[df['client_state'] == "Waiting List"]
+        if row == "All":
+            return df
+        elif row == "CIC/CLA":
+            return CIC_FILTER(df, dfname)
+        elif row == "SEN":
+            return SEN_FILTER(df, dfname)
+        elif row == "EHCP":
+            return EHCP_FILTER(df, dfname)
+        elif row == "CRAVEN":
+            return CRAVEN_FILTER(df, dfname)
+        elif row == "BRADFORD DISTRICT":
+            return BRADFORD_FILTER(df, dfname)
+        
+        return "row not caught"
+    except Exception as e:
+        print(
+            f"Error in common_demographic_filter with row : {e}. Current df: {dfname}"
+        )
+        raise Exception(
+            f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
+        )
+
 filter_function_map = {
     "Overall_caseload_and_referrals":OCR_filter,
     "CIC_CLA_caseload_and_referrals":CIC_CLA_caseload_and_referrals_filter,
@@ -463,20 +681,20 @@ filter_function_map = {
     "Source_of_Referrals_BRADFORD_DISTRICT":Source_of_Referrals___BRADFORD_DISTRICT_filter,
     "No_of_CYP_receiving_a_second_attended_contact_with_mental_health_services": No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter,
     "DNAs_and_cancellations":DNAs_and_cancellations_filter,
-    # "Goals_Based_Outcomes":,
-    # "All_Goal_Themes":,
-    # "CIC_Goal_Themes":,
-    # "SEN_Goal_Themes":,
-    # "EHCP_Goal_Themes":,
-    # "CRAVEN_Goal_Themes":,
-    # "Bradford_District_Goal_Themes":,
-    # "Overall_Discharges":,
-    # "Discharges___CIC_CLA":,
-    # "Discharges___SEN":,
-    # "Discharges___EHCP":,
-    # "Discharges___CRAVEN":,
-    # "Discharges___BRADFORD_DISTRICT":,
-    # "Overall_Number_on_Waiting_list__CYP_referred_but_yet_to_attend_1st_appointment_":,
+    "Goals_Based_Outcomes":Goals_Based_Outcomes_filter,
+    "All_Goal_Themes":All_Goal_Themes_filter,
+    "CIC_Goal_Themes":CIC_Goal_Themes_filter,
+    "SEN_Goal_Themes":SEN_Goal_Themes_filter,
+    "EHCP_Goal_Themes":EHCP_Goal_Themes_filter,
+    "CRAVEN_Goal_Themes":CRAVEN_Goal_Themes_filter,
+    "Bradford_District_Goal_Themes":Bradford_District_Goal_Themes_filter,
+    "Overall_Discharges":Overall_Discharges_filter,
+    "Discharges_CIC_CLA":Discharges_CIC_CLA_filter,
+    "Discharges_SEN":Discharges_SEN_filter,
+    "Discharges_EHCP":Discharges_EHCP_filter,
+    "Discharges_CRAVEN":Discharges_CRAVEN_filter,
+    "Discharges_BRADFORD_DISTRICT":Discharges_BRADFORD_DISTRICT_filter,
+    "Overall_Number_on_Waiting_list":Overall_Number_on_Waiting_list_filter,
     # "Overall_Wait_Times":,
     # "CIC_CLA_Wait_Times":,
     # "SEN_Wait_Times":,
