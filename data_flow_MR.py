@@ -27,7 +27,8 @@ from data_cleaning import (
     isolate_client_ages,
     remove_invalid_rows,
     remove_closure_cols,
-    filter_post_codes_add_craven
+    filter_post_codes_add_craven,
+    clean_dates
 )
 from MR_filters import filter_function_map
 
@@ -313,6 +314,9 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
         
         cleaned_dataframes = remove_duplicates(cleaned_dataframes, log_message=log_message)
         
+        cleaned_dataframes = clean_dates(cleaned_dataframes, log_message=log_message)
+        
+        
         # cleaned_dataframes = isolate_reporting_period(
         #     cleaned_dataframes, start_date, end_date, log_message=log_message
         # )
@@ -398,7 +402,7 @@ def produce_tables(dataframes, file_string, franchise_list):
 def filter_service_information(dataframes, config, franchise_list):
     print("Generating table...", config["table_name"])
     log_message(f"Generating table... {config['table_name']}")
-
+        
     row_names = config["row_names"]
     placeholder_rows = config.get("placeholder_text", {})
     default_db_key = config.get("row_db_default", "Default Logic")

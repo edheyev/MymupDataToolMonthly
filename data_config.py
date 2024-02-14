@@ -1099,110 +1099,92 @@ Overall_Number_on_Waiting_list = {
 }
 
 Overall_Wait_Times = {
-    "sheet_name": "Wait Times",
-    "table_name": "Overall Wait Times",
+    "sheet_name": "Wait_Times",
+    "table_name": "Overall_Wait_Times",
     "row_names": [
         "Average Weeks from referral to 1st attended contact/indirect",
         "Average Weeks from referral to 2nd attended contact/indirect",
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {
-        "Average Weeks from referral to 1st attended contact/indirect": "todo",
-        "Average Weeks from referral to 2nd attended contact/indirect": "todo",
-        "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect": "todo",
     },
-    "mib_row_db_default": "CYPMH_Referrals",
-    "row_db_default": "CYPMH_Referrals",
+    "mib_row_db_default": "CYPMH_Two_Contacts",
+    "row_db_default": "CYPMH_Two_Contacts",
 }
 
 CIC_CLA_Wait_Times = {
-    "sheet_name": "Wait Times",
-    "table_name": "CIC/CLA Wait Times",
+    "sheet_name": "Wait_Times",
+    "table_name": "CIC_CLA_Wait_Times",
     "row_names": [
         "Average Weeks from referral to 1st attended contact/indirect",
         "Average Weeks from referral to 2nd attended contact/indirect",
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {
-        "Average Weeks from referral to 1st attended contact/indirect": "todo",
-        "Average Weeks from referral to 2nd attended contact/indirect": "todo",
-        "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect": "todo",
     },
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
+    "row_db_default": "CYPMH_Two_Contacts_MIB",
 }
 
 SEN_Wait_Times = {
-    "sheet_name": "Wait Times",
-    "table_name": "SEN Wait Times",
+    "sheet_name": "Wait_Times",
+    "table_name": "SEN_Wait_Times",
     "row_names": [
         "Average Weeks from referral to 1st attended contact/indirect",
         "Average Weeks from referral to 2nd attended contact/indirect",
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {
-        "Average Weeks from referral to 1st attended contact/indirect": "todo",
-        "Average Weeks from referral to 2nd attended contact/indirect": "todo",
-        "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect": "todo",
     },
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
+    "row_db_default": "CYPMH_Two_Contacts_MIB",
 }
 
 EHCP_Wait_Times = {
-    "sheet_name": "Wait Times",
-    "table_name": "EHCP Wait Times",
+    "sheet_name": "Wait_Times",
+    "table_name": "EHCP_Wait_Times",
     "row_names": [
         "Average Weeks from referral to 1st attended contact/indirect",
         "Average Weeks from referral to 2nd attended contact/indirect",
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {
-        "Average Weeks from referral to 1st attended contact/indirect": "todo",
-        "Average Weeks from referral to 2nd attended contact/indirect": "todo",
-        "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect": "todo",
     },
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
+    "row_db_default": "CYPMH_Two_Contacts_MIB",
 }
 
 CRAVEN_Wait_Times = {
-    "sheet_name": "Wait Times",
-    "table_name": "CRAVEN Wait Times",
+    "sheet_name": "Wait_Times",
+    "table_name": "CRAVEN_Wait_Times",
     "row_names": [
         "Average Weeks from referral to 1st attended contact/indirect",
         "Average Weeks from referral to 2nd attended contact/indirect",
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {
-        "Average Weeks from referral to 1st attended contact/indirect": "todo",
-        "Average Weeks from referral to 2nd attended contact/indirect": "todo",
-        "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect": "todo",
     },
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
+    "row_db_default": "CYPMH_Two_Contacts_MIB",
 }
 
 BRADFORD_DISTRICT_Wait_Times = {
-    "sheet_name": "Wait Times",
-    "table_name": "BRADFORD DISTRICT Wait Times",
+    "sheet_name": "Wait_Times",
+    "table_name": "BRADFORD_DISTRICT_Wait_Times",
     "row_names": [
         "Average Weeks from referral to 1st attended contact/indirect",
         "Average Weeks from referral to 2nd attended contact/indirect",
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {
-        "Average Weeks from referral to 1st attended contact/indirect": "todo",
-        "Average Weeks from referral to 2nd attended contact/indirect": "todo",
-        "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect": "todo",
     },
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
+    "row_db_default": "CYPMH_Two_Contacts_MIB",
 }
 
 Yim_Live = {
-    "sheet_name": "YIM LIVE & KCU Delivery",
-    "table_name": "Yim Live",
+    "sheet_name": "YIM_LIVE_&_KCU_Delivery",
+    "table_name": "Yim_Live",
     "row_names": ["Number Sessions", "Number Participants"],
     "placeholder_text": {"Number Sessions": "todo", "Number Participants": "todo"},
     "mib_row_db_default": "CYPMH_Clients_All",
@@ -1210,7 +1192,7 @@ Yim_Live = {
 }
 
 KCU = {
-    "sheet_name": "YIM LIVE & KCU Delivery",
+    "sheet_name": "YIM_LIVE_&_KCU_Delivery",
     "table_name": "KCU",
     "row_names": ["Number Schools/Youth Settings", "Number Participants"],
     "placeholder_text": {

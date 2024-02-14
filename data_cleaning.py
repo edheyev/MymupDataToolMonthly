@@ -404,6 +404,39 @@ def add_reason_to_file_closures(dataframes, log_message=None):
             log_message(f"An error occurred: {e}")
         return None
 
+import pandas as pd
+
+def clean_dates(dataframes, log_message=None):
+    date_cols = ["referral_date", "first_contact_/_indirect_date", "second_contact_/_indirect_date"]
+    
+    def clean_date_column(df, column_name):
+        """Cleans a date column in a DataFrame."""
+        # Define the date format
+        date_format = "%d/%m/%Y"
+        
+        # Attempt to parse the date string into datetime object, ignoring hours, minutes, and seconds
+        df[column_name] = pd.to_datetime(df[column_name], format="%d/%m/%Y %H:%M", errors='coerce')
+        
+        # Keep only the date part
+        df[column_name] = df[column_name].dt.strftime(date_format)
+
+    cleaned_dataframes = {}
+    
+    for df_name, df in dataframes.items():
+        if log_message:
+            log_message(f"Cleaning dates in {df_name}...")
+        else:
+            print(f"Cleaning dates in {df_name}...")
+        for col in date_cols:
+            if col in df.columns:
+                clean_date_column(df, col)
+        cleaned_dataframes[df_name] = df
+    
+    return cleaned_dataframes
+
+
+    
+    
 
 def add_reason_to_contact(dataframes, log_message=None):
     print("Adding 'file_closure_reason' to specified DataFrames...")

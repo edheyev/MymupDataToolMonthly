@@ -12,21 +12,30 @@ import numpy as np
 import pandas as pd
 import os
 
+import os
+import pandas as pd
+import sys
+
+import os
+import pandas as pd
+import sys
+
 def load_data_files(directory, file_info, log_message=None):
     print("Loading data files...")
-    # log_message("Loading data files...")
     dataframes = {}
     
     if not os.listdir(directory):
         raise ValueError(f"The directory {directory} is empty")
 
     for key, info in file_info.items():
-        matching_files = [f for f in os.listdir(directory) if f.startswith(info["filename"].split(".")[0])]
+        base_filename = info["filename"].split(".")[0]
+        # Adjust the pattern to include files with and without '_mib_' after the base filename
+        matching_files = [f for f in os.listdir(directory) if base_filename in f and (f.endswith(".csv") or "_mib_" in f)]
         
         if not matching_files:
-            error_message = f"Error: Required file starting with '{info['filename'].split('.')[0]}' not found in directory."
+            error_message = f"Error: Required file starting with '{base_filename}' not found in directory."
             print(error_message)
-            log_message(error_message)
+            if log_message: log_message(error_message)
             sys.exit(1)  # Exit with an error code if files are missing
         
         combined_df_list = []
@@ -38,7 +47,7 @@ def load_data_files(directory, file_info, log_message=None):
                 print(f"> Loaded {key} from {file_name}")
             except Exception as e:
                 print(f"Error loading {full_path}: {e}")
-                # log_message(f"Error loading {full_path}: {e}")
+                if log_message: log_message(f"Error loading {full_path}: {e}")
                 continue  # Optionally continue to try loading other files even if one fails
         
         # Combine all matching DataFrames into one DataFrame for this key
@@ -46,10 +55,35 @@ def load_data_files(directory, file_info, log_message=None):
             dataframes[key] = pd.concat(combined_df_list, ignore_index=True)
         else:
             print(f"No dataframes were loaded for {key}, likely due to errors.")
-            log_message(f"No dataframes were loaded for {key}, likely due to errors.")
+            if log_message: log_message(f"No dataframes were loaded for {key}, likely due to errors.")
     
     return dataframes
 
+def isolate_date_range(df, date_column, start_date, end_date):
+    """
+    Filters the DataFrame to include rows where the date in the specified column falls within the given date range.
+
+    Parameters:
+    - df: DataFrame to filter.
+    - date_column: The name of the column containing date values.
+    - start_date: The start date of the range as a string in "%d/%m/%Y" format.
+    - end_date: The end date of the range as a string in "%d/%m/%Y" format.
+
+    Returns:
+    - A DataFrame filtered to include only rows within the specified date range.
+    """
+    # Ensure the date column is in datetime format with the correct dayfirst setting
+    df[date_column] = pd.to_datetime(df[date_column], format="%d/%m/%Y", errors='coerce', dayfirst=True)
+
+    # Convert start and end dates to datetime for comparison
+    start_date = pd.to_datetime(start_date, format="%d/%m/%Y", dayfirst=True)
+    end_date = pd.to_datetime(end_date, format="%d/%m/%Y", dayfirst=True)
+
+    # Filter the DataFrame based on the date range
+    mask = (df[date_column] >= start_date) & (df[date_column] <= end_date)
+    filtered_df = df.loc[mask]
+
+    return filtered_df
 
 def find_dict_by_table_name(table_name, dict_array):
     for dictionary in dict_array:

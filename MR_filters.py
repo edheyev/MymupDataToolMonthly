@@ -7,8 +7,8 @@ Created on Tues Feb 06 15:58:58 2023
 import pandas as pd
 import numpy as np
 
-def isolate_active_month(df, column, active_month):
-    return df
+from data_utils import isolate_date_range
+
 
 def CIC_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'looked_after_child' column is 'YES'
@@ -39,7 +39,7 @@ def BRADFORD_FILTER(df, df_name="empty"):
 
 # referalls sheet
 
-def OCR_filter(df, row, dfname="empty"):
+def OCR_filter(df, row, dfname="empty", date_range=None):
     # isolate active month TODO
     try:
         if row == "Number referrals":
@@ -65,35 +65,35 @@ def OCR_filter(df, row, dfname="empty"):
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
          
-def CIC_CLA_caseload_and_referrals_filter(df, row, dfname="empty"):
+def CIC_CLA_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = CIC_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def SEN_caseload_and_referrals_filter(df, row, dfname="empty"):
+def SEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = SEN_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def EHCP_caseload_and_referrals_filter(df, row, dfname="empty"):
+def EHCP_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = EHCP_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def CRAVEN_caseload_and_referrals_filter(df, row, dfname="empty"):
+def CRAVEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = CRAVEN_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def BRADFORD_DISTRICT_caseload_and_referrals_filter(df, row, dfname="empty"):
+def BRADFORD_DISTRICT_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = BRADFORD_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
@@ -660,6 +660,72 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname = 'empty'):
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
 
+
+#wait times sheet
+
+def Overall_Wait_Times_filter(df, row, dfname="empty"):
+    try:
+        # Create a copy of the DataFrame to avoid SettingWithCopyWarning
+        df = df.copy()
+
+        # Now proceed with your existing logic
+        date_cols = ['first_contact_/_indirect_date', 'referral_date', 'second_contact_/_indirect_date']
+        for col in date_cols:
+            df.loc[:, col] = pd.to_datetime(df[col], format='%d/%m/%Y', errors='coerce')
+
+        # Calculate differences in weeks as before
+        df.loc[:, 'first_contact_referral_diff'] = (df.loc[:, 'first_contact_/_indirect_date'] - df.loc[:, 'referral_date']) / pd.Timedelta(weeks=1)
+        df.loc[:, 'second_contact_referral_diff'] = (df.loc[:, 'second_contact_/_indirect_date'] - df.loc[:, 'referral_date']) / pd.Timedelta(weeks=1)
+        df.loc[:, 'second_first_contact_diff'] = (df.loc[:, 'second_contact_/_indirect_date'] - df.loc[:, 'first_contact_/_indirect_date']) / pd.Timedelta(weeks=1)
+
+        # Drop rows where 'second_contact_/_indirect_date' is NaT if those rows are not relevant for some calculations
+        df_filtered = df.dropna(subset=['second_contact_/_indirect_date'])
+
+        # Filtering logic based on the 'row' parameter
+        if row == "Average Weeks from referral to 1st attended contact/indirect":
+            return (df_filtered, 'first_contact_referral_diff')
+        elif row == "Average Weeks from referral to 2nd attended contact/indirect":
+            return (df_filtered, 'second_contact_referral_diff')
+        elif row == "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect":
+            return (df_filtered, 'second_first_contact_diff')
+    except Exception as e:
+        print(f"Error in Overall_Wait_Times_filter with row: {e}. Current df: {dfname}")
+        raise
+
+    return df
+
+def CIC_CLA_Wait_Times_filter(df, row, dfname='empty'):
+    initial_filter = CIC_FILTER(df, dfname)
+    filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def SEN_Wait_Times_filter(df, row, dfname='empty'):
+    initial_filter = SEN_FILTER(df, dfname)
+    filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def EHCP_Wait_Times_filter(df, row, dfname='empty'):
+    initial_filter = EHCP_FILTER(df, dfname)
+    filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def CRAVEN_Wait_Times_filter(df, row, dfname='empty'):
+    initial_filter = CRAVEN_FILTER(df, dfname)
+    filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def BRADFORD_DISTRICT_Wait_Times_filter(df, row, dfname='empty'):
+    initial_filter = BRADFORD_FILTER(df, dfname)
+    filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
+    return filtered_df
+
+def Yim_Live_filter(df, row, dfname = "empty"):
+    return df
+
+def KCU_filter(df, row, dfname = "empty"):
+    return df
+
+
 filter_function_map = {
     "Overall_caseload_and_referrals":OCR_filter,
     "CIC_CLA_caseload_and_referrals":CIC_CLA_caseload_and_referrals_filter,
@@ -695,12 +761,12 @@ filter_function_map = {
     "Discharges_CRAVEN":Discharges_CRAVEN_filter,
     "Discharges_BRADFORD_DISTRICT":Discharges_BRADFORD_DISTRICT_filter,
     "Overall_Number_on_Waiting_list":Overall_Number_on_Waiting_list_filter,
-    # "Overall_Wait_Times":,
-    # "CIC_CLA_Wait_Times":,
-    # "SEN_Wait_Times":,
-    # "EHCP_Wait_Times":,
-    # "CRAVEN_Wait_Times":,
-    # "BRADFORD_DISTRICT_Wait_Times":,
-    # "Yim_Live":,
-    # "KCU":,
+    "Overall_Wait_Times":Overall_Wait_Times_filter,
+    "CIC_CLA_Wait_Times":CIC_CLA_Wait_Times_filter,
+    "SEN_Wait_Times":SEN_Wait_Times_filter,
+    "EHCP_Wait_Times":EHCP_Wait_Times_filter,
+    "CRAVEN_Wait_Times":CRAVEN_Wait_Times_filter,
+    "BRADFORD_DISTRICT_Wait_Times":BRADFORD_DISTRICT_Wait_Times_filter,
+    "Yim_Live":Yim_Live_filter,
+    "KCU":KCU_filter,
 }
