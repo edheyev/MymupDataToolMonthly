@@ -36,12 +36,12 @@ def BRADFORD_FILTER(df, df_name="empty"):
 
     return filtered_df
     
-
 # referalls sheet
 
 def OCR_filter(df, row, dfname="empty", date_range=None):
-    # isolate active month TODO
     try:
+        df = isolate_date_range(df, "referral_date",date_range)
+        
         if row == "Number referrals":
             return df
         elif row == "Number unique referrals":
@@ -102,7 +102,9 @@ def BRADFORD_DISTRICT_caseload_and_referrals_filter(df, row, dfname="empty", dat
 
 # demographics sheet
 
-def All_Referrals_by_demographics_filter(df, row, dfname="empty"):
+def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
+    df = isolate_date_range(df, "referral_date",date_range)
+    
     try:
         # List for age categories
         age_categories = [
@@ -217,35 +219,35 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty"):
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
               
-def All_CIC_CLA_Referrals_by_demographics_filter(df, row, dfname="empty"):
+def All_CIC_CLA_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = CIC_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def All_SEN_Referrals_by_demographics_filter(df, row, dfname="empty"):
+def All_SEN_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = SEN_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def All_EHCP_Referrals_by_demographics_filter(df, row, dfname="empty"):
+def All_EHCP_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = EHCP_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def All_CRAVEN_Referrals_by_demographics_filter(df, row, dfname="empty"):
+def All_CRAVEN_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = CRAVEN_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def BRADFORD_DISTRICT_Referrals_by_demographics_filter(df, row, dfname="empty"):
+def BRADFORD_DISTRICT_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = BRADFORD_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
@@ -254,7 +256,9 @@ def BRADFORD_DISTRICT_Referrals_by_demographics_filter(df, row, dfname="empty"):
 
 # referral source sheet
 
-def Source_of_All_Referrals_filter(df, row, dfname="empty"):
+def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
+    df = isolate_date_range(df, "referral_date",date_range)
+    
     try:
         # Mapping from 'row_names' to 'referral_source' column values in the dataframe
         source_map = {
@@ -340,35 +344,35 @@ def Source_of_All_Referrals_filter(df, row, dfname="empty"):
         print(f"Error in referral_source_filter with row: {row}, {e}. Current df: {dfname}")
         raise Exception(f"Error in referral_source_filter with row: {row}, {e}. Current df is {dfname}")
 
-def Source_of_Referrals___CIC_CLA_filter(df, row, dfname="empty"):
+def Source_of_Referrals___CIC_CLA_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = CIC_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def Source_of_Referrals___SEN_filter(df, row, dfname="empty"):
+def Source_of_Referrals___SEN_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = SEN_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def Source_of_Referrals___EHCP_filter(df, row, dfname="empty"):
+def Source_of_Referrals___EHCP_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = EHCP_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def Source_of_Referrals___CRAVEN_filter(df, row, dfname="empty"):
+def Source_of_Referrals___CRAVEN_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = CRAVEN_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def Source_of_Referrals___BRADFORD_DISTRICT_filter(df, row, dfname="empty"):
+def Source_of_Referrals___BRADFORD_DISTRICT_filter(df, row, dfname="empty", date_range=None):
     
     initial_filtered_df = BRADFORD_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
@@ -377,8 +381,8 @@ def Source_of_Referrals___BRADFORD_DISTRICT_filter(df, row, dfname="empty"):
 
 # two attended contacts sheet
 
-def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter(df, row, dfname="empty"):
-    # TODO some extra data cleaning - check pad
+def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter(df, row, dfname="empty", date_range=None):
+    df = isolate_date_range(df, "referral_date",date_range)
     
     try:
         if row == "All":
@@ -405,8 +409,9 @@ def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_f
     
 # dna and cancellations sheet
 
-def DNAs_and_cancellations_filter(df, row, dfname="empty"):
-    # isolate active month TODO
+def DNAs_and_cancellations_filter(df, row, dfname="empty", date_range=None):
+    df = isolate_date_range(df, "contact_date", date_range)
+
     # Initial filter based on the category
     if "CIC/CLA" in row:
         df = CIC_FILTER(df, dfname)
@@ -443,7 +448,8 @@ def DNAs_and_cancellations_filter(df, row, dfname="empty"):
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
 
-def Goals_Based_Outcomes_filter(df, row, dfname="empty"):
+def Goals_Based_Outcomes_filter(df, row, dfname="empty", date_range=None):
+    df = isolate_date_range(df, "goal_date",date_range)
     
     def calculate_average_scores(df):
         # Ensure you're working on a copy of the DataFrame to avoid affecting the original data
@@ -504,7 +510,9 @@ def Goals_Based_Outcomes_filter(df, row, dfname="empty"):
         raise Exception(f"Error in Goals_Based_Outcomes_filter with row: {row}, {e}. Current df is {dfname}")
 
 #goal themes sheet
-def All_Goal_Themes_filter(df, row, dfname="empty"):
+def All_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
+    df = isolate_date_range(df, "goal_date", date_range)
+
     # TODO ADD percentages to ting
     try:
         # Filter based on goal theme
@@ -538,34 +546,36 @@ def All_Goal_Themes_filter(df, row, dfname="empty"):
         print(f"Error in All_Goal_Themes_filter with row: {row}, {e}. Current df: {dfname}")
         raise Exception(f"Error in All_Goal_Themes_filter with row: {row}, {e}. Current df is {dfname}")
 
-def CIC_Goal_Themes_filter(df, row, dfname="empty"):
+def CIC_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = CIC_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
 
-def SEN_Goal_Themes_filter(df, row, dfname="empty"):
+def SEN_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = SEN_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
 
-def EHCP_Goal_Themes_filter(df, row, dfname="empty"):
+def EHCP_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = EHCP_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
 
-def CRAVEN_Goal_Themes_filter(df, row, dfname="empty"):
+def CRAVEN_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = CRAVEN_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Bradford_District_Goal_Themes_filter(df, row, dfname="empty"):
+def Bradford_District_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = BRADFORD_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
 
 # Discharge Data sheet
 
-def Overall_Discharges_filter(df, row, dfname="empty"):
+def Overall_Discharges_filter(df, row, dfname="empty", date_range=None):
+    df = isolate_date_range(df, "file_closure",date_range)
+    
     # Mapping unique closure reasons to broader categories
     closure_reason_map = {
         "Planned ending met outcomes at Review Point": "Number completed treatment",
@@ -605,34 +615,35 @@ def Overall_Discharges_filter(df, row, dfname="empty"):
         print(f"Error in file_closure_reason_filter with row: {row}, {e}. Current df: {dfname}")
         raise Exception(f"Error in file_closure_reason_filter with row: {row}, {e}. Current df is {dfname}")
 
-def Discharges_CIC_CLA_filter(df, row, dfname = 'empty'):
+def Discharges_CIC_CLA_filter(df, row, dfname = 'empty', date_range=None):
     initial_filter = CIC_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Discharges_SEN_filter(df, row, dfname = 'empty'):
+def Discharges_SEN_filter(df, row, dfname = 'empty', date_range=None):
     initial_filter = SEN_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Discharges_EHCP_filter(df, row, dfname = 'empty'):
+def Discharges_EHCP_filter(df, row, dfname = 'empty', date_range=None):
     initial_filter = EHCP_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Discharges_CRAVEN_filter(df, row, dfname = 'empty'):
+def Discharges_CRAVEN_filter(df, row, dfname = 'empty', date_range=None):
     initial_filter = CRAVEN_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Discharges_BRADFORD_DISTRICT_filter(df, row, dfname = 'empty'):
+def Discharges_BRADFORD_DISTRICT_filter(df, row, dfname = 'empty', date_range=None):
     initial_filter = BRADFORD_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
 # wait list data sheet
 
-def Overall_Number_on_Waiting_list_filter(df, row, dfname = 'empty'):
+def Overall_Number_on_Waiting_list_filter(df, row, dfname = 'empty', date_range=None):
+    df = isolate_date_range(df, "referral_date", date_range)
     
     
     try:
@@ -660,10 +671,11 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname = 'empty'):
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
 
-
 #wait times sheet
 
-def Overall_Wait_Times_filter(df, row, dfname="empty"):
+def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
+    df = isolate_date_range(df, "referral_date", date_range)
+    
     try:
         # Create a copy of the DataFrame to avoid SettingWithCopyWarning
         df = df.copy()
@@ -694,35 +706,35 @@ def Overall_Wait_Times_filter(df, row, dfname="empty"):
 
     return df
 
-def CIC_CLA_Wait_Times_filter(df, row, dfname='empty'):
+def CIC_CLA_Wait_Times_filter(df, row, dfname='empty', date_range=None):
     initial_filter = CIC_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def SEN_Wait_Times_filter(df, row, dfname='empty'):
+def SEN_Wait_Times_filter(df, row, dfname='empty', date_range=None):
     initial_filter = SEN_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def EHCP_Wait_Times_filter(df, row, dfname='empty'):
+def EHCP_Wait_Times_filter(df, row, dfname='empty', date_range=None):
     initial_filter = EHCP_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def CRAVEN_Wait_Times_filter(df, row, dfname='empty'):
+def CRAVEN_Wait_Times_filter(df, row, dfname='empty', date_range=None):
     initial_filter = CRAVEN_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def BRADFORD_DISTRICT_Wait_Times_filter(df, row, dfname='empty'):
+def BRADFORD_DISTRICT_Wait_Times_filter(df, row, dfname='empty', date_range=None):
     initial_filter = BRADFORD_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Yim_Live_filter(df, row, dfname = "empty"):
+def Yim_Live_filter(df, row, dfname = "empty", date_range=None):
     return df
 
-def KCU_filter(df, row, dfname = "empty"):
+def KCU_filter(df, row, dfname = "empty", date_range=None):
     return df
 
 

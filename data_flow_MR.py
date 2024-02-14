@@ -26,7 +26,6 @@ from data_cleaning import (
     add_reason_to_contact,
     isolate_client_ages,
     remove_invalid_rows,
-    remove_closure_cols,
     filter_post_codes_add_craven,
     clean_dates
 )
@@ -183,6 +182,7 @@ def select_folder(start_date_entry, end_date_entry, root):
         try:
             start_date = start_date_entry.get()
             end_date = end_date_entry.get()
+            
             log_message("Directory selected: " + directory)
             log_message(f"Start Date: {start_date}, End Date: {end_date}")
             threading.Thread(
@@ -240,12 +240,13 @@ def main_gui():
         date_str = datetime.datetime.now().strftime("%d-%m-%Y")
         file_string_1 = f"output_csv_QR_{date_str}_franchise_group_1.csv"
         file_string_2 = f"output_csv_QR_{date_str}_franchise_group_2.csv"
-
+        
+        date_range = start_date_entry, end_date_entry
         # Generate CSV files for each franchise list
-        produce_tables(validated_data, file_string_1, yim_providers)
+        produce_tables(validated_data, file_string_1, yim_providers, date_range)
         log_message("CSV saved. File name: " + file_string_1)
 
-        produce_tables(validated_data, file_string_2, other_vcse)
+        produce_tables(validated_data, file_string_2, other_vcse, date_range)
         log_message("CSV saved. File name: " + file_string_2)
 
         # Optionally update the GUI with completion status
@@ -264,6 +265,7 @@ def main_headless(directory, start_date, end_date):
     print("Running in headless mode...")
     print("Begin Processing files in directory:", directory)
     log_message("Begin Processing files")
+    date_range = (start_date,end_date)
 
     try:
         raw_data = load_data_files(directory, file_info)
@@ -275,10 +277,10 @@ def main_headless(directory, start_date, end_date):
         file_string_2 = "output_csv_QR_franchise_other_VCSE.csv"
         
         # Generate CSV files for each franchise list
-        output_df_1 = produce_tables(validated_data, file_string_1, yim_providers)
+        output_df_1 = produce_tables(validated_data, file_string_1, yim_providers, date_range)
         log_message("CSV saved. File name: " + file_string_1)
         
-        output_df_2 = produce_tables(validated_data, file_string_2, other_vcse)
+        output_df_2 = produce_tables(validated_data, file_string_2, other_vcse, date_range)
         log_message("CSV saved. File name: " + file_string_2)
         
         # Return both DataFrames if needed, or adjust return statement as required
@@ -308,8 +310,6 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
         
         cleaned_dataframes = isolate_client_ages(cleaned_dataframes, yim_providers, log_message=log_message)
         
-        cleaned_dataframes = remove_closure_cols(cleaned_dataframes, log_message=log_message)
-        
         cleaned_dataframes = filter_post_codes_add_craven(cleaned_dataframes, log_message)
         
         cleaned_dataframes = remove_duplicates(cleaned_dataframes, log_message=log_message)
@@ -332,36 +332,7 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
     return cleaned_dataframes
 
 
-# def produce_tables(dataframes, file_string, franchise_list):
-#     print("Producing output tables...")
-#     log_message("Producing output tables...")
-
-#     with open(file_string, "w", newline="") as f:
-#         for name in filter_function_map.keys():
-#             try:
-#                 this_table = filter_service_information(dataframes, find_dict_by_table_name(name, table_configs), franchise_list)
-                
-#                 # Write the table name on its own line
-#                 f.write(f"{name}\n")
-                
-#                 if not this_table.empty:
-#                     # Iterate over DataFrame rows and columns to write the entire table
-#                     for index, row in this_table.iterrows():
-#                         # Join all column values in a row into a single string separated by commas
-#                         row_str = ','.join(str(value) for value in row)
-#                         f.write(f"{row_str}\n")
-#                 else:
-#                     print(f"No data to write for {name}")
-#                     log_message(f"No data to write for {name}")
-                
-#                 # Add a newline after the table has been added for separation
-#                 f.write("\n")
-                
-#             except Exception as e:
-#                 log_message(f"Error processing filter for {name}: {e}")
-#                 continue  # Skip to the next iteration if there's an error
-            
-def produce_tables(dataframes, file_string, franchise_list):
+def produce_tables(dataframes, file_string, franchise_list, date_range):
     print("Producing output tables...")
     log_message("Producing output tables...")
 
@@ -370,14 +341,13 @@ def produce_tables(dataframes, file_string, franchise_list):
     with open(file_string, "w", newline="") as f:
         for name in filter_function_map.keys():
             config = find_dict_by_table_name(name, table_configs)
-            this_table = filter_service_information(dataframes, config, franchise_list)
+            this_table = filter_service_information(dataframes, config, franchise_list, date_range)
 
             # Check if the sheet name has changed (or if it's the first table being processed)
             if config["sheet_name"] != last_sheet_name:
                 # Print the sheet name if it's the first table in the sheet or if the sheet name has changed
                 f.write(f"{config['sheet_name']}\n")
                 last_sheet_name = config["sheet_name"]  # Update the last processed sheet name
-
             try:                
                 # Write the table name on its own line
                 f.write(f"{name}\n")
@@ -399,7 +369,7 @@ def produce_tables(dataframes, file_string, franchise_list):
                 continue  # Skip to the next iteration if there's an error
 
 
-def filter_service_information(dataframes, config, franchise_list):
+def filter_service_information(dataframes, config, franchise_list, date_range):
     print("Generating table...", config["table_name"])
     log_message(f"Generating table... {config['table_name']}")
         
@@ -425,7 +395,7 @@ def filter_service_information(dataframes, config, franchise_list):
             this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
             
             this_row_dataframe = this_row_dataframe[this_row_dataframe['franchise'].isin(franchise_list)]
-            filtered_data = filter_func(this_row_dataframe, row, dfname=dataframe_key)
+            filtered_data = filter_func(this_row_dataframe, row, dfname=dataframe_key, date_range=date_range)
 
             if isinstance(filtered_data, str):
                 # If filtered_data is a string, append it directly
@@ -454,8 +424,9 @@ if __name__ == "__main__":
     if IS_HEADLESS:
         # Specify the directory and date range for headless mode
         directory_path = "./data"
-        start_date = "2020-01-01"
-        end_date = "2024-03-31"
+        start_date = "2023-01-01"
+        end_date = "2023-02-01"
+        date_range = (start_date, end_date)
         main_headless(directory_path, start_date, end_date)
     else:
         main_gui()

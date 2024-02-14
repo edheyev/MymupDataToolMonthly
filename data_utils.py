@@ -59,30 +59,39 @@ def load_data_files(directory, file_info, log_message=None):
     
     return dataframes
 
-def isolate_date_range(df, date_column, start_date, end_date):
+def isolate_date_range(df, date_column, date_range=None):
     """
     Filters the DataFrame to include rows where the date in the specified column falls within the given date range.
-
+    
     Parameters:
     - df: DataFrame to filter.
-    - date_column: The name of the column containing date values.
-    - start_date: The start date of the range as a string in "%d/%m/%Y" format.
-    - end_date: The end date of the range as a string in "%d/%m/%Y" format.
-
+    - date_column: The name of the column containing date values in "DD/MM/YYYY" format.
+    - date_range: A tuple containing the start and end date of the range as strings in "YYYY-MM-DD" format. Defaults to None.
+    
     Returns:
-    - A DataFrame filtered to include only rows within the specified date range.
+    - A DataFrame filtered to include only rows within the specified date range if provided, otherwise returns the original DataFrame.
     """
-    # Ensure the date column is in datetime format with the correct dayfirst setting
-    df[date_column] = pd.to_datetime(df[date_column], format="%d/%m/%Y", errors='coerce', dayfirst=True)
-
-    # Convert start and end dates to datetime for comparison
-    start_date = pd.to_datetime(start_date, format="%d/%m/%Y", dayfirst=True)
-    end_date = pd.to_datetime(end_date, format="%d/%m/%Y", dayfirst=True)
-
-    # Filter the DataFrame based on the date range
-    mask = (df[date_column] >= start_date) & (df[date_column] <= end_date)
-    filtered_df = df.loc[mask]
-
+    
+    # Convert the date column from "DD/MM/YYYY" to datetime format
+    df = df.copy()
+    df.loc[:, date_column] = pd.to_datetime(df[date_column], format="%d/%m/%Y", errors='coerce')
+    
+    # If a date range is provided, convert start_date and end_date from "YYYY-MM-DD" to datetime for comparison
+    if date_range:
+        start_date, end_date = date_range
+        # Convert start_date and end_date strings to datetime
+        # start_date = pd.to_datetime(start_date, format="%Y-%m-%d")
+        # end_date = pd.to_datetime(end_date, format="%Y-%m-%d")
+        
+        start_date = pd.to_datetime(start_date)
+        end_date = pd.to_datetime(end_date)
+        # Filter the DataFrame based on the date range
+        mask = (df[date_column] >= start_date) & (df[date_column] <= end_date)
+        filtered_df = df.loc[mask]
+    else:
+        # If no date range is provided, return the original DataFrame or handle differently
+        filtered_df = df
+    
     return filtered_df
 
 def find_dict_by_table_name(table_name, dict_array):

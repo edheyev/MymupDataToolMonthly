@@ -146,7 +146,7 @@ class TestIsolateDateRange(unittest.TestCase):
         end_date = '30/09/2020'    # DD/MM/YYYY format
 
         # Call the function under test
-        filtered_df = isolate_date_range(self.df, 'date_column', start_date, end_date)
+        filtered_df = isolate_date_range(self.df, 'date_column', (start_date, end_date))
 
         # Check the number of rows in the filtered DataFrame
         self.assertEqual(len(filtered_df), 3, "The filtered DataFrame should contain 3 rows.")

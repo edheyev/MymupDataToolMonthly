@@ -97,24 +97,30 @@ def remove_invalid_rows(dataframes, log_message=None):
     # TODO
     return dataframes
     
-def remove_closure_cols(dataframes, log_message=None):
-    # Columns to be removed are now stored within the function
-    columns_to_remove = ['file_closure', 'referral_closure']
-    removed_count = 0  # Initialize a counter for removed columns
+def remove_duplicates(dataframes, log_message=None):
+    columns_to_ignore = ['file_closure', 'referral_closure']
+    print("Removing duplicates...")
+    if log_message:
+        log_message("Removing duplicates...")
     
-    for key, df in dataframes.items():
-        # Iterate over each column to remove; if it exists in the DataFrame, drop it
-        for column in columns_to_remove:
-            if column in df.columns:
-                df.drop(column, axis=1, inplace=True)
-                print(f"Removed column '{column}' from DataFrame '{key}'.")
-                removed_count += 1
-                
-    # Report how many columns were removed in total
-    print(f"Total columns removed: {removed_count}")
-    return dataframes
-
-import pandas as pd
+    cleaned_dataframes = {}
+    for df_name, df in dataframes.items():
+        original_row_count = df.shape[0]
+        
+        # Create a list of columns to consider for duplicate removal
+        columns_to_consider = [col for col in df.columns if col not in columns_to_ignore]
+        
+        # Use the `subset` parameter to ignore specified columns
+        cleaned_df = df.drop_duplicates(subset=columns_to_consider)
+        
+        cleaned_dataframes[df_name] = cleaned_df
+        duplicates_removed = original_row_count - cleaned_df.shape[0]
+        if log_message:
+            log_message(f"Removed {duplicates_removed} duplicates from {df_name}.")
+        else:
+            print(f"Removed {duplicates_removed} duplicates from {df_name}.")
+    
+    return cleaned_dataframes
 
 def isolate_client_ages(dataframes, yim_providers, log_message=None):
     """
@@ -404,34 +410,49 @@ def add_reason_to_file_closures(dataframes, log_message=None):
             log_message(f"An error occurred: {e}")
         return None
 
-import pandas as pd
+
+def clean_date_column(df, column_name):
+    """
+    Cleans and standardizes the date column in the dataframe.
+    Attempts to parse various date formats into standardized datetime objects.
+    """
+    # Repgs, 'nan', and None with np.nan to clean the data
+    df[column_name] = df[column_name].replace({'': np.nan, 'nan': np.nan, None: np.nan})
+
+    # First attempt a vectorized conversion for the most common format
+    df[column_name] = pd.to_datetime(df[column_name], errors='coerce', dayfirst=True)
+
+    return df
+
 
 def clean_dates(dataframes, log_message=None):
-    date_cols = ["referral_date", "first_contact_/_indirect_date", "second_contact_/_indirect_date"]
-    
-    def clean_date_column(df, column_name):
-        """Cleans a date column in a DataFrame."""
-        # Define the date format
-        date_format = "%d/%m/%Y"
-        
-        # Attempt to parse the date string into datetime object, ignoring hours, minutes, and seconds
-        df[column_name] = pd.to_datetime(df[column_name], format="%d/%m/%Y %H:%M", errors='coerce')
-        
-        # Keep only the date part
-        df[column_name] = df[column_name].dt.strftime(date_format)
+    """
+    Iterates over each dataframe and cleans specified date columns.
+
+    Parameters:
+    - dataframes: Dictionary of pandas dataframes to clean.
+    - date_cols: List of column names containing dates to be standardized.
+    - log_message: Optional logging function for messages.
+
+    Returns:
+    - A dictionary of cleaned dataframes.
+    """
+    date_cols = ["referral_date", "first_contact_/_indirect_date", "second_contact_/_indirect_date", "file_closure","contact_date", "goal_date"]
 
     cleaned_dataframes = {}
-    
     for df_name, df in dataframes.items():
+        print(f"{df_name} columns: {df.columns.tolist()}")
         if log_message:
             log_message(f"Cleaning dates in {df_name}...")
         else:
             print(f"Cleaning dates in {df_name}...")
+
         for col in date_cols:
             if col in df.columns:
-                clean_date_column(df, col)
+                df = clean_date_column(df, col)
+
         cleaned_dataframes[df_name] = df
-    
+
     return cleaned_dataframes
 
 
