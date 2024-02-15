@@ -7,41 +7,47 @@ Created on Tues Feb 06 15:58:58 2023
 import pandas as pd
 import numpy as np
 
-from data_utils import isolate_date_range
+from data_utils import isolate_date_range, get_previous_month_date_range
 
 
 def CIC_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'looked_after_child' column is 'YES'
-    filtered_df = df.loc[df['looked_after_child'] == 'YES']
+    filtered_df = df.loc[df["looked_after_child"] == "YES"]
     return filtered_df
+
 
 def SEN_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'special_education_needs' column is 'YES'
-    filtered_df = df.loc[df['special_education_needs'] == 'YES']
+    filtered_df = df.loc[df["special_education_needs"] == "YES"]
     return filtered_df
+
 
 def EHCP_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'EHCP' column is 'YES'
-    filtered_df = df.loc[df['ehcp'] == 'YES']
+    filtered_df = df.loc[df["ehcp"] == "YES"]
     return filtered_df
+
 
 def CRAVEN_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'EHCP' column is 'YES'
-    filtered_df = df.loc[df['craven'] == True]
+    filtered_df = df.loc[df["craven"] == True]
     return filtered_df
+
 
 def BRADFORD_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'EHCP' column is 'YES'
-    filtered_df = df.loc[df['craven'] == False]
+    filtered_df = df.loc[df["craven"] == False]
 
     return filtered_df
-    
+
+
 # referalls sheet
+
 
 def OCR_filter(df, row, dfname="empty", date_range=None):
     try:
-        df = isolate_date_range(df, "referral_date",date_range)
-        
+        df = isolate_date_range(df, "referral_date", date_range)
+
         if row == "Number referrals":
             return df
         elif row == "Number unique referrals":
@@ -55,7 +61,7 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
             return "make checks"
         elif row == "Number closed cases":
             return "make checks"
-        
+
         return "row not caught"
     except Exception as e:
         print(
@@ -64,13 +70,15 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
         raise Exception(
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
-         
+
+
 def CIC_CLA_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
-    
+
     initial_filtered_df = CIC_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 def SEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
@@ -79,12 +87,14 @@ def SEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     return filtered_df
 
+
 def EHCP_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = EHCP_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 def CRAVEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
@@ -93,25 +103,49 @@ def CRAVEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=Non
 
     return filtered_df
 
-def BRADFORD_DISTRICT_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
+
+def BRADFORD_DISTRICT_caseload_and_referrals_filter(
+    df, row, dfname="empty", date_range=None
+):
 
     initial_filtered_df = BRADFORD_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
+
 # demographics sheet
 
+
 def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
-    df = isolate_date_range(df, "referral_date",date_range)
-    
+    df = isolate_date_range(df, "referral_date", date_range)
+
     try:
         # List for age categories
         age_categories = [
-            "Age 4", "Age 5", "Age 6", "Age 7", "Age 8", "Age 9", "Age 10",
-            "Age 11", "Age 12", "Age 13", "Age 14", "Age 15", "Age 16",
-            "Age 17", "Age 18", "Age 19", "Age 20", "Age 21", "Age 22",
-            "Age 23", "Age 24", "Age 25", "Out of age range (data input error)"
+            "Age 4",
+            "Age 5",
+            "Age 6",
+            "Age 7",
+            "Age 8",
+            "Age 9",
+            "Age 10",
+            "Age 11",
+            "Age 12",
+            "Age 13",
+            "Age 14",
+            "Age 15",
+            "Age 16",
+            "Age 17",
+            "Age 18",
+            "Age 19",
+            "Age 20",
+            "Age 21",
+            "Age 22",
+            "Age 23",
+            "Age 24",
+            "Age 25",
+            "Out of age range (data input error)",
         ]
 
         # List for gender categories
@@ -126,30 +160,49 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
 
         # List for ethnicity categories
         ethnicity_categories = [
-            "African", "Arab", "Bangladeshi", "Caribbean", "Central and Eastern European",
-            "Chinese", "Gypsy/Roma/Traveller", "Indian", "Irish", "Latin America",
-            "Pakistani", "White and Asian", "White and Black African", "White and Black Carribean",
-            "White British", "Any other Asian background", "Any other Black background",
-            "Any other Ethnic group", "Any other Mixed background", "Any other White background",
-            "Unknown Ethnicity"  
+            "African",
+            "Arab",
+            "Bangladeshi",
+            "Caribbean",
+            "Central and Eastern European",
+            "Chinese",
+            "Gypsy/Roma/Traveller",
+            "Indian",
+            "Irish",
+            "Latin America",
+            "Pakistani",
+            "White and Asian",
+            "White and Black African",
+            "White and Black Carribean",
+            "White British",
+            "Any other Asian background",
+            "Any other Black background",
+            "Any other Ethnic group",
+            "Any other Mixed background",
+            "Any other White background",
+            "Unknown Ethnicity",
         ]
-        
+
         # Determine the category of 'row' and filter accordingly
         if row in age_categories:
             # Extract the age from the row string, assuming row format is "Age X" where X is the age
             if row.startswith("Age "):
                 age = int(row.split(" ")[1])  # Extract age from the row string
-                filtered_df = df[df['age'] == age]  # Filter df for rows matching the age
+                filtered_df = df[
+                    df["age"] == age
+                ]  # Filter df for rows matching the age
             elif row == "Out of age range (data input error)":
                 # Handle out of range ages if necessary, e.g., filter out known invalid ages
                 # This part depends on how you want to handle this special case
-                filtered_df = df[df['age'] > 25]  # Example: filtering ages greater than 25
+                filtered_df = df[
+                    df["age"] > 25
+                ]  # Example: filtering ages greater than 25
             else:
                 # If the row does not represent an age category, return the df as is or handle differently
                 return df  # Or: return "Row does not represent an age category"
-            
+
         elif row in gender_categories:
-          
+
             gender_map = {
                 "Female (including Transgender Woman)": "Female (including Transgender Woman)",
                 "Male (including Transgender Man)": "Man (including Transgender Man)",
@@ -166,9 +219,11 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
                     # Filter for rows where 'client_ethnicity' is NaN
                     filtered_df = df[pd.isna(df["gender_name"])]
                 else:
-                    filtered_df = df[df['gender_name'] == mapped_value]
-                
-                return filtered_df  # Or: return "Row does not represent a gender category"
+                    filtered_df = df[df["gender_name"] == mapped_value]
+
+                return (
+                    filtered_df  # Or: return "Row does not represent a gender category"
+                )
 
         elif row in ethnicity_categories:
             ethnic_map = {
@@ -188,23 +243,25 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
                 "Indian": "Asian or Asian British - Indian",
                 "Irish": "White - Irish",
                 "Latin America": "Latin America",
-                # "Not known": "Not known", 
+                # "Not known": "Not known",
                 # "Not stated": "Not stated",
                 "Pakistani": "Asian or Asian British - Pakistani",
                 "White and Asian": "Mixed - White and Asian",
                 "White and Black African": "Mixed - White and Black African",
                 "White and Black Caribbean": "Mixed - White and Black Caribbean",
-                "White British":"White - British",
+                "White British": "White - British",
                 # "Blank (nothing selected)": "Blank",
-                "Unknown Ethnicity":"Blank",
+                "Unknown Ethnicity": "Blank",
             }
 
-            mapped_value = ethnic_map.get(row, "Unknown Ethnicity")  # Default to "Unknown Ethnicity" if not found
+            mapped_value = ethnic_map.get(
+                row, "Unknown Ethnicity"
+            )  # Default to "Unknown Ethnicity" if not found
             if mapped_value == "Blank":
                 # Filter for rows where 'client_ethnicity' is NaN
                 filtered_df = df[pd.isna(df["ethnicity_name"])]
             else:
-                filtered_df =  df[df['ethnicity_name'] == mapped_value]
+                filtered_df = df[df["ethnicity_name"] == mapped_value]
 
             return filtered_df
         else:
@@ -218,172 +275,188 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
         raise Exception(
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
-              
-def All_CIC_CLA_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
-    
+
+
+def All_CIC_CLA_Referrals_by_demographics_filter(
+    df, row, dfname="empty", date_range=None
+):
+
     initial_filtered_df = CIC_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
+
 def All_SEN_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
-    
+
     initial_filtered_df = SEN_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
+
 def All_EHCP_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
-    
+
     initial_filtered_df = EHCP_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def All_CRAVEN_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
-    
+
+def All_CRAVEN_Referrals_by_demographics_filter(
+    df, row, dfname="empty", date_range=None
+):
+
     initial_filtered_df = CRAVEN_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def BRADFORD_DISTRICT_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
-    
+
+def BRADFORD_DISTRICT_Referrals_by_demographics_filter(
+    df, row, dfname="empty", date_range=None
+):
+
     initial_filtered_df = BRADFORD_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 # referral source sheet
 
+
 def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
-    df = isolate_date_range(df, "referral_date",date_range)
-    
+    # df = isolate_date_range(df, "referral_date",date_range)
+
+    referral_mapping = {
+        "Primary Health Care: General Medical Practitioner Practice": "GP services",
+        "Accident and Emergency Department": "Accident And Emergency Department",
+        "CAMHS - Core/Step Down": "CAMHS Core/Step down",
+        "CAMHS - Crisis Team (Hospital Urgents)": "CAMHS Crisis",
+        "CAMHS - Waiting List": "CAMHS Waiting List",
+        "Child Health: Community-based Paediatrics": "Community-based Paediatrics",
+        "Child Health: Hospital-based Paediatrics": "Hospital-based Paediatrics",
+        "Child Health: School Nurse": "School Nurse",
+        "Community Mental Health Team (Adult Mental Health)": "Community-based Paediatrics",  # Assuming best fit based on the list
+        "Employer": "Other service or agency",  # Assuming best fit based on the list
+        "Employer: Occupational Health": "Other service or agency",  # Assuming best fit based on the list
+        "Family Support Worker": "Social Services",  # Assuming best fit based on the list
+        "Improving Access to Psychological Therapies Service": "Other secondary care specialty",  # Assuming best fit based on the list
+        "Independent Sector: Low secure Inpatients": "Hospital-based Paediatrics",  # Assuming best fit based on the list
+        "Independent Sector: Medium secure Inpatients": "Hospital-based Paediatrics",  # Assuming best fit based on the list
+        "Inpatient Service Child and Adult Mental Health": "Hospital-based Paediatrics",  # Assuming best fit based on the list
+        "Inpatient Service Learning Disabilities": "Hospital-based Paediatrics",  # Assuming best fit based on the list
+        "Internal Referral": "Internal Referral",
+        "Justice System: Court Liaison and Diversion Service": "Police",  # Approximated to closest possible value
+        "Justice System: Courts": "Police",  # Approximated
+        "Justice System: Police": "Police",
+        "Justice System: Prison": "Police",  # Approximated
+        "Justice System: Probation": "Police",  # Approximated
+        "Justice System: Youth Offending Team": "Youth Offending Service",
+        "Local Authority and Other Public Services: Education Service / Educational Establishment": "Education Service",
+        "Local Authority and Other Public Services: Housing Service": "Housing Service",
+        "Local Authority and Other Public Services: Social Services": "Social Services",
+        "Mental Health Drop In Service": "Single Point of Access Service",  # Assuming best fit based on the list
+        "Not Known": "Unknown",
+        "Other Independent Sector Mental Health Services": "Other service or agency",  # Best approximation
+        "Other Primary Health Care": "Other Primary Health Care",
+        "Other secondary care specialty": "Other secondary care specialty",
+        "Other SERVICE or agency": "Other service or agency",
+        "Other: Asylum Services": "Hospital-based Paediatrics",  # Assuming best fit based on the list
+        "Other: Drug Action Team / Drug Misuse Agency": "Drug Action Team / Drug Misuse Agency",
+        "Other: Job Centre Plus": "Social Services",  # Assuming best fit based on the list
+        "Other: Out of Area Agency": "Out of Area Agency",
+        "Other: Single Point of Access Service": "Single Point of Access Service",
+        "Other: Urgent and Emergency Care Ambulance Service": "Accident And Emergency Department",  # Approximated
+        "Permanent Transfer from Another Mental Health Trust": "Out of Area Agency",  # Assuming best fit based on the list
+        "Primary Health Care: Health Visitor": "Community-based Paediatrics",  # Assuming best fit based on the list
+        "Primary Health Care: Maternity Service": "Community-based Paediatrics",  # Assuming best fit based on the list
+        "Self-Referral :Self": "Self",
+        "Self-Referral: Carer/Relative": "Carer",
+        "Temporary Transfer from Another Mental Health Trust": "Out of Area Agency",  # Assuming best fit based on the list
+        "Transfer by Graduation from CAMHS to Adult Mental Health Services": "Transfer by graduation from Child Adolescent Mental Health Services to Adult",
+        "Voluntary Sector": "Voluntary Sector",
+        "VCS": "VCS",
+        "Blank (nothing selected)": "Unknown",  # Assuming 'Blank' is equivalent to 'Unknown'
+    }
+
     try:
-        # Mapping from 'row_names' to 'referral_source' column values in the dataframe
-        source_map = {
-            "GP services": "Primary Health Care: General Medical Practitioner Practice",
-            "Primary care": "Primary care",  # Assuming 'Primary care' fits here
-            "Other Primary Health Care": "Other Primary Health Care",
-            "Self Referral": "Self-Referral: Self",
-            "Self": "Self",
-            "Carer": "Self-Referral: Carer/Relative",
-            "Social Services": "Local Authority and Other Public Services: Social Services",
-            "Education Service": "Local Authority and Other Public Services: Education Service / Educational Establishment",
-            "Housing Service": "Local Authority and Other Public Services: Housing Service",
-            "Police": "Justice System: Police",
-            "Youth Offending Service": "Justice System: Youth Offending Team",
-            "School Nurse": "Child Health: School Nurse",
-            "Hospital-based Paediatrics": "Child Health: Hospital-based Paediatrics",
-            "Community-based Paediatrics": "Child Health: Community-based Paediatrics",
-            "Voluntary Sector": "Voluntary Sector",
-            "Accident And Emergency Department": "Accident and Emergency Department",
-            "Other secondary care specialty": "Other secondary care specialty",
-            "Out of Area Agency": "Other: Out of Area Agency",
-            "Drug Action Team / Drug Misuse Agency": "Other: Drug Action Team / Drug Misuse Agency",
-            "Other service or agency": "Other SERVICE or agency",
-            "Single Point of Access Service": "Other: Single Point of Access Service",
-            "Internal Referral": "Internal Referral",
-            "CAMHS Core/Step down": "CAMHS - Core/Step Down",
-            "CAMHS Waiting List": "CAMHS - Waiting List",
-            "CAMHS Crisis": "CAMHS - Crisis Team (Hospital Urgents)",
-            "Transfer by graduation from Child Adolescent Mental Health Services to Adult": "Transfer by Graduation from CAMHS to Adult Mental Health Services",
-            "VCS": "Voluntary Sector",
-            "Unknown": "Not Known",
+        # Find all keys in referral_mapping that have a value matching 'row'
+        matching_keys = [key for key, value in referral_mapping.items() if value == row]
 
-            # Adding missing entries from the old source_map
-            "Community Mental Health Team (Adult Mental Health)": "Community Mental Health Team (Adult Mental Health)",
-            "Employer": "Employer",
-            "Employer: Occupational Health": "Employer: Occupational Health",
-            "Family Support Worker": "Family Support Worker",
-            "Improving Access to Psychological Therapies Service": "Improving Access to Psychological Therapies Service",
-            "Independent Sector: Low secure Inpatients": "Independent Sector: Low secure Inpatients",
-            "Independent Sector: Medium secure Inpatients": "Independent Sector: Medium secure Inpatients",
-            "Inpatient Service Child and Adult Mental Health": "Inpatient Service Child and Adult Mental Health",
-            "Inpatient Service Learning Disabilities": "Inpatient Service Learning Disabilities",
-            "Justice System: Court Liaison and Diversion Service": "Justice System: Court Liaison and Diversion Service",
-            "Justice System: Courts": "Justice System: Courts",
-            "Justice System: Police": "Justice System: Police",
-            "Justice System: Prison": "Justice System: Prison",
-            "Justice System: Probation": "Justice System: Probation",
-            "Justice System: Youth Offending Team": "Justice System: Youth Offending Team",
-            "Local Authority and Other Public Services: Education Service / Educational Establishment": "Local Authority and Other Public Services: Education Service / Educational Establishment",
-            "Local Authority and Other Public Services: Housing Service": "Local Authority and Other Public Services: Housing Service",
-            "Local Authority and Other Public Services: Social Services": "Local Authority and Other Public Services: Social Services",
-            "Mental Health Drop In Service": "Mental Health Drop In Service",
-            "Not Known": "Not Known",
-            "Other Independent Sector Mental Health Services": "Other Independent Sector Mental Health Services",
-            "Other: Asylum Services": "Other: Asylum Services",
-            "Other: Job Centre Plus": "Other: Job Centre Plus",
-            "Other: Single Point of Access Service": "Other: Single Point of Access Service",
-            "Other: Urgent and Emergency Care Ambulance Service": "Other: Urgent and Emergency Care Ambulance Service",
-            "Permanent Transfer from Another Mental Health Trust": "Permanent Transfer from Another Mental Health Trust",
-            "Primary Health Care: Health Visitor": "Primary Health Care: Health Visitor",
-            "Primary Health Care: Maternity Service": "Primary Health Care: Maternity Service",
-            "Temporary Transfer from Another Mental Health Trust": "Temporary Transfer from Another Mental Health Trust",
-            "Blank (nothing selected)": "Blank (nothing selected)",
-        }
+        # Check if there are matching keys to filter on
+        if not matching_keys:
+            print(
+                f"No matching referral source found for '{row}'. Using unfiltered dataframe."
+            )
+            return df
 
-        # Get the mapped value from the source_map; use a placeholder if the row is not found
-        mapped_value = source_map.get(row, "Placeholder for unmapped row")
-
-        # Filter the dataframe based on the referral_source column
-        if mapped_value != "Placeholder for unmapped row" and mapped_value != "Blank (nothing selected)":
-            # Filter for rows where referral_source matches mapped_value
-            filtered_df = df[df['referral_source'] == mapped_value]
-        elif mapped_value == "Blank (nothing selected)":
-            # Filter for rows where referral_source is NaN or blank
-            filtered_df = df[df['referral_source'].isna() | (df['referral_source'] == '')]
-        else:
-            # If we have a placeholder value, it means the row was not in source_map
-            print(f"Row '{row}' not found in source_map. Using unfiltered dataframe.")
-            filtered_df = df
+        # Filter the dataframe for rows where 'referral_source' matches any of the matching keys
+        filtered_df = df[df["referral_source"].isin(matching_keys)]
 
         return filtered_df
+
     except Exception as e:
-        print(f"Error in referral_source_filter with row: {row}, {e}. Current df: {dfname}")
-        raise Exception(f"Error in referral_source_filter with row: {row}, {e}. Current df is {dfname}")
+        print(
+            f"Error in Source_of_All_Referrals_filter with row: '{row}', {e}. Current df: '{dfname}'"
+        )
+        return pd.DataFrame()  # Return an empty DataFrame in case of error
+
 
 def Source_of_Referrals___CIC_CLA_filter(df, row, dfname="empty", date_range=None):
-    
+
     initial_filtered_df = CIC_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
+
 def Source_of_Referrals___SEN_filter(df, row, dfname="empty", date_range=None):
-    
+
     initial_filtered_df = SEN_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
+
 def Source_of_Referrals___EHCP_filter(df, row, dfname="empty", date_range=None):
-    
+
     initial_filtered_df = EHCP_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
+
 def Source_of_Referrals___CRAVEN_filter(df, row, dfname="empty", date_range=None):
-    
+
     initial_filtered_df = CRAVEN_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
-def Source_of_Referrals___BRADFORD_DISTRICT_filter(df, row, dfname="empty", date_range=None):
-    
+
+def Source_of_Referrals___BRADFORD_DISTRICT_filter(
+    df, row, dfname="empty", date_range=None
+):
+
     initial_filtered_df = BRADFORD_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
 
+
 # two attended contacts sheet
 
-def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter(df, row, dfname="empty", date_range=None):
-    df = isolate_date_range(df, "referral_date",date_range)
-    
+
+def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter(
+    df, row, dfname="empty", date_range=None
+):
+
+    date_range = get_previous_month_date_range(date_range)
+
+    df = isolate_date_range(df, "second_contact_/_indirect_date", date_range)
+
     try:
         if row == "All":
             return df
@@ -397,7 +470,7 @@ def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_f
             return CRAVEN_FILTER(df, dfname)
         elif row == "BRADFORD DISTRICT":
             return BRADFORD_FILTER(df, dfname)
-        
+
         return "row not caught"
     except Exception as e:
         print(
@@ -406,8 +479,10 @@ def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_f
         raise Exception(
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
-    
+
+
 # dna and cancellations sheet
+
 
 def DNAs_and_cancellations_filter(df, row, dfname="empty", date_range=None):
     df = isolate_date_range(df, "contact_date", date_range)
@@ -423,23 +498,26 @@ def DNAs_and_cancellations_filter(df, row, dfname="empty", date_range=None):
         df = CRAVEN_FILTER(df, dfname)
     elif "BRADFORD DISTRICT" in row:
         df = BRADFORD_FILTER(df, dfname)
-    
+
     # Now filter based on the type of appointment
     try:
         if "DNA Appointments" in row:
-            filtered_df = df[df['attendance'] == "Did not Attend"]
+            filtered_df = df[df["attendance"] == "Did not Attend"]
         elif "Cancelled by patient" in row:
-            filtered_df = df[df['attendance'] == "Cancelled by Patient"]  # Placeholder, replace with actual value
+            filtered_df = df[
+                df["attendance"] == "Cancelled by Patient"
+            ]  # Placeholder, replace with actual value
         elif "Cancelled by Provider" in row:
-            filtered_df = df[df['attendance'] == "Cancelled by Provider"]  # Placeholder, replace with actual value
+            filtered_df = df[
+                df["attendance"] == "Cancelled by Provider"
+            ]  # Placeholder, replace with actual value
         else:
             # Return the df as is if the row doesn't match the expected patterns
             # This might need adjustment based on your specific needs
             return df
-        
+
         return filtered_df
 
-        
     except Exception as e:
         print(
             f"Error in common_demographic_filter with row : {e}. Current df: {dfname}"
@@ -448,22 +526,24 @@ def DNAs_and_cancellations_filter(df, row, dfname="empty", date_range=None):
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
 
+
 def Goals_Based_Outcomes_filter(df, row, dfname="empty", date_range=None):
-    df = isolate_date_range(df, "goal_date",date_range)
-    
+    df = isolate_date_range(df, "goal_date", date_range)
+
     def calculate_average_scores(df):
         # Ensure you're working on a copy of the DataFrame to avoid affecting the original data
         df_copy = df.copy()
 
         # Convert score columns to numeric, treating non-numeric values as NaN
-        for column in ['score_1', 'score_2', 'score_3']:
-            df_copy.loc[:, column] = pd.to_numeric(df_copy[column], errors='coerce')
+        for column in ["score_1", "score_2", "score_3"]:
+            df_copy.loc[:, column] = pd.to_numeric(df_copy[column], errors="coerce")
 
         # Calculate the average of the score columns, ignoring NaN values
-        df_copy.loc[:, 'average_score'] = df_copy[['score_1', 'score_2', 'score_3']].mean(axis=1, skipna=True)
+        df_copy.loc[:, "average_score"] = df_copy[
+            ["score_1", "score_2", "score_3"]
+        ].mean(axis=1, skipna=True)
 
         return df_copy
-
 
     try:
         # First, filter based on the category
@@ -477,40 +557,44 @@ def Goals_Based_Outcomes_filter(df, row, dfname="empty", date_range=None):
             df = CRAVEN_FILTER(df, dfname)
         elif "BRADFORD DISTRICT" in row:
             df = BRADFORD_FILTER(df, dfname)
-        
+
         # Now, filter based on the specific goal outcome type
         if "Initials completed" in row:
             # Assuming there's a way to determine if initials are completed (placeholder condition)
-            filtered_df = df[df['initial_or_follow_up'] == "Initial"]
+            filtered_df = df[df["initial_or_follow_up"] == "Initial"]
         elif "Follow ups completed" in row:
             # Assuming there's a way to determine if follow-ups are completed (placeholder condition)
-            filtered_df = df[df['initial_or_follow_up'] == "Follow  up"]
-            
-            
+            filtered_df = df[df["initial_or_follow_up"] == "Follow  up"]
+
         elif "Initial score" in row:
-            filtered_df = df[df['initial_or_follow_up'] == "Initial"]
+            filtered_df = df[df["initial_or_follow_up"] == "Initial"]
             df_with_average = calculate_average_scores(filtered_df)
-            return(df_with_average, 'average_score')
-            
-            
-        elif"Follow up score" in row:
-            filtered_df = df[df['initial_or_follow_up'] == "Follow  up"]
+            return (df_with_average, "average_score")
+
+        elif "Follow up score" in row:
+            filtered_df = df[df["initial_or_follow_up"] == "Follow  up"]
             df_with_average = calculate_average_scores(filtered_df)
-            return(df_with_average, 'average_score')
-            
-            
+            return (df_with_average, "average_score")
+
         else:
             # If the row doesn't match any expected pattern
             return df
-        
-        return filtered_df
-    
-    except Exception as e:
-        print(f"Error in Goals_Based_Outcomes_filter with row: {row}, {e}. Current df: {dfname}")
-        raise Exception(f"Error in Goals_Based_Outcomes_filter with row: {row}, {e}. Current df is {dfname}")
 
-#goal themes sheet
+        return filtered_df
+
+    except Exception as e:
+        print(
+            f"Error in Goals_Based_Outcomes_filter with row: {row}, {e}. Current df: {dfname}"
+        )
+        raise Exception(
+            f"Error in Goals_Based_Outcomes_filter with row: {row}, {e}. Current df is {dfname}"
+        )
+
+
+# goal themes sheet
 def All_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
+
+    # date_range = get_previous_month_date_range(date_range)
     df = isolate_date_range(df, "goal_date", date_range)
 
     # TODO ADD percentages to ting
@@ -528,7 +612,7 @@ def All_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
             "Understanding who I am",
         ]:
             # Assuming 'goal_theme' is the column where these themes are listed
-            df_filtered = df[df['goal_theme'] == row]
+            df_filtered = df[df["goal_theme"] == row]
             return df_filtered
 
         elif row == "TOTAL":
@@ -536,46 +620,57 @@ def All_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
             # This could be a sum of counts for each theme, or a unique count of cases, etc.
             # Adjust this logic based on what 'TOTAL' means in your context
             # Example: return the count of all non-empty 'goal_theme' entries
-            total_count = df['goal_theme'].notnull().sum()
+            total_count = df["goal_theme"].notnull().sum()
             return f"Total Goal Themes: {total_count}"
 
         else:
             return "row not caught"
 
     except Exception as e:
-        print(f"Error in All_Goal_Themes_filter with row: {row}, {e}. Current df: {dfname}")
-        raise Exception(f"Error in All_Goal_Themes_filter with row: {row}, {e}. Current df is {dfname}")
+        print(
+            f"Error in All_Goal_Themes_filter with row: {row}, {e}. Current df: {dfname}"
+        )
+        raise Exception(
+            f"Error in All_Goal_Themes_filter with row: {row}, {e}. Current df is {dfname}"
+        )
+
 
 def CIC_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = CIC_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
 
+
 def SEN_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = SEN_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
+
 
 def EHCP_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = EHCP_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
 
+
 def CRAVEN_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = CRAVEN_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
+
 
 def Bradford_District_Goal_Themes_filter(df, row, dfname="empty", date_range=None):
     initial_filter = BRADFORD_FILTER(df, dfname)
     filtered_df = All_Goal_Themes_filter(initial_filter, row, dfname)
     return filtered_df
 
+
 # Discharge Data sheet
 
+
 def Overall_Discharges_filter(df, row, dfname="empty", date_range=None):
-    df = isolate_date_range(df, "file_closure",date_range)
-    
+    df = isolate_date_range(df, "file_closure", date_range)
+
     # Mapping unique closure reasons to broader categories
     closure_reason_map = {
         "Planned ending met outcomes at Review Point": "Number completed treatment",
@@ -602,53 +697,75 @@ def Overall_Discharges_filter(df, row, dfname="empty", date_range=None):
 
     try:
         # Filter DataFrame based on the broader category
-        filtered_reasons = {value: key for key, value in closure_reason_map.items() if value == row}
-        if row in ["Number completed treatment", "Number inappropriate referrals", "Number who could not be contacted", "Number disengaged", "Number signposted to another CCG provider"]:
-            df_filtered = df[df['file_closure_reason'].map(closure_reason_map) == row]
+        filtered_reasons = {
+            value: key for key, value in closure_reason_map.items() if value == row
+        }
+        if row in [
+            "Number completed treatment",
+            "Number inappropriate referrals",
+            "Number who could not be contacted",
+            "Number disengaged",
+            "Number signposted to another CCG provider",
+        ]:
+            df_filtered = df[df["file_closure_reason"].map(closure_reason_map) == row]
         elif row == "Not Disclosed":
             # Assuming "Not Disclosed" means missing or unspecified closure reasons
-            df_filtered = df[pd.isnull(df['file_closure_reason']) | (df['file_closure_reason'] == "Not Disclosed")]
+            df_filtered = df[
+                pd.isnull(df["file_closure_reason"])
+                | (df["file_closure_reason"] == "Not Disclosed")
+            ]
 
         return df_filtered
 
     except Exception as e:
-        print(f"Error in file_closure_reason_filter with row: {row}, {e}. Current df: {dfname}")
-        raise Exception(f"Error in file_closure_reason_filter with row: {row}, {e}. Current df is {dfname}")
+        print(
+            f"Error in file_closure_reason_filter with row: {row}, {e}. Current df: {dfname}"
+        )
+        raise Exception(
+            f"Error in file_closure_reason_filter with row: {row}, {e}. Current df is {dfname}"
+        )
 
-def Discharges_CIC_CLA_filter(df, row, dfname = 'empty', date_range=None):
+
+def Discharges_CIC_CLA_filter(df, row, dfname="empty", date_range=None):
     initial_filter = CIC_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Discharges_SEN_filter(df, row, dfname = 'empty', date_range=None):
+
+def Discharges_SEN_filter(df, row, dfname="empty", date_range=None):
     initial_filter = SEN_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Discharges_EHCP_filter(df, row, dfname = 'empty', date_range=None):
+
+def Discharges_EHCP_filter(df, row, dfname="empty", date_range=None):
     initial_filter = EHCP_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Discharges_CRAVEN_filter(df, row, dfname = 'empty', date_range=None):
+
+def Discharges_CRAVEN_filter(df, row, dfname="empty", date_range=None):
     initial_filter = CRAVEN_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Discharges_BRADFORD_DISTRICT_filter(df, row, dfname = 'empty', date_range=None):
+
+def Discharges_BRADFORD_DISTRICT_filter(df, row, dfname="empty", date_range=None):
     initial_filter = BRADFORD_FILTER(df, dfname)
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
+
 # wait list data sheet
 
-def Overall_Number_on_Waiting_list_filter(df, row, dfname = 'empty', date_range=None):
-    df = isolate_date_range(df, "referral_date", date_range)
-    
-    
+
+def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=None):
+    # df = isolate_date_range(df, "referral_date", date_range)
+
     try:
         # filter all currently on waiting list
-        df = df[df['client_state'] == "Waiting List"]
+        df = df[df["client_state"] == "Waiting List"]
+
         if row == "All":
             return df
         elif row == "CIC/CLA":
@@ -661,7 +778,7 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname = 'empty', date_range=
             return CRAVEN_FILTER(df, dfname)
         elif row == "BRADFORD DISTRICT":
             return BRADFORD_FILTER(df, dfname)
-        
+
         return "row not caught"
     except Exception as e:
         print(
@@ -671,114 +788,137 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname = 'empty', date_range=
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
 
-#wait times sheet
+
+# wait times sheet
+
 
 def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
-    df = isolate_date_range(df, "referral_date", date_range)
-    
+    # df = isolate_date_range(df, "referral_date", date_range)
+
     try:
         # Create a copy of the DataFrame to avoid SettingWithCopyWarning
         df = df.copy()
 
         # Now proceed with your existing logic
-        date_cols = ['first_contact_/_indirect_date', 'referral_date', 'second_contact_/_indirect_date']
+        date_cols = [
+            "first_contact_/_indirect_date",
+            "referral_date",
+            "second_contact_/_indirect_date",
+        ]
         for col in date_cols:
-            df.loc[:, col] = pd.to_datetime(df[col], format='%d/%m/%Y', errors='coerce')
+            df.loc[:, col] = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce")
 
         # Calculate differences in weeks as before
-        df.loc[:, 'first_contact_referral_diff'] = (df.loc[:, 'first_contact_/_indirect_date'] - df.loc[:, 'referral_date']) / pd.Timedelta(weeks=1)
-        df.loc[:, 'second_contact_referral_diff'] = (df.loc[:, 'second_contact_/_indirect_date'] - df.loc[:, 'referral_date']) / pd.Timedelta(weeks=1)
-        df.loc[:, 'second_first_contact_diff'] = (df.loc[:, 'second_contact_/_indirect_date'] - df.loc[:, 'first_contact_/_indirect_date']) / pd.Timedelta(weeks=1)
+        df.loc[:, "first_contact_referral_diff"] = (
+            df.loc[:, "first_contact_/_indirect_date"] - df.loc[:, "referral_date"]
+        ) / pd.Timedelta(weeks=1)
+        df.loc[:, "second_contact_referral_diff"] = (
+            df.loc[:, "second_contact_/_indirect_date"] - df.loc[:, "referral_date"]
+        ) / pd.Timedelta(weeks=1)
+        df.loc[:, "second_first_contact_diff"] = (
+            df.loc[:, "second_contact_/_indirect_date"]
+            - df.loc[:, "first_contact_/_indirect_date"]
+        ) / pd.Timedelta(weeks=1)
 
         # Drop rows where 'second_contact_/_indirect_date' is NaT if those rows are not relevant for some calculations
-        df_filtered = df.dropna(subset=['second_contact_/_indirect_date'])
+        df_filtered = df.dropna(subset=["second_contact_/_indirect_date"])
 
         # Filtering logic based on the 'row' parameter
         if row == "Average Weeks from referral to 1st attended contact/indirect":
-            return (df_filtered, 'first_contact_referral_diff')
+            return (df_filtered, "first_contact_referral_diff")
         elif row == "Average Weeks from referral to 2nd attended contact/indirect":
-            return (df_filtered, 'second_contact_referral_diff')
-        elif row == "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect":
-            return (df_filtered, 'second_first_contact_diff')
+            return (df_filtered, "second_contact_referral_diff")
+        elif (
+            row
+            == "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect"
+        ):
+            return (df_filtered, "second_first_contact_diff")
     except Exception as e:
         print(f"Error in Overall_Wait_Times_filter with row: {e}. Current df: {dfname}")
         raise
 
     return df
 
-def CIC_CLA_Wait_Times_filter(df, row, dfname='empty', date_range=None):
+
+def CIC_CLA_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     initial_filter = CIC_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def SEN_Wait_Times_filter(df, row, dfname='empty', date_range=None):
+
+def SEN_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     initial_filter = SEN_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def EHCP_Wait_Times_filter(df, row, dfname='empty', date_range=None):
+
+def EHCP_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     initial_filter = EHCP_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def CRAVEN_Wait_Times_filter(df, row, dfname='empty', date_range=None):
+
+def CRAVEN_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     initial_filter = CRAVEN_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def BRADFORD_DISTRICT_Wait_Times_filter(df, row, dfname='empty', date_range=None):
+
+def BRADFORD_DISTRICT_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     initial_filter = BRADFORD_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname)
     return filtered_df
 
-def Yim_Live_filter(df, row, dfname = "empty", date_range=None):
+
+def Yim_Live_filter(df, row, dfname="empty", date_range=None):
     return df
 
-def KCU_filter(df, row, dfname = "empty", date_range=None):
+
+def KCU_filter(df, row, dfname="empty", date_range=None):
     return df
 
 
 filter_function_map = {
-    "Overall_caseload_and_referrals":OCR_filter,
-    "CIC_CLA_caseload_and_referrals":CIC_CLA_caseload_and_referrals_filter,
+    "Overall_caseload_and_referrals": OCR_filter,
+    "CIC_CLA_caseload_and_referrals": CIC_CLA_caseload_and_referrals_filter,
     "SEN_caseload_and_referrals": SEN_caseload_and_referrals_filter,
     "EHCP_caseload_and_referrals": EHCP_caseload_and_referrals_filter,
-    "CRAVEN_caseload_and_referrals":CRAVEN_caseload_and_referrals_filter,
-    "BRADFORD_DISTRICT_caseload_and_referrals":BRADFORD_DISTRICT_caseload_and_referrals_filter,
-    "All_Referrals_by_demographics":All_Referrals_by_demographics_filter,
-    "All_CIC_CLA_Referrals_by_demographics":All_CIC_CLA_Referrals_by_demographics_filter,
-    "All_SEN_Referrals_by_demographics":All_SEN_Referrals_by_demographics_filter,
-    "All_EHCP_Referrals_by_demographics":All_EHCP_Referrals_by_demographics_filter,
-    "All_CRAVEN_Referrals_by_demographics":All_CRAVEN_Referrals_by_demographics_filter,
-    "BRADFORD_DISTRICT_Referrals_by_demographics":BRADFORD_DISTRICT_Referrals_by_demographics_filter,
-    "Source_of_All_Referrals":Source_of_All_Referrals_filter,
-    "Source_of_Referrals_CIC_CLA":Source_of_Referrals___CIC_CLA_filter,
-    "Source_of_Referrals_SEN":Source_of_Referrals___SEN_filter,
-    "Source_of_Referrals_EHCP":Source_of_Referrals___EHCP_filter,
-    "Source_of_Referrals_CRAVEN":Source_of_Referrals___CRAVEN_filter,
-    "Source_of_Referrals_BRADFORD_DISTRICT":Source_of_Referrals___BRADFORD_DISTRICT_filter,
+    "CRAVEN_caseload_and_referrals": CRAVEN_caseload_and_referrals_filter,
+    "BRADFORD_DISTRICT_caseload_and_referrals": BRADFORD_DISTRICT_caseload_and_referrals_filter,
+    "All_Referrals_by_demographics": All_Referrals_by_demographics_filter,
+    "All_CIC_CLA_Referrals_by_demographics": All_CIC_CLA_Referrals_by_demographics_filter,
+    "All_SEN_Referrals_by_demographics": All_SEN_Referrals_by_demographics_filter,
+    "All_EHCP_Referrals_by_demographics": All_EHCP_Referrals_by_demographics_filter,
+    "All_CRAVEN_Referrals_by_demographics": All_CRAVEN_Referrals_by_demographics_filter,
+    "BRADFORD_DISTRICT_Referrals_by_demographics": BRADFORD_DISTRICT_Referrals_by_demographics_filter,
+    "Source_of_All_Referrals": Source_of_All_Referrals_filter,
+    "Source_of_Referrals_CIC_CLA": Source_of_Referrals___CIC_CLA_filter,
+    "Source_of_Referrals_SEN": Source_of_Referrals___SEN_filter,
+    "Source_of_Referrals_EHCP": Source_of_Referrals___EHCP_filter,
+    "Source_of_Referrals_CRAVEN": Source_of_Referrals___CRAVEN_filter,
+    "Source_of_Referrals_BRADFORD_DISTRICT": Source_of_Referrals___BRADFORD_DISTRICT_filter,
     "No_of_CYP_receiving_a_second_attended_contact_with_mental_health_services": No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter,
-    "DNAs_and_cancellations":DNAs_and_cancellations_filter,
-    "Goals_Based_Outcomes":Goals_Based_Outcomes_filter,
-    "All_Goal_Themes":All_Goal_Themes_filter,
-    "CIC_Goal_Themes":CIC_Goal_Themes_filter,
-    "SEN_Goal_Themes":SEN_Goal_Themes_filter,
-    "EHCP_Goal_Themes":EHCP_Goal_Themes_filter,
-    "CRAVEN_Goal_Themes":CRAVEN_Goal_Themes_filter,
-    "Bradford_District_Goal_Themes":Bradford_District_Goal_Themes_filter,
-    "Overall_Discharges":Overall_Discharges_filter,
-    "Discharges_CIC_CLA":Discharges_CIC_CLA_filter,
-    "Discharges_SEN":Discharges_SEN_filter,
-    "Discharges_EHCP":Discharges_EHCP_filter,
-    "Discharges_CRAVEN":Discharges_CRAVEN_filter,
-    "Discharges_BRADFORD_DISTRICT":Discharges_BRADFORD_DISTRICT_filter,
-    "Overall_Number_on_Waiting_list":Overall_Number_on_Waiting_list_filter,
-    "Overall_Wait_Times":Overall_Wait_Times_filter,
-    "CIC_CLA_Wait_Times":CIC_CLA_Wait_Times_filter,
-    "SEN_Wait_Times":SEN_Wait_Times_filter,
-    "EHCP_Wait_Times":EHCP_Wait_Times_filter,
-    "CRAVEN_Wait_Times":CRAVEN_Wait_Times_filter,
-    "BRADFORD_DISTRICT_Wait_Times":BRADFORD_DISTRICT_Wait_Times_filter,
-    "Yim_Live":Yim_Live_filter,
-    "KCU":KCU_filter,
+    "DNAs_and_cancellations": DNAs_and_cancellations_filter,
+    "Goals_Based_Outcomes": Goals_Based_Outcomes_filter,
+    "All_Goal_Themes": All_Goal_Themes_filter,
+    "CIC_Goal_Themes": CIC_Goal_Themes_filter,
+    "SEN_Goal_Themes": SEN_Goal_Themes_filter,
+    "EHCP_Goal_Themes": EHCP_Goal_Themes_filter,
+    "CRAVEN_Goal_Themes": CRAVEN_Goal_Themes_filter,
+    "Bradford_District_Goal_Themes": Bradford_District_Goal_Themes_filter,
+    "Overall_Discharges": Overall_Discharges_filter,
+    "Discharges_CIC_CLA": Discharges_CIC_CLA_filter,
+    "Discharges_SEN": Discharges_SEN_filter,
+    "Discharges_EHCP": Discharges_EHCP_filter,
+    "Discharges_CRAVEN": Discharges_CRAVEN_filter,
+    "Discharges_BRADFORD_DISTRICT": Discharges_BRADFORD_DISTRICT_filter,
+    "Overall_Number_on_Waiting_list": Overall_Number_on_Waiting_list_filter,
+    "Overall_Wait_Times": Overall_Wait_Times_filter,
+    "CIC_CLA_Wait_Times": CIC_CLA_Wait_Times_filter,
+    "SEN_Wait_Times": SEN_Wait_Times_filter,
+    "EHCP_Wait_Times": EHCP_Wait_Times_filter,
+    "CRAVEN_Wait_Times": CRAVEN_Wait_Times_filter,
+    "BRADFORD_DISTRICT_Wait_Times": BRADFORD_DISTRICT_Wait_Times_filter,
+    "Yim_Live": Yim_Live_filter,
+    "KCU": KCU_filter,
 }

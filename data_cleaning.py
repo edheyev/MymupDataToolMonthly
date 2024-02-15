@@ -150,60 +150,42 @@ def isolate_client_ages(dataframes, yim_providers, log_message=None):
 
     return dataframes
 
+def clean_mib(dataframes, log_message=None):
+    print(f"Isolating only correct MIB services")
+    
+    # Define allowed service types
+    allowed_service_types = ["Know Your Mind", "Know Your Mind Plus", "Hospital Buddies BRI", "Hospital Buddies AGH"]
+    
+    # Container for client_ids to remove
+    client_ids_to_remove = set()
+    
+    # First pass: Identify client_ids to remove
+    for df_name, df in dataframes.items():
+        if "franchise" in df.columns and "service_type" in df.columns:
+            # Filter for Mind In Bradford franchise
+            mib_df = df[df["franchise"] == "Mind In Bradford"]
+            # Identify disallowed service types
+            disallowed_rows = mib_df[~mib_df["service_type"].isin(allowed_service_types)]
+            # Update set of client_ids to remove
+            client_ids_to_remove.update(disallowed_rows["client_id"].unique())
+            if log_message:
+                log_message(f"Identified client_ids to remove in {df_name}.")
+            else:
+                print(f"Identified client_ids to remove in {df_name}.")
+    
+    # Second pass: Remove rows with identified client_ids in all DataFrames
+    cleaned_dataframes = {}
+    for df_name, df in dataframes.items():
+        cleaned_df = df[~df["client_id"].isin(client_ids_to_remove)]
+        cleaned_dataframes[df_name] = cleaned_df
+        if log_message:
+            log_message(f"Cleaned {df_name}, removed {len(df) - len(cleaned_df)} rows.")
+        else:
+            print(f"Cleaned {df_name}, removed {len(df) - len(cleaned_df)} rows.")
+    
+    return cleaned_dataframes
 
 
-# def isolate_client_ages(dataframes, yim_providers, log_message=None):
-#     print("Isolating client ages...")
-#     if log_message:
-#         log_message("Isolating client ages...")
-#     if log_message and not callable(log_message):
-#         raise ValueError("log_message should be a callable function")
-
-#     removed_client_ids = set()
-#     removed_count_first_pass = 0
-
-#     for df_name, df in dataframes.items():
-#         if not isinstance(df, pd.DataFrame):
-#             raise ValueError(f"The item {df_name} is not a pandas DataFrame.")
-
-#         if "age" in df.columns and "client_id" in df.columns:
-#             # Apply different removal criteria based on the 'franchise' column
-#             try:
-#                 # Conditions for YiM and non-YiM providers
-#                 yim_condition = (df["age"] >= 26) & df["franchise"].isin(yim_providers)
-#                 non_yim_condition = ((df["age"] >= 26) | ((df["age"] >= 19) & (df["age"] <= 25))) & ~df["franchise"].isin(yim_providers)
-                
-#                 # Identify rows to remove
-#                 rows_to_remove = df[yim_condition | non_yim_condition]
-#                 removed_count_first_pass += len(rows_to_remove)
-                
-#                 # Update set of client IDs to remove
-#                 removed_client_ids.update(rows_to_remove["client_id"].unique())
-                
-#                 # Drop the identified rows
-#                 dataframes[df_name] = df.drop(index=rows_to_remove.index).reset_index(drop=True)
-
-#             except KeyError as e:
-#                 if log_message:
-#                     log_message(f"Column not found in {df_name}: {e}")
-#                 continue  # Continue to next DataFrame if there's an error
-
-#     # Second pass: remove all rows with client_ids marked for removal in any dataframe
-#     removed_count_second_pass = 0
-#     for df_name, df in dataframes.items():
-#         if "client_id" in df.columns:
-#             initial_len = len(df)
-#             # Keep rows where 'client_id' is not in 'removed_client_ids'
-#             dataframes[df_name] = df[~df["client_id"].isin(removed_client_ids)]
-#             removed_count_second_pass += initial_len - len(dataframes[df_name])
-
-#     if log_message:
-#         log_message(f"Removed {removed_count_first_pass} rows based on age criteria.")
-#         log_message(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
-#         print(f"Removed {removed_count_first_pass} rows based on age criteria.")
-#         print(f"Removed an additional {removed_count_second_pass} rows based on matching client_ids.")
-
-#     return dataframes
 
 def filter_post_codes_add_craven(dataframes, log_message=None):
     print("Filtering postcodes and adding Craven column...")
@@ -246,9 +228,9 @@ def filter_post_codes_add_craven(dataframes, log_message=None):
             # Standardize and extract prefixes
             df['postcode_prefix'] = df['post_code'].apply(extract_postcode_prefix)
             
-            # Marking Craven
-            df['craven'] = df['postcode_prefix'].isin(craven_prefixes)
-            total_craven_marked += df['craven'].sum()
+            # # Marking Craven
+            # df['craven'] = df['postcode_prefix'].isin(craven_prefixes)
+            # total_craven_marked += df['craven'].sum()
 
             # Apply filtering
             df_filtered = df[df['postcode_prefix'].isin(bradford_prefixes.union(craven_prefixes))]
@@ -441,7 +423,6 @@ def clean_dates(dataframes, log_message=None):
 
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
-        print(f"{df_name} columns: {df.columns.tolist()}")
         if log_message:
             log_message(f"Cleaning dates in {df_name}...")
         else:

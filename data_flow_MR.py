@@ -27,7 +27,8 @@ from data_cleaning import (
     isolate_client_ages,
     remove_invalid_rows,
     filter_post_codes_add_craven,
-    clean_dates
+    clean_dates,
+    clean_mib,
 )
 from MR_filters import filter_function_map
 
@@ -41,7 +42,7 @@ from data_utils import (
     calculate_percentage_row_total,
     is_percentage_row,
     is_average_row,
-    load_data_files
+    load_data_files,
 )
 
 
@@ -182,7 +183,7 @@ def select_folder(start_date_entry, end_date_entry, root):
         try:
             start_date = start_date_entry.get()
             end_date = end_date_entry.get()
-            
+
             log_message("Directory selected: " + directory)
             log_message(f"Start Date: {start_date}, End Date: {end_date}")
             threading.Thread(
@@ -208,14 +209,18 @@ def load_and_clean_data(folder_path, start_date, end_date):
 def main_gui():
     global root
     root, file_button, start_date_entry, end_date_entry = create_logging_window()
-    root.protocol("WM_DELETE_WINDOW", lambda: root.quit())  # Proper shutdown on window close
+    root.protocol(
+        "WM_DELETE_WINDOW", lambda: root.quit()
+    )  # Proper shutdown on window close
     root.mainloop()
 
     try:
         # Wait and get cleaned data from the queue
         cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
         # Proceed with validated data and other processing
-        validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
+        validated_data = validate_data_files(
+            cleaned_data, file_info, log_message=log_message
+        )
 
         # Define your franchise lists for each CSV
         yim_providers = [
@@ -224,7 +229,7 @@ def main_gui():
             "Brathay -MAGIC service type only",
             "INCIC -service type CYP only",
             "Mind in Bradford (MiB) service type Know Your Mind, Know Your Mind plus, Hospital Buddies BRI and Hospital Buddies AGH only",
-            "SELFA"
+            "SELFA",
         ]
 
         other_vcse = [
@@ -234,13 +239,13 @@ def main_gui():
             "Family Action Bradford",
             "Roshnighar",
             "STEP 2",
-            "The Cellar Trust"
+            "The Cellar Trust",
         ]
         # Generate filenames based on the current date
         date_str = datetime.datetime.now().strftime("%d-%m-%Y")
         file_string_1 = f"output_csv_QR_{date_str}_franchise_group_1.csv"
         file_string_2 = f"output_csv_QR_{date_str}_franchise_group_2.csv"
-        
+
         date_range = start_date_entry, end_date_entry
         # Generate CSV files for each franchise list
         produce_tables(validated_data, file_string_1, yim_providers, date_range)
@@ -254,7 +259,9 @@ def main_gui():
 
     except queue.Empty:
         log_message("Error: No cleaned data received within the timeout period.")
-        text_widget.insert(tk.END, "Error: No cleaned data received within the timeout period.\n")
+        text_widget.insert(
+            tk.END, "Error: No cleaned data received within the timeout period.\n"
+        )
     except Exception as e:
         log_message(f"Unexpected error: {e}")
         text_widget.insert(tk.END, f"Unexpected error: {e}\n")
@@ -265,27 +272,33 @@ def main_headless(directory, start_date, end_date):
     print("Running in headless mode...")
     print("Begin Processing files in directory:", directory)
     log_message("Begin Processing files")
-    date_range = (start_date,end_date)
+    date_range = (start_date, end_date)
 
     try:
         raw_data = load_data_files(directory, file_info)
         cleaned_data = clean_data(raw_data, start_date, end_date, log_message)
-        validated_data = validate_data_files(cleaned_data, file_info, log_message=log_message)
+        validated_data = validate_data_files(
+            cleaned_data, file_info, log_message=log_message
+        )
 
         # File names for each franchise list
         file_string_1 = "output_csv_QR_franchise_YIM.csv"
         file_string_2 = "output_csv_QR_franchise_other_VCSE.csv"
-        
+
         # Generate CSV files for each franchise list
-        output_df_1 = produce_tables(validated_data, file_string_1, yim_providers, date_range)
+        output_df_1 = produce_tables(
+            validated_data, file_string_1, yim_providers, date_range
+        )
         log_message("CSV saved. File name: " + file_string_1)
-        
-        output_df_2 = produce_tables(validated_data, file_string_2, other_vcse, date_range)
+
+        output_df_2 = produce_tables(
+            validated_data, file_string_2, other_vcse, date_range
+        )
         log_message("CSV saved. File name: " + file_string_2)
-        
+
         # Return both DataFrames if needed, or adjust return statement as required
         return output_df_1, output_df_2
-        
+
     except Exception as e:
         log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
@@ -300,27 +313,34 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
 
     try:
         print("Cleaning dataframes...")
-        
+
         if log_message:
             log_message("Cleaning dataframes...")
 
         cleaned_dataframes = remove_invalid_rows(dataframes, log_message=log_message)
 
-        cleaned_dataframes = clean_column_names(cleaned_dataframes, log_message=log_message)
-        
-        cleaned_dataframes = isolate_client_ages(cleaned_dataframes, yim_providers, log_message=log_message)
-        
-        cleaned_dataframes = filter_post_codes_add_craven(cleaned_dataframes, log_message)
-        
-        cleaned_dataframes = remove_duplicates(cleaned_dataframes, log_message=log_message)
-        
+        cleaned_dataframes = clean_column_names(
+            cleaned_dataframes, log_message=log_message
+        )
+
+        cleaned_dataframes = isolate_client_ages(
+            cleaned_dataframes, yim_providers, log_message=log_message
+        )
+
+        cleaned_dataframes = filter_post_codes_add_craven(
+            cleaned_dataframes, log_message
+        )
+
+        cleaned_dataframes = remove_duplicates(
+            cleaned_dataframes, log_message=log_message
+        )
+
         cleaned_dataframes = clean_dates(cleaned_dataframes, log_message=log_message)
-        
-        
+
+        cleaned_dataframes = clean_mib(cleaned_dataframes, log_message)
         # cleaned_dataframes = isolate_reporting_period(
         #     cleaned_dataframes, start_date, end_date, log_message=log_message
         # )
-        
 
     except Exception as e:
         error_message = f"An error occurred while cleaning dataframes: {e}"
@@ -341,29 +361,33 @@ def produce_tables(dataframes, file_string, franchise_list, date_range):
     with open(file_string, "w", newline="") as f:
         for name in filter_function_map.keys():
             config = find_dict_by_table_name(name, table_configs)
-            this_table = filter_service_information(dataframes, config, franchise_list, date_range)
+            this_table = filter_service_information(
+                dataframes, config, franchise_list, date_range
+            )
 
             # Check if the sheet name has changed (or if it's the first table being processed)
             if config["sheet_name"] != last_sheet_name:
                 # Print the sheet name if it's the first table in the sheet or if the sheet name has changed
                 f.write(f"{config['sheet_name']}\n")
-                last_sheet_name = config["sheet_name"]  # Update the last processed sheet name
-            try:                
+                last_sheet_name = config[
+                    "sheet_name"
+                ]  # Update the last processed sheet name
+            try:
                 # Write the table name on its own line
                 f.write(f"{name}\n")
-                
+
                 if not this_table.empty:
                     # Iterate over DataFrame rows and columns to write the entire table
                     for index, row in this_table.iterrows():
-                        row_str = ','.join(str(value) for value in row)
+                        row_str = ",".join(str(value) for value in row)
                         f.write(f"{row_str}\n")
                 else:
                     print(f"No data to write for {name}")
                     log_message(f"No data to write for {name}")
-                
+
                 # Add a newline after the table has been added for separation
                 f.write("\n")
-                
+
             except Exception as e:
                 log_message(f"Error processing filter for {name}: {e}")
                 continue  # Skip to the next iteration if there's an error
@@ -372,7 +396,7 @@ def produce_tables(dataframes, file_string, franchise_list, date_range):
 def filter_service_information(dataframes, config, franchise_list, date_range):
     print("Generating table...", config["table_name"])
     log_message(f"Generating table... {config['table_name']}")
-        
+
     row_names = config["row_names"]
     placeholder_rows = config.get("placeholder_text", {})
     default_db_key = config.get("row_db_default", "Default Logic")
@@ -387,15 +411,21 @@ def filter_service_information(dataframes, config, franchise_list, date_range):
         try:
             if row in placeholder_rows:
                 # Append placeholder text directly
-                result_list.append({"Row Name": row, "Q1_Totals": placeholder_rows[row]})
+                result_list.append(
+                    {"Row Name": row, "Q1_Totals": placeholder_rows[row]}
+                )
                 continue
 
             dataframe_key = default_db_key
             # Filter the dataframe by franchise before applying further processing
             this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
-            
-            this_row_dataframe = this_row_dataframe[this_row_dataframe['franchise'].isin(franchise_list)]
-            filtered_data = filter_func(this_row_dataframe, row, dfname=dataframe_key, date_range=date_range)
+
+            this_row_dataframe = this_row_dataframe[
+                this_row_dataframe["franchise"].isin(franchise_list)
+            ]
+            filtered_data = filter_func(
+                this_row_dataframe, row, dfname=dataframe_key, date_range=date_range
+            )
 
             if isinstance(filtered_data, str):
                 # If filtered_data is a string, append it directly
@@ -414,7 +444,9 @@ def filter_service_information(dataframes, config, franchise_list, date_range):
 
         except Exception as e:
             print(f"Error processing row: {row}, dfkey: {dataframe_key} Error: {e}")
-            log_message(f"Error processing row: {row}, dfkey: {dataframe_key} Error: {e}")
+            log_message(
+                f"Error processing row: {row}, dfkey: {dataframe_key} Error: {e}"
+            )
             result_list.append({"Row Name": row, "Q1_Totals": f"Error: {e}"})
 
     return pd.DataFrame(result_list)
