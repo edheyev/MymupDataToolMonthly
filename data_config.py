@@ -72,9 +72,14 @@ Overall_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "placeholder_text": {
+        "Number open cases": "PLACEHOLDER"
+        },
+    "row_db_logic": {
+        "Number closed cases": "CYPMH_File_Closures_All",
+    },
+    "mib_row_db_default": "CYPMH_Referrals",
+    "row_db_default": "CYPMH_Referrals",
 }
 
 CIC_CLA_caseload_and_referrals = {
@@ -88,9 +93,14 @@ CIC_CLA_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "placeholder_text": {
+        "Number open cases": "PLACEHOLDER"
+        },
+    "row_db_logic": {
+        "Number closed cases": "CYPMH_File_Closures_All",
+    },
+    "mib_row_db_default": "CYPMH_Referrals",
+    "row_db_default": "CYPMH_Referrals",
 }
 
 SEN_caseload_and_referrals = {
@@ -104,9 +114,14 @@ SEN_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "placeholder_text": {
+        "Number open cases": "PLACEHOLDER"
+        },
+    "row_db_logic": {
+        "Number closed cases": "CYPMH_File_Closures_All",
+    },
+    "mib_row_db_default": "CYPMH_Referrals",
+    "row_db_default": "CYPMH_Referrals",
 }
 
 EHCP_caseload_and_referrals = {
@@ -120,9 +135,14 @@ EHCP_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "placeholder_text": {
+        "Number open cases": "PLACEHOLDER"
+        },
+    "row_db_logic": {
+        "Number closed cases": "CYPMH_File_Closures_All",
+    },
+    "mib_row_db_default": "CYPMH_Referrals",
+    "row_db_default": "CYPMH_Referrals",
 }
 
 CRAVEN_caseload_and_referrals = {
@@ -136,9 +156,14 @@ CRAVEN_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "placeholder_text": {
+        "Number open cases": "PLACEHOLDER"
+        },
+    "row_db_logic": {
+        "Number closed cases": "CYPMH_File_Closures_All",
+    },
+    "mib_row_db_default": "CYPMH_Referrals",
+    "row_db_default": "CYPMH_Referrals",
 }
 
 BRADFORD_DISTRICT_caseload_and_referrals = {
@@ -152,10 +177,16 @@ BRADFORD_DISTRICT_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Clients_All",
-    "row_db_default": "CYPMH_Clients_All",
+    "placeholder_text": {
+        "Number open cases": "PLACEHOLDER"
+        },
+    "row_db_logic": {
+        "Number closed cases": "CYPMH_File_Closures_All",
+    },
+    "mib_row_db_default": "CYPMH_Referrals",
+    "row_db_default": "CYPMH_Referrals",
 }
+
 
 All_Referrals_by_demographics = {
     "sheet_name": "Demographic_split ",
@@ -216,6 +247,7 @@ All_Referrals_by_demographics = {
     "mib_row_db_default": "CYPMH_Clients_All",
     "row_db_default": "CYPMH_Clients_All",
 }
+
 
 All_CIC_CLA_Referrals_by_demographics = {
     "sheet_name": "Demographic_split ",
@@ -517,6 +549,7 @@ BRADFORD_DISTRICT_Referrals_by_demographics = {
     "row_db_default": "CYPMH_Clients_All",
 }
 
+
 referrals_row_names = (
     [
         "GP services",
@@ -547,6 +580,7 @@ referrals_row_names = (
         "Unknown",
     ],
 )
+
 
 Source_of_All_Referrals = {
     "sheet_name": "Referral_Source",
@@ -602,6 +636,7 @@ Source_of_Referrals___BRADFORD_DISTRICT = {
     "row_db_default": "CYPMH_Referrals",
 }
 
+
 No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_ = {
     "sheet_name": "Two_attended_contacts_data",
     "table_name": "No_of_CYP_receiving_a_second_attended_contact_with_mental_health_services",
@@ -639,6 +674,7 @@ DNAs_and_cancellations = {
     "mib_row_db_default": "CYPMH_Clients_All",
     "row_db_default": "CYPMH_Contacts_All",
 }
+
 
 Goals_Based_Outcomes = {
     "sheet_name": "Outcome_Data",
@@ -698,6 +734,7 @@ Goals_Based_Outcomes = {
     "mib_row_db_default": "CYPMH_Plans_And_Goals_All",
     "row_db_default": "CYPMH_Plans_And_Goals_All",
 }
+
 
 All_Goal_Themes = {
     "sheet_name": "Goal_Themes",
@@ -885,6 +922,7 @@ Bradford_District_Goal_Themes = {
     "row_db_default": "CYPMH_Goal_Themes_All",
 }
 
+
 Overall_Discharges = {
     "sheet_name": "Discharge_Data",
     "table_name": "Overall_Discharges",
@@ -979,14 +1017,16 @@ Discharges_BRADFORD_DISTRICT = {
     "row_db_default": "CYPMH_File_Closures_All",
 }
 
+
 Overall_Number_on_Waiting_list = {
     "sheet_name": "Wait_List_Data",
     "table_name": "Overall_Number_on_Waiting_list",
     "row_names": ["All", "CIC/CLA", "SEN", "EHCP", "CRAVEN", "BRADFORD DISTRICT"],
     "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Referrals",
-    "row_db_default": "CYPMH_Referrals",
+    "mib_row_db_default": "CYPMH_Two_Contacts",
+    "row_db_default": "CYPMH_Two_Contacts",
 }
+
 
 Overall_Wait_Times = {
     "sheet_name": "Wait_Times",
@@ -1010,8 +1050,8 @@ CIC_CLA_Wait_Times = {
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
-    "row_db_default": "CYPMH_Two_Contacts_MIB",
+    "mib_row_db_default": "CYPMH_Two_Contacts",
+    "row_db_default": "CYPMH_Two_Contacts",
 }
 
 SEN_Wait_Times = {
@@ -1023,8 +1063,8 @@ SEN_Wait_Times = {
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
-    "row_db_default": "CYPMH_Two_Contacts_MIB",
+    "mib_row_db_default": "CYPMH_Two_Contacts",
+    "row_db_default": "CYPMH_Two_Contacts",
 }
 
 EHCP_Wait_Times = {
@@ -1036,8 +1076,8 @@ EHCP_Wait_Times = {
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
-    "row_db_default": "CYPMH_Two_Contacts_MIB",
+    "mib_row_db_default": "CYPMH_Two_Contacts",
+    "row_db_default": "CYPMH_Two_Contacts",
 }
 
 CRAVEN_Wait_Times = {
@@ -1049,8 +1089,8 @@ CRAVEN_Wait_Times = {
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
-    "row_db_default": "CYPMH_Two_Contacts_MIB",
+    "mib_row_db_default": "CYPMH_Two_Contacts",
+    "row_db_default": "CYPMH_Two_Contacts",
 }
 
 BRADFORD_DISTRICT_Wait_Times = {
@@ -1062,15 +1102,16 @@ BRADFORD_DISTRICT_Wait_Times = {
         "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect",
     ],
     "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Two_Contacts_MIB",
-    "row_db_default": "CYPMH_Two_Contacts_MIB",
+    "mib_row_db_default": "CYPMH_Two_Contacts",
+    "row_db_default": "CYPMH_Two_Contacts",
 }
+
 
 Yim_Live = {
     "sheet_name": "YIM_LIVE_&_KCU_Delivery",
     "table_name": "Yim_Live",
     "row_names": ["Number Sessions", "Number Participants"],
-    "placeholder_text": {"Number Sessions": "todo", "Number Participants": "todo"},
+    "placeholder_text": {"Number Sessions": "PLACEHOLDER", "Number Participants": "PLACEHOLDER"},
     "mib_row_db_default": "CYPMH_Clients_All",
     "row_db_default": "CYPMH_Clients_All",
 }
@@ -1080,12 +1121,13 @@ KCU = {
     "table_name": "KCU",
     "row_names": ["Number Schools/Youth Settings", "Number Participants"],
     "placeholder_text": {
-        "Number Schools/Youth Settings": "todo",
-        "Number Participants": "todo",
+        "Number Schools/Youth Settings": "PLACEHOLDER",
+        "Number Participants": "PLACEHOLDER",
     },
     "mib_row_db_default": "CYPMH_Clients_All",
     "row_db_default": "CYPMH_Clients_All",
 }
+
 
 table_configs = [
     Overall_caseload_and_referrals,
@@ -1131,7 +1173,6 @@ table_configs = [
     Yim_Live,
     KCU,
 ]
-
 
 craven_postcodes = [
     "BD200AA",

@@ -5,7 +5,7 @@ import numpy as np
 import unittest
 from unittest.mock import patch, MagicMock
 
-from data_cleaning import clean_column_names,isolate_client_ages, filter_post_codes_add_craven
+from data_cleaning import clean_column_names,bradford_postcode_filter_function,isolate_client_ages,filter_post_codes_add_craven, filter_post_codes_add_craven
 from data_flow_MR import log_message
 from data_utils import load_data_files, isolate_date_range
 
@@ -24,40 +24,6 @@ class TestDataCleaningFunctions(unittest.TestCase):
         # Assert
         self.assertListEqual(list(cleaned_dataframes['test_df'].columns), expected_columns)
 
-
-
-class TestFilterPostCodesAddCraven(unittest.TestCase):
-    def setUp(self):
-        # Sample data setup
-        self.dataframes = {
-            'test_df': pd.DataFrame({
-                'client_id': [1, 2, 3, 4, 5, 6,7,8],
-                'post_code': ['BD1 2RE', 'LS29 8JQ', 'BD20 7RT', 'HX3 5AX', 'ZZ99 9ZZ', 'ZZ999ZZ', 'BD19ZZ', np.nan],
-                'data': ['a', 'b', 'c', 'd', 'e', 'f','g','h']
-            })
-        }
-        # Expected Bradford and Craven postcodes
-        self.expected_bradford_craven_postcodes = {'BD1', 'LS29', 'BD20', 'HX3', 'BD1'}
-
-    def test_filter_post_codes_add_craven(self):
-        # Applying the filter function
-        filtered_dataframes = filter_post_codes_add_craven(self.dataframes)
-        
-        # Verify rows are correctly filtered and marked
-        df = filtered_dataframes['test_df']
-        
-        # Assert the correct number of rows remain
-        self.assertEqual(len(df), 5)  # Adjusted to match the actual expected number of valid postcodes
-        
-        # Assert correct marking of Craven
-        # self.assertTrue(all(df[df['post_code'].str.startswith('BD20') | df['post_code'].str.startswith('LS29')]['craven']))
-        
-        # Assert only valid postcodes remain
-        postcodes_processed = set(df['post_code'].str.replace(" ", "").apply(lambda x: x[:4] if len(x) > 6 else x[:3]))
-        self.assertTrue(postcodes_processed.issubset(self.expected_bradford_craven_postcodes))
-
-    # You can add more test cases for other scenarios, such as handling empty DataFrames,
-    # DataFrames without 'post_code' or 'client_id' columns, etc.
 
 class TestIsolateClientAges(unittest.TestCase):
     def setUp(self):
@@ -127,7 +93,29 @@ class TestDataFilesLoading(unittest.TestCase):
         pd.testing.assert_frame_equal(dataframes['referrals'], expected_df)
         self.assertEqual(mock_read_csv.call_count, 3, "read_csv should be called three times for three files")
 
+class TestBradfordPostcodeFiltering(unittest.TestCase):
+    def test_bradford_postcode_filter_function(self):
+        # Mock data simulating your DataFrame structure
+        data = {
+            'client_id': [1, 2, 3, 4, 5, 6, 7],
+            'post_code': ['BD1 2AB', 'BD20 8HH', 'LS29 8JH', 'HX3 5AX', 'BD99 1AB', 'YO24 1AB', 'LS1 4PL']
+        }
+        df = pd.DataFrame(data)
+        dataframes = {'test_df': df}
 
+        # Apply the Bradford postcode filtering function
+        filtered_dataframes = bradford_postcode_filter_function(dataframes)
+
+        # Expected postcodes to remain after filtering
+        expected_postcodes = ['BD1 2AB', 'BD20 8HH', 'LS29 8JH', 'HX3 5AX', 'BD99 1AB']  # Adjust based on your function logic
+
+        # Extract remaining postcodes after filtering
+        remaining_postcodes = filtered_dataframes['test_df']['post_code'].tolist()
+
+        # Assert that only the expected Bradford postcodes remain
+        self.assertListEqual(remaining_postcodes, expected_postcodes)
+        
+        
 # class TestIsolateDateRange(unittest.TestCase):
 #     def setUp(self):
 #         # Create a sample DataFrame for testing
@@ -156,6 +144,25 @@ class TestDataFilesLoading(unittest.TestCase):
 #         filtered_dates = filtered_df['date_column'].dt.strftime('%d/%m/%Y').tolist()
 #         self.assertListEqual(filtered_dates, expected_dates, "The dates in the filtered DataFrame do not match the expected dates.")
 
+
+class TestCravenPostcodesFiltering(unittest.TestCase):
+    def test_filter_post_codes_add_craven(self):
+        # Mock data simulating your DataFrame structure
+        data = {
+            'client_id': [1, 2, 3, 4, 5, 6],
+            'post_code': ['BD20 8NJ', 'LS2 97 UI', 'BD1 2AB', 'LS27 KT', 'UNKNOWN', " "]
+        }
+        df = pd.DataFrame(data)
+        dataframes = {'test_df': df}
+
+        # Expected results after applying the function
+        expected_craven_marks = [True, True, False, True, False, False]
+
+        # Apply the filtering function
+        filtered_dataframes = filter_post_codes_add_craven(dataframes)
+
+        # Assert that Craven postcodes are correctly identified
+        self.assertTrue((filtered_dataframes['test_df']['craven'].values == expected_craven_marks).all())
 
 if __name__ == '__main__':
     unittest.main()

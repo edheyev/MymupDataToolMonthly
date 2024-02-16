@@ -18,6 +18,7 @@ sys.path.append(current_dir)
 # Now import your local modules
 from data_config import file_info, table_configs, yim_providers, other_vcse
 from data_cleaning import (
+    add_referred_this_reporting_period,
     clean_column_names,
     remove_duplicates,
     remove_trailing_spaces_from_values,
@@ -29,6 +30,8 @@ from data_cleaning import (
     filter_post_codes_add_craven,
     clean_dates,
     clean_mib,
+    bradford_postcode_filter_function,
+    add_rejected_referral_col_to_referral
 )
 from MR_filters import filter_function_map
 
@@ -326,6 +329,10 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
         cleaned_dataframes = isolate_client_ages(
             cleaned_dataframes, yim_providers, log_message=log_message
         )
+        
+        cleaned_dataframes = bradford_postcode_filter_function(
+            cleaned_dataframes, log_message
+        )
 
         cleaned_dataframes = filter_post_codes_add_craven(
             cleaned_dataframes, log_message
@@ -337,11 +344,14 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
 
         cleaned_dataframes = clean_dates(cleaned_dataframes, log_message=log_message)
 
+        cleaned_dataframes = add_rejected_referral_col_to_referral(cleaned_dataframes, log_message=log_message)
+        
         cleaned_dataframes = clean_mib(cleaned_dataframes, log_message)
         # cleaned_dataframes = isolate_reporting_period(
         #     cleaned_dataframes, start_date, end_date, log_message=log_message
         # )
-
+        cleaned_dataframes = add_referred_this_reporting_period(cleaned_dataframes, date_range, log_message)
+        
     except Exception as e:
         error_message = f"An error occurred while cleaning dataframes: {e}"
         print(error_message)
@@ -399,6 +409,7 @@ def filter_service_information(dataframes, config, franchise_list, date_range):
 
     row_names = config["row_names"]
     placeholder_rows = config.get("placeholder_text", {})
+
     default_db_key = config.get("row_db_default", "Default Logic")
     mib_default_db_key = config.get("mib_row_db_default", "MIB Default Logic")
 
@@ -415,7 +426,10 @@ def filter_service_information(dataframes, config, franchise_list, date_range):
                     {"Row Name": row, "Q1_Totals": placeholder_rows[row]}
                 )
                 continue
-
+            if "row_db_logic" in config:
+                if row in config["row_db_logic"]:
+                    default_db_key = config["row_db_logic"][row]
+                    
             dataframe_key = default_db_key
             # Filter the dataframe by franchise before applying further processing
             this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
@@ -456,8 +470,8 @@ if __name__ == "__main__":
     if IS_HEADLESS:
         # Specify the directory and date range for headless mode
         directory_path = "./data"
-        start_date = "2023-01-01"
-        end_date = "2023-02-01"
+        start_date = "2022-01-01"
+        end_date = "2024-12-01"
         date_range = (start_date, end_date)
         main_headless(directory_path, start_date, end_date)
     else:

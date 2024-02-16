@@ -1,7 +1,8 @@
 # from data_config import yim_providers
 import pandas as pd
 import numpy as np
-
+from data_config import craven_postcodes
+from data_utils import isolate_date_range
 
 def clean_column_names(dataframes, log_message=None):
     print("Standardizing column names...")
@@ -187,39 +188,141 @@ def clean_mib(dataframes, log_message=None):
 
 
 
+# def filter_post_codes_add_craven(dataframes, log_message=None):
+#     print("Filtering postcodes and adding Craven column...")
+#     if log_message:
+#         log_message("Filtering postcodes and adding Craven column...")
+    
+#     # Initialization
+#     removed_client_ids_due_to_no_postcode = set()
+#     total_rows_before = 0
+#     total_rows_after = 0
+#     total_craven_marked = 0
+
+#     # Sets for postcode prefixes
+#     bradford_prefixes = {"BD1", "BD10", "BD11", "BD12", "BD13", "BD14", "BD15", "BD16", "BD17", "BD18", "BD2", "BD20", "BD21", "BD22", "BD23", "BD3", "BD4", "BD5", "BD6", "BD7", "BD8", "BD9", "BD98", "BD99", "HD6", "HX2", "HX3", "HX7", "LS12", "LS19", "LS20", "LS21", "LS28", "LS29"}
+#     craven_prefixes = {"BD20", "LS29"}
+#     craven_postcodes = {"BD208NJ", "LS27KT", "LS297UI"}
+    
+
+#     def extract_postcode_prefix(postcode):
+#         # Convert any input to string and remove spaces
+#         cleaned_postcode = ''.join(filter(str.isalnum, str(postcode).upper()))
+        
+#         # Determine the prefix based on the length after removing spaces
+#         # For postcodes with 6 characters (without spaces), the prefix is the first 3 characters
+#         # For postcodes with 7 characters (without spaces), the prefix is the first 4 characters
+#         if len(cleaned_postcode) == 6:
+#             return cleaned_postcode[:3]
+#         elif len(cleaned_postcode) == 7:
+#             return cleaned_postcode[:4]
+#         else:
+#             # Handle other lengths conservatively, defaulting to the first 3 characters
+#             return cleaned_postcode[:3]
+
+
+
+#     # Loop through each dataframe
+#     for df_name, df in dataframes.items():
+#         if 'post_code' in df.columns:
+#             # Initial count
+#             total_rows_before += len(df)
+
+#             # Standardize and extract prefixes
+#             df['postcode_prefix'] = df['post_code'].apply(extract_postcode_prefix)
+            
+#             # # Marking Craven
+#             # df['craven'] = df['postcode_prefix'].isin(craven_prefixes)
+#             # total_craven_marked += df['craven'].sum()
+
+#             # Apply filtering
+#             df_filtered = df[df['postcode_prefix'].isin(bradford_prefixes.union(craven_prefixes))]
+#             total_rows_after += len(df_filtered)
+
+#             # Update dataframe without the temporary column
+#             df_final = df_filtered.drop(columns=['postcode_prefix'])
+#             dataframes[df_name] = df_final
+
+#     # Reporting
+#     print(f"Total rows before filtering: {total_rows_before}, after filtering: {total_rows_after}, Craven marked: {total_craven_marked}")
+
+#     if log_message:
+#         log_message(f"Completed postcode filtering. Rows before: {total_rows_before}, after: {total_rows_after}, Craven marked: {total_craven_marked}")
+
+#     return dataframes
+
+def extract_postcode_prefix(postcode):
+    # Convert any input to string and remove spaces
+    cleaned_postcode = ''.join(filter(str.isalnum, str(postcode).upper()))
+    
+    # Determine the prefix based on the length after removing spaces
+    if len(cleaned_postcode) == 6:
+        return cleaned_postcode[:3]
+    elif len(cleaned_postcode) == 7:
+        return cleaned_postcode[:4]
+    else:
+        # Handle other lengths conservatively, defaulting to the first 3 characters
+        return cleaned_postcode[:3]
+
 def filter_post_codes_add_craven(dataframes, log_message=None):
     print("Filtering postcodes and adding Craven column...")
     if log_message:
         log_message("Filtering postcodes and adding Craven column...")
     
+    # Craven postcodes for exact matching
+    craven_postcodes
+    total_craven_marked = 0
+
+    # Loop through each dataframe
+    for df_name, df in dataframes.items():
+        if 'post_code' in df.columns:
+            # Marking Craven based on exact matches
+            df['craven'] = df['post_code'].apply(lambda x: ''.join(filter(str.isalnum, x.upper())) in craven_postcodes)
+            total_craven_marked += df['craven'].sum()
+
+    print(f"Craven marked: {total_craven_marked}")
+    if log_message:
+        print(f"Completed Craven marking. Craven marked: {total_craven_marked}")
+        log_message(f"Completed Craven marking. Craven marked: {total_craven_marked}")
+
+    return dataframes
+
+def add_rejected_referral_col_to_referral(dataframes, log_message=None):
+    if log_message:
+        log_message("Adding referral_rejected column to CYMPH_Referrals...")
+
+    # Check if the key for rejected referrals exists
+    if 'CYPMH_Referral_Rejections_All' in dataframes:
+        # Extract client_ids for rejected referrals
+        rejected_client_ids = set(dataframes['CYPMH_Referral_Rejections_All']['client_id'])
+
+        # Check if the key for referrals exists
+        if 'CYPMH_Referrals' in dataframes:
+            # Add referral_rejected column based on whether client_id is in rejected_client_ids
+            dataframes['CYPMH_Referrals']['referral_rejected'] = dataframes['CYPMH_Referrals']['client_id'].isin(rejected_client_ids)
+
+            if log_message:
+                log_message("referral_rejected column added successfully.")
+        else:
+            if log_message:
+                log_message("CYMPH_Referrals not found in dataframes.")
+    else:
+        if log_message:
+            log_message("CYPMH_Referral_Rejections_All not found in dataframes.")
+
+    return dataframes
+
+
+def bradford_postcode_filter_function(dataframes, log_message=None):
     # Initialization
     removed_client_ids_due_to_no_postcode = set()
     total_rows_before = 0
     total_rows_after = 0
-    total_craven_marked = 0
 
     # Sets for postcode prefixes
     bradford_prefixes = {"BD1", "BD10", "BD11", "BD12", "BD13", "BD14", "BD15", "BD16", "BD17", "BD18", "BD2", "BD20", "BD21", "BD22", "BD23", "BD3", "BD4", "BD5", "BD6", "BD7", "BD8", "BD9", "BD98", "BD99", "HD6", "HX2", "HX3", "HX7", "LS12", "LS19", "LS20", "LS21", "LS28", "LS29"}
-    craven_prefixes = {"BD20", "LS29"}
 
-    def extract_postcode_prefix(postcode):
-        # Convert any input to string and remove spaces
-        cleaned_postcode = ''.join(filter(str.isalnum, str(postcode).upper()))
-        
-        # Determine the prefix based on the length after removing spaces
-        # For postcodes with 6 characters (without spaces), the prefix is the first 3 characters
-        # For postcodes with 7 characters (without spaces), the prefix is the first 4 characters
-        if len(cleaned_postcode) == 6:
-            return cleaned_postcode[:3]
-        elif len(cleaned_postcode) == 7:
-            return cleaned_postcode[:4]
-        else:
-            # Handle other lengths conservatively, defaulting to the first 3 characters
-            return cleaned_postcode[:3]
-
-
-
-    # Loop through each dataframe
+    # Loop through each dataframe for filtering with prefixes
     for df_name, df in dataframes.items():
         if 'post_code' in df.columns:
             # Initial count
@@ -228,27 +331,15 @@ def filter_post_codes_add_craven(dataframes, log_message=None):
             # Standardize and extract prefixes
             df['postcode_prefix'] = df['post_code'].apply(extract_postcode_prefix)
             
-            # # Marking Craven
-            # df['craven'] = df['postcode_prefix'].isin(craven_prefixes)
-            # total_craven_marked += df['craven'].sum()
-
             # Apply filtering
-            df_filtered = df[df['postcode_prefix'].isin(bradford_prefixes.union(craven_prefixes))]
+            df_filtered = df[df['postcode_prefix'].isin(bradford_prefixes)]
             total_rows_after += len(df_filtered)
 
             # Update dataframe without the temporary column
             df_final = df_filtered.drop(columns=['postcode_prefix'])
             dataframes[df_name] = df_final
-
-    # Reporting
-    print(f"Total rows before filtering: {total_rows_before}, after filtering: {total_rows_after}, Craven marked: {total_craven_marked}")
-
-    if log_message:
-        log_message(f"Completed postcode filtering. Rows before: {total_rows_before}, after: {total_rows_after}, Craven marked: {total_craven_marked}")
-
+            
     return dataframes
-
-
 
 
 def remove_trailing_spaces_from_values(dataframes_dict, log_message=None):
@@ -326,6 +417,27 @@ def filter_mib_services(dataframes, log_message=None):
 
     return filtered_dataframes
 
+def add_referred_this_reporting_period(dataframes, date_range, log_message=None):
+    if 'CYPMH_Referrals' in dataframes:
+        # Isolate referrals within the date range
+        isolated_df = isolate_date_range(dataframes['CYPMH_Referrals'], "referral_date", date_range)
+        # Extract client_ids for referrals within the date range
+        referral_client_ids = set(isolated_df['client_id'])
+
+        # Loop through all dataframes
+        for df_name, df in dataframes.items():
+            # Add 'referred_in_date_range' column based on whether client_id is in referral_client_ids
+            df['referred_in_date_range'] = df['client_id'].isin(referral_client_ids)
+            # Update the dataframe in the dictionary
+            dataframes[df_name] = df
+
+        if log_message:
+            log_message("Added 'referred_in_date_range' column to all dataframes based on CYPMH_Referrals within the specified date range.")
+    else:
+        if log_message:
+            log_message("CYPMH_Referrals dataframe not found in the provided dataframes dictionary.")
+
+    return dataframes
 
 def add_reason_to_file_closures(dataframes, log_message=None):
     print("Adding 'reason' column to file_closures and file_closures_and_goals...")
