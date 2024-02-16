@@ -52,29 +52,14 @@ from data_utils import (
 # Global variables
 log_queue = queue.Queue()
 root = None
-IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
+# IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
+IS_HEADLESS = False  # Set to True for headless mode, False for GUI mode
 
 
 # Global queue for cleaned data
 cleaned_data_queue = queue.Queue()
 
-
-def log_message(message):
-    """Log a message to the Tkinter text widget."""
-    # print("l ", message)
-    log_queue.put(message)
-
-
-def update_text_widget(log_queue, text_widget):
-    """Update the text widget with log messages."""
-    while True:
-        message = log_queue.get()
-        if message == "QUIT":
-            break
-        text_widget.configure(state="normal")
-        text_widget.insert(tk.END, message + "\n")
-        text_widget.configure(state="disabled")
-        text_widget.yview(tk.END)
+# GUI stuff
 
 
 def create_logging_window():
@@ -147,7 +132,7 @@ def create_logging_window():
     start_button = ttk.Button(
         button_frame,
         text="Start Processing",
-        command=lambda: start_processing(text_widget),
+        command=lambda: start_processing(start_date_entry, end_date_entry, text_widget),
     )
     start_button.pack(side=tk.LEFT)
 
@@ -165,13 +150,21 @@ def create_logging_window():
 
     return root, file_button, start_date_entry, end_date_entry
 
+def log_message(message):
+    """Log a message to the Tkinter text widget."""
+    # print("l ", message)
+    log_queue.put(message)
 
-def start_processing(text_widget):
-    """Function to start the main processing."""
-    # You can now use the global variable `directory` to access the selected directory
-    global directory
-    threading.Thread(target=main, args=(directory, text_widget), daemon=True).start()
-
+def update_text_widget(log_queue, text_widget):
+    """Update the text widget with log messages."""
+    while True:
+        message = log_queue.get()
+        if message == "QUIT":
+            break
+        text_widget.configure(state="normal")
+        text_widget.insert(tk.END, message + "\n")
+        text_widget.configure(state="disabled")
+        text_widget.yview(tk.END)
 
 def select_folder(start_date_entry, end_date_entry, root):
     global directory
@@ -197,7 +190,6 @@ def select_folder(start_date_entry, end_date_entry, root):
         except Exception as e:
             log_message(f"Error in data processing: {e}")
 
-
 def load_and_clean_data(folder_path, start_date, end_date):
     try:
         raw_data = load_data_files(folder_path, file_info, log_message=log_message)
@@ -208,6 +200,12 @@ def load_and_clean_data(folder_path, start_date, end_date):
     except Exception as e:
         log_message(f"Error in data processing: {e}")
 
+def start_processing(start_date_entry, end_date_entry, text_widget):
+    """Function to start the main processing."""
+    # You can now use the global variable `directory` to access the selected directory
+    global directory
+    threading.Thread(target=run_main_gui, args=(start_date_entry, end_date_entry, text_widget), daemon=True).start()
+
 
 def main_gui():
     global root
@@ -216,7 +214,8 @@ def main_gui():
         "WM_DELETE_WINDOW", lambda: root.quit()
     )  # Proper shutdown on window close
     root.mainloop()
-
+    
+def run_main_gui(start_date_entry, end_date_entry, text_widget):
     try:
         # Wait and get cleaned data from the queue
         cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
@@ -225,31 +224,12 @@ def main_gui():
             cleaned_data, file_info, log_message=log_message
         )
 
-        # Define your franchise lists for each CSV
-        yim_providers = [
-            "Barnardos",
-            "Bradford Youth Service (BYS)",
-            "Brathay -MAGIC service type only",
-            "INCIC -service type CYP only",
-            "Mind in Bradford (MiB) service type Know Your Mind, Know Your Mind plus, Hospital Buddies BRI and Hospital Buddies AGH only",
-            "SELFA",
-        ]
-
-        other_vcse = [
-            "All Star Youth Entertainment",
-            "Bradford Counselling Service",
-            "Bradford Bereavement Support",
-            "Family Action Bradford",
-            "Roshnighar",
-            "STEP 2",
-            "The Cellar Trust",
-        ]
         # Generate filenames based on the current date
         date_str = datetime.datetime.now().strftime("%d-%m-%Y")
         file_string_1 = f"output_csv_QR_{date_str}_franchise_group_1.csv"
         file_string_2 = f"output_csv_QR_{date_str}_franchise_group_2.csv"
 
-        date_range = start_date_entry, end_date_entry
+        date_range = start_date_entry.get(), end_date_entry.get()
         # Generate CSV files for each franchise list
         produce_tables(validated_data, file_string_1, yim_providers, date_range)
         log_message("CSV saved. File name: " + file_string_1)
@@ -267,7 +247,7 @@ def main_gui():
         )
     except Exception as e:
         log_message(f"Unexpected error: {e}")
-        text_widget.insert(tk.END, f"Unexpected error: {e}\n")
+        # text_widget.insert(tk.END, f"Unexpected error: {e}\n")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
 
@@ -309,6 +289,8 @@ def main_headless(directory, start_date, end_date):
 
 def clean_data(dataframes, start_date, end_date, log_message=None):
     print(f"log_message is callable: {callable(log_message)}")
+    
+    date_range = start_date, end_date
 
     if log_message and not callable(log_message):
         print("here")

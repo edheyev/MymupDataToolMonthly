@@ -67,7 +67,7 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
             
             # referrals refused count from file clusures data dump of innaproitare referrals
             filtered_df = df[df['referral_rejected'] == False]
-            return "make checks"
+            return filtered_df
         elif row == "Number open cases":
             # CANNOT DO
             return "PLACEHOLDER"
