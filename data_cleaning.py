@@ -5,9 +5,6 @@ from data_config import craven_postcodes
 from data_utils import isolate_date_range
 
 
-
-
-
 def clean_column_names(dataframes, log_message=None):
     print("Standardizing column names...")
     log_message("Standardizing column names...")
@@ -101,36 +98,40 @@ def isolate_reporting_period(dataframes, start_date, end_date, log_message=None)
 def remove_invalid_rows(dataframes, log_message=None):
     # TODO
     return dataframes
-    
+
+
 def remove_duplicates(dataframes, log_message=None):
-    columns_to_ignore = ['file_closure', 'referral_closure']
+    columns_to_ignore = ["file_closure", "referral_closure"]
     print("Removing duplicates...")
     if log_message:
         log_message("Removing duplicates...")
-    
+
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
         original_row_count = df.shape[0]
-        
+
         # Create a list of columns to consider for duplicate removal
-        columns_to_consider = [col for col in df.columns if col not in columns_to_ignore]
-        
+        columns_to_consider = [
+            col for col in df.columns if col not in columns_to_ignore
+        ]
+
         # Use the `subset` parameter to ignore specified columns
         cleaned_df = df.drop_duplicates(subset=columns_to_consider)
-        
+
         cleaned_dataframes[df_name] = cleaned_df
         duplicates_removed = original_row_count - cleaned_df.shape[0]
         if log_message:
             log_message(f"Removed {duplicates_removed} duplicates from {df_name}.")
         else:
             print(f"Removed {duplicates_removed} duplicates from {df_name}.")
-    
+
     return cleaned_dataframes
+
 
 def isolate_client_ages(dataframes, yim_providers, log_message=None):
     """
     Removes clients from the dataframe that are not in the correct age categories.
-    
+
     For entries from the yim_providers list in the 'franchise' column, removes ages 26 and up.
     For those that are not yim_providers, also removes ages 19-25.
     """
@@ -140,44 +141,54 @@ def isolate_client_ages(dataframes, yim_providers, log_message=None):
     for df_name, df in dataframes.items():
         if "age" in df.columns and "franchise" in df.columns:
             is_yim_provider = df["franchise"].isin(yim_providers)
-            keep_rows = ((is_yim_provider & (df["age"] < 26)) | (~is_yim_provider & (df["age"] < 19)))
+            # TODO remove people who are 0
+            keep_rows = (is_yim_provider & (df["age"] < 26)) | (
+                ~is_yim_provider & (df["age"] < 19)
+            )
 
-            removal_ids.update(df[~keep_rows]["client_id"].unique())
+            removal_ids.update(df[~keep_rows]["global_id"].unique())
 
             df_filtered = df[keep_rows].reset_index(drop=True)
             dataframes[df_name] = df_filtered
 
-
     for df_name, df in dataframes.items():
-        if "client_id" in df.columns:
-            df_final = df[~df['client_id'].isin(removal_ids)].reset_index(drop=True)
+        if "global_id" in df.columns:
+            df_final = df[~df["global_id"].isin(removal_ids)].reset_index(drop=True)
             dataframes[df_name] = df_final
 
     return dataframes
 
+
 def clean_mib(dataframes, log_message=None):
     print(f"Isolating only correct MIB services")
-    
+
     # Define allowed service types
-    allowed_service_types = ["Know Your Mind", "Know Your Mind Plus", "Hospital Buddies BRI", "Hospital Buddies AGH"]
-    
+    allowed_service_types = [
+        "Know Your Mind",
+        "Know Your Mind Plus",
+        "Hospital Buddies BRI",
+        "Hospital Buddies AGH",
+    ]
+
     # Container for client_ids to remove
     client_ids_to_remove = set()
-    
+
     # First pass: Identify client_ids to remove
     for df_name, df in dataframes.items():
         if "franchise" in df.columns and "service_type" in df.columns:
             # Filter for Mind In Bradford franchise
             mib_df = df[df["franchise"] == "Mind In Bradford"]
             # Identify disallowed service types
-            disallowed_rows = mib_df[~mib_df["service_type"].isin(allowed_service_types)]
+            disallowed_rows = mib_df[
+                ~mib_df["service_type"].isin(allowed_service_types)
+            ]
             # Update set of client_ids to remove
             client_ids_to_remove.update(disallowed_rows["client_id"].unique())
             if log_message:
                 log_message(f"Identified client_ids to remove in {df_name}.")
             else:
                 print(f"Identified client_ids to remove in {df_name}.")
-    
+
     # Second pass: Remove rows with identified client_ids in all DataFrames
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
@@ -187,16 +198,15 @@ def clean_mib(dataframes, log_message=None):
             log_message(f"Cleaned {df_name}, removed {len(df) - len(cleaned_df)} rows.")
         else:
             print(f"Cleaned {df_name}, removed {len(df) - len(cleaned_df)} rows.")
-    
-    return cleaned_dataframes
 
+    return cleaned_dataframes
 
 
 # def filter_post_codes_add_craven(dataframes, log_message=None):
 #     print("Filtering postcodes and adding Craven column...")
 #     if log_message:
 #         log_message("Filtering postcodes and adding Craven column...")
-    
+
 #     # Initialization
 #     removed_client_ids_due_to_no_postcode = set()
 #     total_rows_before = 0
@@ -207,12 +217,12 @@ def clean_mib(dataframes, log_message=None):
 #     bradford_prefixes = {"BD1", "BD10", "BD11", "BD12", "BD13", "BD14", "BD15", "BD16", "BD17", "BD18", "BD2", "BD20", "BD21", "BD22", "BD23", "BD3", "BD4", "BD5", "BD6", "BD7", "BD8", "BD9", "BD98", "BD99", "HD6", "HX2", "HX3", "HX7", "LS12", "LS19", "LS20", "LS21", "LS28", "LS29"}
 #     craven_prefixes = {"BD20", "LS29"}
 #     craven_postcodes = {"BD208NJ", "LS27KT", "LS297UI"}
-    
+
 
 #     def extract_postcode_prefix(postcode):
 #         # Convert any input to string and remove spaces
 #         cleaned_postcode = ''.join(filter(str.isalnum, str(postcode).upper()))
-        
+
 #         # Determine the prefix based on the length after removing spaces
 #         # For postcodes with 6 characters (without spaces), the prefix is the first 3 characters
 #         # For postcodes with 7 characters (without spaces), the prefix is the first 4 characters
@@ -225,7 +235,6 @@ def clean_mib(dataframes, log_message=None):
 #             return cleaned_postcode[:3]
 
 
-
 #     # Loop through each dataframe
 #     for df_name, df in dataframes.items():
 #         if 'post_code' in df.columns:
@@ -234,7 +243,7 @@ def clean_mib(dataframes, log_message=None):
 
 #             # Standardize and extract prefixes
 #             df['postcode_prefix'] = df['post_code'].apply(extract_postcode_prefix)
-            
+
 #             # # Marking Craven
 #             # df['craven'] = df['postcode_prefix'].isin(craven_prefixes)
 #             # total_craven_marked += df['craven'].sum()
@@ -255,10 +264,11 @@ def clean_mib(dataframes, log_message=None):
 
 #     return dataframes
 
+
 def extract_postcode_prefix(postcode):
     # Convert any input to string and remove spaces
-    cleaned_postcode = ''.join(filter(str.isalnum, str(postcode).upper()))
-    
+    cleaned_postcode = "".join(filter(str.isalnum, str(postcode).upper()))
+
     # Determine the prefix based on the length after removing spaces
     if len(cleaned_postcode) == 6:
         return cleaned_postcode[:3]
@@ -268,21 +278,24 @@ def extract_postcode_prefix(postcode):
         # Handle other lengths conservatively, defaulting to the first 3 characters
         return cleaned_postcode[:3]
 
+
 def filter_post_codes_add_craven(dataframes, log_message=None):
     print("Filtering postcodes and adding Craven column...")
     if log_message:
         log_message("Filtering postcodes and adding Craven column...")
-    
+
     # Craven postcodes for exact matching
     craven_postcodes
     total_craven_marked = 0
 
     # Loop through each dataframe
     for df_name, df in dataframes.items():
-        if 'post_code' in df.columns:
+        if "post_code" in df.columns:
             # Marking Craven based on exact matches
-            df['craven'] = df['post_code'].apply(lambda x: ''.join(filter(str.isalnum, x.upper())) in craven_postcodes)
-            total_craven_marked += df['craven'].sum()
+            df["craven"] = df["post_code"].apply(
+                lambda x: "".join(filter(str.isalnum, x.upper())) in craven_postcodes
+            )
+            total_craven_marked += df["craven"].sum()
 
     print(f"Craven marked: {total_craven_marked}")
     if log_message:
@@ -291,19 +304,24 @@ def filter_post_codes_add_craven(dataframes, log_message=None):
 
     return dataframes
 
+
 def add_rejected_referral_col_to_referral(dataframes, log_message=None):
     if log_message:
         log_message("Adding referral_rejected column to CYMPH_Referrals...")
 
     # Check if the key for rejected referrals exists
-    if 'CYPMH_Referral_Rejections_All' in dataframes:
+    if "CYPMH_Referral_Rejections_All" in dataframes:
         # Extract client_ids for rejected referrals
-        rejected_client_ids = set(dataframes['CYPMH_Referral_Rejections_All']['client_id'])
+        rejected_client_ids = set(
+            dataframes["CYPMH_Referral_Rejections_All"]["client_id"]
+        )
 
         # Check if the key for referrals exists
-        if 'CYPMH_Referrals' in dataframes:
+        if "CYPMH_Referrals" in dataframes:
             # Add referral_rejected column based on whether client_id is in rejected_client_ids
-            dataframes['CYPMH_Referrals']['referral_rejected'] = dataframes['CYPMH_Referrals']['client_id'].isin(rejected_client_ids)
+            dataframes["CYPMH_Referrals"]["referral_rejected"] = dataframes[
+                "CYPMH_Referrals"
+            ]["client_id"].isin(rejected_client_ids)
 
             if log_message:
                 log_message("referral_rejected column added successfully.")
@@ -324,25 +342,60 @@ def bradford_postcode_filter_function(dataframes, log_message=None):
     total_rows_after = 0
 
     # Sets for postcode prefixes
-    bradford_prefixes = {"BD1", "BD10", "BD11", "BD12", "BD13", "BD14", "BD15", "BD16", "BD17", "BD18", "BD2", "BD20", "BD21", "BD22", "BD23", "BD3", "BD4", "BD5", "BD6", "BD7", "BD8", "BD9", "BD98", "BD99", "HD6", "HX2", "HX3", "HX7", "LS12", "LS19", "LS20", "LS21", "LS28", "LS29"}
+    bradford_prefixes = {
+        "BD1",
+        "BD10",
+        "BD11",
+        "BD12",
+        "BD13",
+        "BD14",
+        "BD15",
+        "BD16",
+        "BD17",
+        "BD18",
+        "BD2",
+        "BD20",
+        "BD21",
+        "BD22",
+        "BD23",
+        "BD3",
+        "BD4",
+        "BD5",
+        "BD6",
+        "BD7",
+        "BD8",
+        "BD9",
+        "BD98",
+        "BD99",
+        "HD6",
+        "HX2",
+        "HX3",
+        "HX7",
+        "LS12",
+        "LS19",
+        "LS20",
+        "LS21",
+        "LS28",
+        "LS29",
+    }
 
     # Loop through each dataframe for filtering with prefixes
     for df_name, df in dataframes.items():
-        if 'post_code' in df.columns:
+        if "post_code" in df.columns:
             # Initial count
             total_rows_before += len(df)
 
             # Standardize and extract prefixes
-            df['postcode_prefix'] = df['post_code'].apply(extract_postcode_prefix)
-            
+            df["postcode_prefix"] = df["post_code"].apply(extract_postcode_prefix)
+
             # Apply filtering
-            df_filtered = df[df['postcode_prefix'].isin(bradford_prefixes)]
+            df_filtered = df[df["postcode_prefix"].isin(bradford_prefixes)]
             total_rows_after += len(df_filtered)
 
             # Update dataframe without the temporary column
-            df_final = df_filtered.drop(columns=['postcode_prefix'])
+            df_final = df_filtered.drop(columns=["postcode_prefix"])
             dataframes[df_name] = df_final
-            
+
     return dataframes
 
 
@@ -421,27 +474,35 @@ def filter_mib_services(dataframes, log_message=None):
 
     return filtered_dataframes
 
+
 def add_referred_this_reporting_period(dataframes, date_range, log_message=None):
-    if 'CYPMH_Referrals' in dataframes:
+    if "CYPMH_Referrals" in dataframes:
         # Isolate referrals within the date range
-        isolated_df = isolate_date_range(dataframes['CYPMH_Referrals'], "referral_date", date_range)
+        isolated_df = isolate_date_range(
+            dataframes["CYPMH_Referrals"], "referral_date", date_range
+        )
         # Extract client_ids for referrals within the date range
-        referral_client_ids = set(isolated_df['client_id'])
+        referral_client_ids = set(isolated_df["client_id"])
 
         # Loop through all dataframes
         for df_name, df in dataframes.items():
             # Add 'referred_in_date_range' column based on whether client_id is in referral_client_ids
-            df['referred_in_date_range'] = df['client_id'].isin(referral_client_ids)
+            df["referred_in_date_range"] = df["client_id"].isin(referral_client_ids)
             # Update the dataframe in the dictionary
             dataframes[df_name] = df
 
         if log_message:
-            log_message("Added 'referred_in_date_range' column to all dataframes based on CYPMH_Referrals within the specified date range.")
+            log_message(
+                "Added 'referred_in_date_range' column to all dataframes based on CYPMH_Referrals within the specified date range."
+            )
     else:
         if log_message:
-            log_message("CYPMH_Referrals dataframe not found in the provided dataframes dictionary.")
+            log_message(
+                "CYPMH_Referrals dataframe not found in the provided dataframes dictionary."
+            )
 
     return dataframes
+
 
 def add_reason_to_file_closures(dataframes, log_message=None):
     print("Adding 'reason' column to file_closures and file_closures_and_goals...")
@@ -515,10 +576,10 @@ def clean_date_column(df, column_name):
     Attempts to parse various date formats into standardized datetime objects.
     """
     # Repgs, 'nan', and None with np.nan to clean the data
-    df[column_name] = df[column_name].replace({'': np.nan, 'nan': np.nan, None: np.nan})
+    df[column_name] = df[column_name].replace({"": np.nan, "nan": np.nan, None: np.nan})
 
     # First attempt a vectorized conversion for the most common format
-    df[column_name] = pd.to_datetime(df[column_name], errors='coerce', dayfirst=True)
+    df[column_name] = pd.to_datetime(df[column_name], errors="coerce", dayfirst=True)
 
     return df
 
@@ -535,7 +596,14 @@ def clean_dates(dataframes, log_message=None):
     Returns:
     - A dictionary of cleaned dataframes.
     """
-    date_cols = ["referral_date", "first_contact_/_indirect_date", "second_contact_/_indirect_date", "file_closure","contact_date", "goal_date"]
+    date_cols = [
+        "referral_date",
+        "first_contact_/_indirect_date",
+        "second_contact_/_indirect_date",
+        "file_closure",
+        "contact_date",
+        "goal_date",
+    ]
 
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
@@ -552,9 +620,6 @@ def clean_dates(dataframes, log_message=None):
 
     return cleaned_dataframes
 
-
-    
-    
 
 def add_reason_to_contact(dataframes, log_message=None):
     print("Adding 'file_closure_reason' to specified DataFrames...")

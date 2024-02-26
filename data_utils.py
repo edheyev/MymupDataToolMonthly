@@ -11,7 +11,6 @@ import os
 import sys
 
 
-
 def load_data_files(directory, file_info, log_message=None):
     print("Loading data files...")
     dataframes = {}

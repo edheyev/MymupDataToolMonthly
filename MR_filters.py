@@ -15,20 +15,24 @@ def CIC_FILTER(df, df_name="empty"):
     filtered_df = df.loc[df["looked_after_child"] == "YES"]
     return filtered_df
 
+
 def SEN_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'special_education_needs' column is 'YES'
     filtered_df = df.loc[df["special_education_needs"] == "YES"]
     return filtered_df
+
 
 def EHCP_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'EHCP' column is 'YES'
     filtered_df = df.loc[df["ehcp"] == "YES"]
     return filtered_df
 
+
 def CRAVEN_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'EHCP' column is 'YES'
     filtered_df = df.loc[df["craven"] == True]
     return filtered_df
+
 
 def BRADFORD_FILTER(df, df_name="empty"):
     # Filter DataFrame where 'EHCP' column is 'YES'
@@ -39,42 +43,45 @@ def BRADFORD_FILTER(df, df_name="empty"):
 
 # referalls sheet
 
+
 def OCR_filter(df, row, dfname="empty", date_range=None):
     try:
 
         if row == "Number referrals":
             df = isolate_date_range(df, "referral_date", date_range)
-            
+
             # unique count
             return df
         elif row == "Number unique referrals":
             df = isolate_date_range(df, "referral_date", date_range)
-            
+
             # unique count
-            filtered_df = df.drop_duplicates(subset=['client_id'])
+            filtered_df = df.drop_duplicates(subset=["client_id"])
             # Filter the DataFrame to keep only non-rejected referrals
             return filtered_df
         elif row == "Referrals accepted":
             df = isolate_date_range(df, "referral_date", date_range)
-            
+
             # unique count
-            unique_client_id_df = df.drop_duplicates(subset=['client_id'])
+            unique_client_id_df = df.drop_duplicates(subset=["client_id"])
             # Filter the DataFrame to keep only non-rejected referrals
-            filtered_df = unique_client_id_df[unique_client_id_df['referral_rejected'] == False]
+            filtered_df = unique_client_id_df[
+                unique_client_id_df["referral_rejected"] == False
+            ]
             return filtered_df
         elif row == "Referrals refused":
             df = isolate_date_range(df, "referral_date", date_range)
-            
+
             # referrals refused count from file clusures data dump of innaproitare referrals
-            filtered_df = df[df['referral_rejected'] == False]
+            filtered_df = df[df["referral_rejected"] == False]
             return filtered_df
         elif row == "Number open cases":
             # CANNOT DO
             return "PLACEHOLDER"
         elif row == "Number closed cases":
             df = isolate_date_range(df, "file_closure", date_range)
-            unique_client_id_df = df.drop_duplicates(subset=['client_id'])
-            
+            unique_client_id_df = df.drop_duplicates(subset=["client_id"])
+
             # closed cases - file closure dd all file closures that are not innapropriate UNIQUE
             return unique_client_id_df
 
@@ -87,12 +94,14 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
 
+
 def CIC_CLA_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = CIC_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 def SEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
@@ -101,6 +110,7 @@ def SEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     return filtered_df
 
+
 def EHCP_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = EHCP_FILTER(df, dfname)
@@ -108,12 +118,14 @@ def EHCP_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None)
 
     return filtered_df
 
+
 def CRAVEN_caseload_and_referrals_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = CRAVEN_FILTER(df, dfname)
     filtered_df = OCR_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 def BRADFORD_DISTRICT_caseload_and_referrals_filter(
     df, row, dfname="empty", date_range=None
@@ -127,8 +139,9 @@ def BRADFORD_DISTRICT_caseload_and_referrals_filter(
 
 # demographics sheet
 
+
 def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
-    df = df[df['referred_in_date_range'] == True]
+    df = df[df["referred_in_date_range"] == True]
 
     try:
         # List for age categories
@@ -237,31 +250,29 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
 
         elif row in ethnicity_categories:
             ethnic_map = {
-                "African": "Black or Black British - African",
-                "Any other Asian background": "Asian or Asian British - Any other Asian background",
-                "Any other Black background": "Black or Black British - Any other Black background",
-                "Any other Ethnic group": "Other Ethnic Groups - Any other ethnic group",
-                "Any other Mixed background": "Mixed - Any other mixed background",
-                "Any other White background": "White - Any other White background",
-                "Arab": "Arab",
-                "Bangladeshi": "Asian or Asian British - Bangladeshi",
-                "British": "White - British",
-                "Caribbean": "Black or Black British - Caribbean",
+                "White - British": "White British",
+                "White - Irish": "Irish",
                 "Central and Eastern European": "Central and Eastern European",
-                "Chinese": "Other Ethnic Groups - Chinese",
+                "White - Any other White background": "Any other White background",
                 "Gypsy/Roma/Traveller": "Gypsy/Roma/Traveller",
-                "Indian": "Asian or Asian British - Indian",
-                "Irish": "White - Irish",
+                "Mixed -White and Black Caribbean": "White and Black Caribbean",
+                "Mixed -White and Black African": "White and Black African",
+                "Mixed -White and Asian": "White and Asian",
+                "Mixed -Any other mixed background": "Any other Mixed background",
+                "Asian or Asian British - Indian": "Indian",
+                "Asian or Asian British - Pakistani": "Pakistani",
+                "Asian or Asian British - Bangladeshi": "Bangladeshi",
+                "Asian or Asian British - Any other Asian background": "Any other Asian background",
+                "Black or Black British - Caribbean": "Caribbean",
+                "Black or Black British - African": "African",
+                "Black or Black British - Any other Black background": "Any other Black background",
+                "Other Ethnic Group - Chinese": "Chinese",
+                "Other Ethnic Group - Any other ethnic group": "Any other Ethnic group",
+                "Not stated": "Unknown",
+                "Not known": "Unknown",
+                "Arab": "Arab",
                 "Latin America": "Latin America",
-                # "Not known": "Not known",
-                # "Not stated": "Not stated",
-                "Pakistani": "Asian or Asian British - Pakistani",
-                "White and Asian": "Mixed - White and Asian",
-                "White and Black African": "Mixed - White and Black African",
-                "White and Black Caribbean": "Mixed - White and Black Caribbean",
-                "White British": "White - British",
-                # "Blank (nothing selected)": "Blank",
-                "Unknown Ethnicity": "Blank",
+                "Blanks": "Unknown",
             }
 
             mapped_value = ethnic_map.get(
@@ -286,6 +297,7 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
 
+
 def All_CIC_CLA_Referrals_by_demographics_filter(
     df, row, dfname="empty", date_range=None
 ):
@@ -295,6 +307,7 @@ def All_CIC_CLA_Referrals_by_demographics_filter(
 
     return filtered_df
 
+
 def All_SEN_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = SEN_FILTER(df, dfname)
@@ -302,12 +315,14 @@ def All_SEN_Referrals_by_demographics_filter(df, row, dfname="empty", date_range
 
     return filtered_df
 
+
 def All_EHCP_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = EHCP_FILTER(df, dfname)
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 def All_CRAVEN_Referrals_by_demographics_filter(
     df, row, dfname="empty", date_range=None
@@ -317,6 +332,7 @@ def All_CRAVEN_Referrals_by_demographics_filter(
     filtered_df = All_Referrals_by_demographics_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 def BRADFORD_DISTRICT_Referrals_by_demographics_filter(
     df, row, dfname="empty", date_range=None
@@ -330,60 +346,74 @@ def BRADFORD_DISTRICT_Referrals_by_demographics_filter(
 
 # referral source sheet
 
+
 def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
     # df = isolate_date_range(df, "referral_date",date_range)
 
     referral_mapping = {
-        "Primary Health Care: General Medical Practitioner Practice": "GP services",
         "Accident and Emergency Department": "Accident And Emergency Department",
+        "CAMHS - Crisis Team (Hospital Urgent)": "CAMHS Crisis",
         "CAMHS - Core/Step Down": "CAMHS Core/Step down",
-        "CAMHS - Crisis Team (Hospital Urgents)": "CAMHS Crisis",
         "CAMHS - Waiting List": "CAMHS Waiting List",
         "Child Health: Community-based Paediatrics": "Community-based Paediatrics",
         "Child Health: Hospital-based Paediatrics": "Hospital-based Paediatrics",
         "Child Health: School Nurse": "School Nurse",
-        "Community Mental Health Team (Adult Mental Health)": "Community-based Paediatrics",  # Assuming best fit based on the list
-        "Employer": "Other service or agency",  # Assuming best fit based on the list
-        "Employer: Occupational Health": "Other service or agency",  # Assuming best fit based on the list
-        "Family Support Worker": "Social Services",  # Assuming best fit based on the list
-        "Improving Access to Psychological Therapies Service": "Other secondary care specialty",  # Assuming best fit based on the list
-        "Independent Sector: Low secure Inpatients": "Hospital-based Paediatrics",  # Assuming best fit based on the list
-        "Independent Sector: Medium secure Inpatients": "Hospital-based Paediatrics",  # Assuming best fit based on the list
-        "Inpatient Service Child and Adult Mental Health": "Hospital-based Paediatrics",  # Assuming best fit based on the list
-        "Inpatient Service Learning Disabilities": "Hospital-based Paediatrics",  # Assuming best fit based on the list
+        "Community Mental Health Team (Adult Mental Health)": "Other secondary care specialty",
+        "Employer": "Other service or agency",
+        "Employer: Occupational Health": "Other service or agency",
+        "Family Support Worker": "Other Primary Health Care",
+        "Improving Access to Psychological Therapies Service": "Other secondary care specialty",
+        "Independent Sector - Medium Secure Inpatients": "Other secondary care specialty",
+        "Independent Sector - Low Secure Inpatients": "Other secondary care specialty",
+        "Inpatient Service (Older People)": "Other secondary care specialty",
+        "Inpatient Service  (Forensics)": "Other secondary care specialty",
+        "Inpatient Service (Learning Disabilities)": "Other secondary care specialty",
+        "Inpatient Service (Adult Mental Health)": "Other secondary care specialty",
+        "Inpatient Service (Child and Adolescent Mental Health)": "CAMHS Crisis",
         "Internal Referral": "Internal Referral",
-        "Justice System: Court Liaison and Diversion Service": "Police",  # Approximated to closest possible value
-        "Justice System: Courts": "Police",  # Approximated
+        "Justice System: Courts": "Youth Offending Service",
         "Justice System: Police": "Police",
-        "Justice System: Prison": "Police",  # Approximated
-        "Justice System: Probation": "Police",  # Approximated
+        "Justice System: Prison": "Police",
+        "Justice System: Probation Service": "Youth Offending Service",
         "Justice System: Youth Offending Team": "Youth Offending Service",
+        "Justice System: Court Liaison and Diversion Service": "Youth Offending Service",
         "Local Authority and Other Public Services: Education Service / Educational Establishment": "Education Service",
-        "Local Authority and Other Public Services: Housing Service": "Housing Service",
+        "Local Authority and Other Public Services: Housing": "Housing Service",
         "Local Authority and Other Public Services: Social Services": "Social Services",
-        "Mental Health Drop In Service": "Single Point of Access Service",  # Assuming best fit based on the list
-        "Not Known": "Unknown",
-        "Other Independent Sector Mental Health Services": "Other service or agency",  # Best approximation
-        "Other Primary Health Care": "Other Primary Health Care",
-        "Other secondary care specialty": "Other secondary care specialty",
-        "Other SERVICE or agency": "Other service or agency",
-        "Other: Asylum Services": "Hospital-based Paediatrics",  # Assuming best fit based on the list
-        "Other: Drug Action Team / Drug Misuse Agency": "Drug Action Team / Drug Misuse Agency",
-        "Other: Job Centre Plus": "Social Services",  # Assuming best fit based on the list
+        "Mental Health Drop In Service": "Other service or agency",
+        "Other: Asylum Services": "Other service or agency",
+        "Other: Drug Action Team  / Drug Misuse Agency": "Drug Action Team / Drug Misuse Agency",
+        "Other Independent Sector Mental Health services": "Other service or agency",
+        "Other: Jobcentre Plus": "Other service or agency",
         "Other: Out of Area Agency": "Out of Area Agency",
+        "Other Primary Health Care": "Other Primary Health Care",
+        "Other: Secondary Care Speciality": "Other secondary care specialty",
+        "Other SERVICE or agency": "Other service or agency",
         "Other: Single Point of Access Service": "Single Point of Access Service",
-        "Other: Urgent and Emergency Care Ambulance Service": "Accident And Emergency Department",  # Approximated
-        "Permanent Transfer from Another Mental Health Trust": "Out of Area Agency",  # Assuming best fit based on the list
-        "Primary Health Care: Health Visitor": "Community-based Paediatrics",  # Assuming best fit based on the list
-        "Primary Health Care: Maternity Service": "Community-based Paediatrics",  # Assuming best fit based on the list
-        "Self-Referral :Self": "Self",
-        "Self-Referral: Carer/Relative": "Carer",
-        "Temporary Transfer from Another Mental Health Trust": "Out of Area Agency",  # Assuming best fit based on the list
-        "Transfer by Graduation from CAMHS to Adult Mental Health Services": "Transfer by graduation from Child Adolescent Mental Health Services to Adult",
+        "Other: Telephone or Electronic Access Service": "Other service or agency",
+        "Other: Urgent and Emergency Care Ambulance Service": "Accident And Emergency Department",
+        "Permanent transfer from another Mental Health NHS Trust": "Permanent transfer from another Mental Health NHS Trust",
+        "Primary Health Care Family Support Worker": "Other Primary Health Care",
+        "Primary Health Care: General Medical Practitioner Practice": "GP services",
+        "Primary Health Care: Health Visitor": "Other Primary Health Care",
+        "Primary Health Care: Maternity Service": "Other Primary Health Care",
+        "Self Referral: Self": "Self",
+        "Self Referral: Carer/Relative": "Carer",
+        "Temporary transfer from another Mental Health NHS Trust": "Other service or agency",
+        "Transfer by graduation from Child and Adolescent Mental Health Services to Adult Mental Health Services": "Transfer by graduation from Child Adolescent Mental Health Services to Adult",
         "Voluntary Sector": "Voluntary Sector",
-        "VCS": "VCS",
-        "Blank (nothing selected)": "Unknown",  # Assuming 'Blank' is equivalent to 'Unknown'
+        "Blanks": "Unknown",
+        "Education": "Education Service",
+        "Housing": "Housing Service",
+        "Justice System": "Police",
+        "Primary care": "GP services",
+        "Self -referral": "Self",
+        "Statutory health and social care": "Social Services",
+        "Urgent and emergency care": "CAMHS Crisis",
+        "VCS": "Voluntary Sector",
+        "Other": "Other service or agency"
     }
+    
 
     try:
         # Find all keys in referral_mapping that have a value matching 'row'
@@ -407,12 +437,14 @@ def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
         )
         return pd.DataFrame()  # Return an empty DataFrame in case of error
 
+
 def Source_of_Referrals___CIC_CLA_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = CIC_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 def Source_of_Referrals___SEN_filter(df, row, dfname="empty", date_range=None):
 
@@ -421,6 +453,7 @@ def Source_of_Referrals___SEN_filter(df, row, dfname="empty", date_range=None):
 
     return filtered_df
 
+
 def Source_of_Referrals___EHCP_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = EHCP_FILTER(df, dfname)
@@ -428,12 +461,14 @@ def Source_of_Referrals___EHCP_filter(df, row, dfname="empty", date_range=None):
 
     return filtered_df
 
+
 def Source_of_Referrals___CRAVEN_filter(df, row, dfname="empty", date_range=None):
 
     initial_filtered_df = CRAVEN_FILTER(df, dfname)
     filtered_df = Source_of_All_Referrals_filter(initial_filtered_df, row, dfname)
 
     return filtered_df
+
 
 def Source_of_Referrals___BRADFORD_DISTRICT_filter(
     df, row, dfname="empty", date_range=None
@@ -446,6 +481,7 @@ def Source_of_Referrals___BRADFORD_DISTRICT_filter(
 
 
 # two attended contacts sheet
+
 
 def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter(
     df, row, dfname="empty", date_range=None
@@ -479,21 +515,21 @@ def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_f
 
 # dna and cancellations sheet
 
+
 def DNAs_and_cancellations_filter(df, row, dfname="empty", date_range=None):
     df = isolate_date_range(df, "contact_date", date_range)
-    
+
     # ony filter f2f, tel, video, talk type
     allowed_contact_types = [
-                "Face to Face",
-                "Telephone",
-                "Type talk",
-                "Video consultation",
-                "Instant Messaging (Synchronous)",
-            ]
+        "Face to Face",
+        "Telephone",
+        "Type talk",
+        "Video consultation",
+        "Instant Messaging (Synchronous)",
+    ]
     df = df[df["contact_approach"].isin(allowed_contact_types)]
     # only dna in attendace col
-    
-    
+
     # Initial filter based on the category
     if "CIC/CLA" in row:
         df = CIC_FILTER(df, dfname)
@@ -682,24 +718,37 @@ def Overall_Discharges_filter(df, row, dfname="empty", date_range=None):
     closure_reason_map = {
         "Planned ending met outcomes at Review Point": "Number completed treatment",
         "Planned ending met outcomes at Assessment Point": "Number completed treatment",
-        "Admitted elsewhere (at the same or other Health Care Provider)": "Number signposted to another CCG provider",
         "Treatment completed": "Number completed treatment",
-        "Planned ending without review": "Number completed treatment",
-        "Client disengages": "Number disengaged",
-        "Client did not attend": "Number who could not be contacted",
-        "Client requested discharge": "Number completed treatment",
-        "Client rejects referral": "Number inappropriate referrals",
-        "Refused to be seen": "Number inappropriate referrals",
-        "Client declined a service prior to or during assessment": "Number inappropriate referrals",
-        "Moved out of the area": "Number signposted to another CCG provider",
-        "No further treatment required": "Number completed treatment",
-        "Organisation cannot contact Client prior to assessment": "Number who could not be contacted",
-        "Organisation rejects referral - Threshold too high": "Number inappropriate referrals",
+        "Single episode": "Number completed treatment",
         "Open access ended": "Number completed treatment",
-        "Organisation rejects referral - Referral not suitable pre-assessment/post-assessment": "Number inappropriate referrals",
-        "Client not available for pre-arranged appointments": "Number who could not be contacted",
+        "Planned ending without review": "Number completed treatment",
         "Decision made at review": "Number completed treatment",
+        "No further treatment required": "Number completed treatment",
+        "Organisation rejects referral - Referral not suitable pre-assessment/post-assessment": "Number inappropriate referrals",
+        "Organisation rejects referral - Threshold too high": "Number inappropriate referrals",
+        "Organisation cannot contact Client prior to assessment": "Number who could not be contacted",
+        "Client disengages": "Number disengaged",
+        "Client did not attend": "Number disengaged",
+        "Client requested discharge": "Number disengaged",
+        "Refused to be seen": "Number disengaged",
+        "Client not available for pre-arranged appointments": "Number disengaged",
+        "Client not available for assessment - failure to keep pre-arranged appointments": "Number disengaged",
+        "Admitted elsewhere (at the same or other Health Care Provider)": "Number signposted to another CCG provider",
         "Referred to other speciality/service (at the same or other Health Care Provider)": "Number signposted to another CCG provider",
+        "Referred to CAMHS": "Number signposted to another CCG provider",
+        "Referred to Healthy Child Team": "Number signposted to another CCG provider",
+        "Referred to VCS": "Number signposted to another CCG provider",
+        "Referred to BDCfT Specialist CAMHS": "Number signposted to another CCG provider",
+        "Referred to Step 2": "Number signposted to another CCG provider",
+        "Referred to Relate Bradford": "Number signposted to another CCG provider",
+        "Referred to another YIM provider": "Number signposted to another CCG provider",
+        "Not disclosed": "Not Disclosed",
+        "Blanks": "Unknown",
+        # "Referred back to School": "Doesn't map",
+        # "Client declined a service prior to or during assessment": "Doesn't map",
+        # "Client rejects referral": "Doesn't map",
+        # "Client deceased": "Doesn't map",
+        # "Moved out of the area": "Doesn't map"
     }
 
     try:
@@ -762,26 +811,27 @@ def Discharges_BRADFORD_DISTRICT_filter(df, row, dfname="empty", date_range=None
     filtered_df = Overall_Discharges_filter(initial_filter, row, dfname)
     return filtered_df
 
+
 # wait list data sheet
 
 
 def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=None):
     # remove any referral_date after date range.
-    
+
     start_date, end_date = date_range
     end_date = pd.to_datetime(end_date)
     # Filter the DataFrame based on the date range
-    mask = (df["referral_date"] <= end_date)
+    mask = df["referral_date"] <= end_date
     df = df.loc[mask]
     # df = isolate_date_range(df, "referral_date", date_range)
 
     try:
-        
-        #  check for blanks in first contact column 
-        df = df[pd.isnull(df['first_contact_/_indirect_date']) | (df['first_contact_/_indirect_date'] == '')]
 
-
-
+        #  check for blanks in first contact column
+        df = df[
+            pd.isnull(df["first_contact_/_indirect_date"])
+            | (df["first_contact_/_indirect_date"] == "")
+        ]
 
         if row == "All":
             df = df
@@ -795,10 +845,10 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=No
             df = CRAVEN_FILTER(df, dfname)
         elif row == "BRADFORD DISTRICT":
             df = BRADFORD_FILTER(df, dfname)
-            
-        unique_client_id_df = df.drop_duplicates(subset=['client_id'])
+
+        unique_client_id_df = df.drop_duplicates(subset=["client_id"])
         return unique_client_id_df
-    
+
     except Exception as e:
         print(
             f"Error in common_demographic_filter with row : {e}. Current df: {dfname}"
@@ -806,6 +856,7 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=No
         raise Exception(
             f"Error in common_demographic_filter with row : {e} . current df is {dfname}"
         )
+
 
 # wait times sheet
 
@@ -817,9 +868,9 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
         start_date, end_date = date_range
         end_date = pd.to_datetime(end_date)
         # Filter the DataFrame based on the date range
-        mask = (df["referral_date"] <= end_date)
+        mask = df["referral_date"] <= end_date
         df = df.loc[mask]
-        
+
         # Create a copy of the DataFrame to avoid SettingWithCopyWarning
         df = df.copy()
 
@@ -829,7 +880,7 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
             "referral_date",
             "second_contact_/_indirect_date",
         ]
-        
+
         for col in date_cols:
             df.loc[:, col] = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce")
 
@@ -850,20 +901,26 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
 
         # Filtering logic based on the 'row' parameter
         if row == "Average Weeks from referral to 1st attended contact/indirect":
-            df_filtered = isolate_date_range(df_filtered, "first_contact_/_indirect_date", date_range)
+            df_filtered = isolate_date_range(
+                df_filtered, "first_contact_/_indirect_date", date_range
+            )
             return (df_filtered, "first_contact_referral_diff")
-        
+
         elif row == "Average Weeks from referral to 2nd attended contact/indirect":
-            df_filtered = isolate_date_range(df_filtered, "second_contact_/_indirect_date", date_range)
+            df_filtered = isolate_date_range(
+                df_filtered, "second_contact_/_indirect_date", date_range
+            )
             return (df_filtered, "second_contact_referral_diff")
-        
+
         elif (
             row
             == "Average Weeks between 1st Attended contact/Indirect & 2nd attended contact/indirect"
         ):
-            df_filtered = isolate_date_range(df_filtered, "second_contact_/_indirect_date", date_range)
+            df_filtered = isolate_date_range(
+                df_filtered, "second_contact_/_indirect_date", date_range
+            )
             return (df_filtered, "second_first_contact_diff")
-        
+
     except Exception as e:
         print(f"Error in Overall_Wait_Times_filter with row: {e}. Current df: {dfname}")
         raise
@@ -871,31 +928,56 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     return df
 
 
-def CIC_CLA_Wait_Times_filter(df, row, dfname="empty", date_range=None,):
+def CIC_CLA_Wait_Times_filter(
+    df,
+    row,
+    dfname="empty",
+    date_range=None,
+):
     initial_filter = CIC_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname, date_range)
     return filtered_df
 
 
-def SEN_Wait_Times_filter(df, row, dfname="empty", date_range=None,):
+def SEN_Wait_Times_filter(
+    df,
+    row,
+    dfname="empty",
+    date_range=None,
+):
     initial_filter = SEN_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname, date_range)
     return filtered_df
 
 
-def EHCP_Wait_Times_filter(df, row, dfname="empty", date_range=None,):
+def EHCP_Wait_Times_filter(
+    df,
+    row,
+    dfname="empty",
+    date_range=None,
+):
     initial_filter = EHCP_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname, date_range)
     return filtered_df
 
 
-def CRAVEN_Wait_Times_filter(df, row, dfname="empty", date_range=None,):
+def CRAVEN_Wait_Times_filter(
+    df,
+    row,
+    dfname="empty",
+    date_range=None,
+):
     initial_filter = CRAVEN_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname, date_range)
     return filtered_df
 
 
-def BRADFORD_DISTRICT_Wait_Times_filter(df, row, dfname="empty", date_range=None,):
+def BRADFORD_DISTRICT_Wait_Times_filter(
+    df,
+    row,
+    dfname="empty",
+    date_range=None,
+):
     initial_filter = BRADFORD_FILTER(df, dfname)
     filtered_df = Overall_Wait_Times_filter(initial_filter, row, dfname, date_range)
     return filtered_df

@@ -31,7 +31,7 @@ from data_cleaning import (
     clean_dates,
     clean_mib,
     bradford_postcode_filter_function,
-    add_rejected_referral_col_to_referral
+    add_rejected_referral_col_to_referral,
 )
 from MR_filters import filter_function_map
 
@@ -53,7 +53,7 @@ from data_utils import (
 log_queue = queue.Queue()
 root = None
 # IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
-IS_HEADLESS = False  # Set to True for headless mode, False for GUI mode
+IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
 
 
 # Global queue for cleaned data
@@ -150,10 +150,12 @@ def create_logging_window():
 
     return root, file_button, start_date_entry, end_date_entry
 
+
 def log_message(message):
     """Log a message to the Tkinter text widget."""
     # print("l ", message)
     log_queue.put(message)
+
 
 def update_text_widget(log_queue, text_widget):
     """Update the text widget with log messages."""
@@ -165,6 +167,7 @@ def update_text_widget(log_queue, text_widget):
         text_widget.insert(tk.END, message + "\n")
         text_widget.configure(state="disabled")
         text_widget.yview(tk.END)
+
 
 def select_folder(start_date_entry, end_date_entry, root):
     global directory
@@ -190,6 +193,7 @@ def select_folder(start_date_entry, end_date_entry, root):
         except Exception as e:
             log_message(f"Error in data processing: {e}")
 
+
 def load_and_clean_data(folder_path, start_date, end_date):
     try:
         raw_data = load_data_files(folder_path, file_info, log_message=log_message)
@@ -200,11 +204,16 @@ def load_and_clean_data(folder_path, start_date, end_date):
     except Exception as e:
         log_message(f"Error in data processing: {e}")
 
+
 def start_processing(start_date_entry, end_date_entry, text_widget):
     """Function to start the main processing."""
     # You can now use the global variable `directory` to access the selected directory
     global directory
-    threading.Thread(target=run_main_gui, args=(start_date_entry, end_date_entry, text_widget), daemon=True).start()
+    threading.Thread(
+        target=run_main_gui,
+        args=(start_date_entry, end_date_entry, text_widget),
+        daemon=True,
+    ).start()
 
 
 def main_gui():
@@ -214,7 +223,8 @@ def main_gui():
         "WM_DELETE_WINDOW", lambda: root.quit()
     )  # Proper shutdown on window close
     root.mainloop()
-    
+
+
 def run_main_gui(start_date_entry, end_date_entry, text_widget):
     try:
         # Wait and get cleaned data from the queue
@@ -289,7 +299,7 @@ def main_headless(directory, start_date, end_date):
 
 def clean_data(dataframes, start_date, end_date, log_message=None):
     print(f"log_message is callable: {callable(log_message)}")
-    
+
     date_range = start_date, end_date
 
     if log_message and not callable(log_message):
@@ -311,7 +321,7 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
         cleaned_dataframes = isolate_client_ages(
             cleaned_dataframes, yim_providers, log_message=log_message
         )
-        
+
         cleaned_dataframes = bradford_postcode_filter_function(
             cleaned_dataframes, log_message
         )
@@ -326,14 +336,18 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
 
         cleaned_dataframes = clean_dates(cleaned_dataframes, log_message=log_message)
 
-        cleaned_dataframes = add_rejected_referral_col_to_referral(cleaned_dataframes, log_message=log_message)
-        
+        cleaned_dataframes = add_rejected_referral_col_to_referral(
+            cleaned_dataframes, log_message=log_message
+        )
+
         cleaned_dataframes = clean_mib(cleaned_dataframes, log_message)
         # cleaned_dataframes = isolate_reporting_period(
         #     cleaned_dataframes, start_date, end_date, log_message=log_message
         # )
-        cleaned_dataframes = add_referred_this_reporting_period(cleaned_dataframes, date_range, log_message)
-        
+        cleaned_dataframes = add_referred_this_reporting_period(
+            cleaned_dataframes, date_range, log_message
+        )
+
     except Exception as e:
         error_message = f"An error occurred while cleaning dataframes: {e}"
         print(error_message)
@@ -411,7 +425,7 @@ def filter_service_information(dataframes, config, franchise_list, date_range):
             if "row_db_logic" in config:
                 if row in config["row_db_logic"]:
                     default_db_key = config["row_db_logic"][row]
-                    
+
             dataframe_key = default_db_key
             # Filter the dataframe by franchise before applying further processing
             this_row_dataframe = dataframes.get(dataframe_key, pd.DataFrame())
@@ -452,7 +466,7 @@ if __name__ == "__main__":
     if IS_HEADLESS:
         # Specify the directory and date range for headless mode
         directory_path = "./data"
-        start_date = "2022-01-01"
+        start_date = "2020-01-01"
         end_date = "2024-12-01"
         date_range = (start_date, end_date)
         main_headless(directory_path, start_date, end_date)

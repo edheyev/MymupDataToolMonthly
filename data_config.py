@@ -72,9 +72,7 @@ Overall_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {
-        "Number open cases": "PLACEHOLDER"
-        },
+    "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
     },
@@ -93,9 +91,7 @@ CIC_CLA_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {
-        "Number open cases": "PLACEHOLDER"
-        },
+    "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
     },
@@ -114,9 +110,7 @@ SEN_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {
-        "Number open cases": "PLACEHOLDER"
-        },
+    "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
     },
@@ -135,9 +129,7 @@ EHCP_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {
-        "Number open cases": "PLACEHOLDER"
-        },
+    "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
     },
@@ -156,9 +148,7 @@ CRAVEN_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {
-        "Number open cases": "PLACEHOLDER"
-        },
+    "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
     },
@@ -177,9 +167,7 @@ BRADFORD_DISTRICT_caseload_and_referrals = {
         "Number open cases",
         "Number closed cases",
     ],
-    "placeholder_text": {
-        "Number open cases": "PLACEHOLDER"
-        },
+    "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
     },
@@ -552,32 +540,30 @@ BRADFORD_DISTRICT_Referrals_by_demographics = {
 
 referrals_row_names = (
     [
-        "GP services",
-        "Other Primary Health Care",
-        "Self",
-        "Carer",
-        "Social Services",
-        "Education Service",
-        "Housing Service",
-        "Police",
-        "Youth Offending Service",
-        "School Nurse",
-        "Hospital-based Paediatrics",
-        "Community-based Paediatrics",
-        "Voluntary Sector",
         "Accident And Emergency Department",
-        "Other secondary care specialty",
-        "Out of Area Agency",
-        "Drug Action Team / Drug Misuse Agency",
-        "Other service or agency",
-        "Single Point of Access Service",
-        "Internal Referral",
+        "CAMHS Crisis",
         "CAMHS Core/Step down",
         "CAMHS Waiting List",
-        "CAMHS Crisis",
+        "Community-based Paediatrics",
+        "Hospital-based Paediatrics",
+        "School Nurse",
+        "Other secondary care specialty",
+        "Other service or agency",
+        "Other Primary Health Care",
+        "Internal Referral",
+        "Youth Offending Service",
+        "Police",
+        "Housing Service",
+        "Social Services",
+        "Drug Action Team / Drug Misuse Agency",
+        "Out of Area Agency",
+        "GP services",
+        "Self",
+        "Carer",
         "Transfer by graduation from Child Adolescent Mental Health Services to Adult",
-        "VCS",
+        "Voluntary Sector",
         "Unknown",
+        "Single Point of Access Service",
     ],
 )
 
@@ -1111,7 +1097,10 @@ Yim_Live = {
     "sheet_name": "YIM_LIVE_&_KCU_Delivery",
     "table_name": "Yim_Live",
     "row_names": ["Number Sessions", "Number Participants"],
-    "placeholder_text": {"Number Sessions": "PLACEHOLDER", "Number Participants": "PLACEHOLDER"},
+    "placeholder_text": {
+        "Number Sessions": "PLACEHOLDER",
+        "Number Participants": "PLACEHOLDER",
+    },
     "mib_row_db_default": "CYPMH_Clients_All",
     "row_db_default": "CYPMH_Clients_All",
 }
