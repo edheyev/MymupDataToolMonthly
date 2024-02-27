@@ -145,8 +145,8 @@ def isolate_client_ages(dataframes, yim_providers, log_message=None):
             keep_rows = (is_yim_provider & (df["age"] < 26)) | (
                 ~is_yim_provider & (df["age"] < 19)
             )
-
-            removal_ids.update(df[~keep_rows]["global_id"].unique())
+            if "global_id" in df.columns:
+                removal_ids.update(df[~keep_rows]["global_id"].unique())
 
             df_filtered = df[keep_rows].reset_index(drop=True)
             dataframes[df_name] = df_filtered
@@ -170,10 +170,10 @@ def clean_mib(dataframes, log_message=None):
         "Hospital Buddies AGH",
     ]
 
-    # Container for client_ids to remove
-    client_ids_to_remove = set()
+    # Container for global_id to remove
+    global_id_to_remove = set()
 
-    # First pass: Identify client_ids to remove
+    # First pass: Identify global_id to remove
     for df_name, df in dataframes.items():
         if "franchise" in df.columns and "service_type" in df.columns:
             # Filter for Mind In Bradford franchise
@@ -182,17 +182,17 @@ def clean_mib(dataframes, log_message=None):
             disallowed_rows = mib_df[
                 ~mib_df["service_type"].isin(allowed_service_types)
             ]
-            # Update set of client_ids to remove
-            client_ids_to_remove.update(disallowed_rows["client_id"].unique())
+            # Update set of global_id to remove
+            global_id_to_remove.update(disallowed_rows["global_id"].unique())
             if log_message:
-                log_message(f"Identified client_ids to remove in {df_name}.")
+                log_message(f"Identified global_id to remove in {df_name}.")
             else:
-                print(f"Identified client_ids to remove in {df_name}.")
+                print(f"Identified global_id to remove in {df_name}.")
 
-    # Second pass: Remove rows with identified client_ids in all DataFrames
+    # Second pass: Remove rows with identified global_id in all DataFrames
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
-        cleaned_df = df[~df["client_id"].isin(client_ids_to_remove)]
+        cleaned_df = df[~df["global_id"].isin(global_id_to_remove)]
         cleaned_dataframes[df_name] = cleaned_df
         if log_message:
             log_message(f"Cleaned {df_name}, removed {len(df) - len(cleaned_df)} rows.")
@@ -311,17 +311,17 @@ def add_rejected_referral_col_to_referral(dataframes, log_message=None):
 
     # Check if the key for rejected referrals exists
     if "CYPMH_Referral_Rejections_All" in dataframes:
-        # Extract client_ids for rejected referrals
-        rejected_client_ids = set(
-            dataframes["CYPMH_Referral_Rejections_All"]["client_id"]
+        # Extract global_id for rejected referrals
+        rejected_global_id = set(
+            dataframes["CYPMH_Referral_Rejections_All"]["global_id"]
         )
 
         # Check if the key for referrals exists
         if "CYPMH_Referrals" in dataframes:
-            # Add referral_rejected column based on whether client_id is in rejected_client_ids
+            # Add referral_rejected column based on whether global_id is in rejected_global_id
             dataframes["CYPMH_Referrals"]["referral_rejected"] = dataframes[
                 "CYPMH_Referrals"
-            ]["client_id"].isin(rejected_client_ids)
+            ]["global_id"].isin(rejected_global_id)
 
             if log_message:
                 log_message("referral_rejected column added successfully.")
@@ -337,7 +337,7 @@ def add_rejected_referral_col_to_referral(dataframes, log_message=None):
 
 def bradford_postcode_filter_function(dataframes, log_message=None):
     # Initialization
-    removed_client_ids_due_to_no_postcode = set()
+    removed_global_id_due_to_no_postcode = set()
     total_rows_before = 0
     total_rows_after = 0
 
@@ -481,13 +481,13 @@ def add_referred_this_reporting_period(dataframes, date_range, log_message=None)
         isolated_df = isolate_date_range(
             dataframes["CYPMH_Referrals"], "referral_date", date_range
         )
-        # Extract client_ids for referrals within the date range
-        referral_client_ids = set(isolated_df["client_id"])
+        # Extract global_id for referrals within the date range
+        referral_global_id = set(isolated_df["global_id"])
 
         # Loop through all dataframes
         for df_name, df in dataframes.items():
-            # Add 'referred_in_date_range' column based on whether client_id is in referral_client_ids
-            df["referred_in_date_range"] = df["client_id"].isin(referral_client_ids)
+            # Add 'referred_in_date_range' column based on whether global_id is in global_id
+            df["referred_in_date_range"] = df["global_id"].isin(referral_global_id)
             # Update the dataframe in the dictionary
             dataframes[df_name] = df
 

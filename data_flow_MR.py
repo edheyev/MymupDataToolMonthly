@@ -466,8 +466,8 @@ if __name__ == "__main__":
     if IS_HEADLESS:
         # Specify the directory and date range for headless mode
         directory_path = "./data"
-        start_date = "2020-01-01"
-        end_date = "2024-12-01"
+        start_date = "2023-12 -01"
+        end_date = "2024-01-01"
         date_range = (start_date, end_date)
         main_headless(directory_path, start_date, end_date)
     else:

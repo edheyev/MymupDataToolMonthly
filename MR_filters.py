@@ -73,7 +73,7 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
             df = isolate_date_range(df, "referral_date", date_range)
 
             # referrals refused count from file clusures data dump of innaproitare referrals
-            filtered_df = df[df["referral_rejected"] == False]
+            filtered_df = df[df["referral_rejected"] == True]
             return filtered_df
         elif row == "Number open cases":
             # CANNOT DO
