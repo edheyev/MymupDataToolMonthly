@@ -1,7 +1,7 @@
 # from data_config import yim_providers
 import pandas as pd
 import numpy as np
-from data_config import craven_postcodes
+from data_config import craven_postcodes, yim_providers, other_vcse
 from data_utils import isolate_date_range
 
 
@@ -141,10 +141,9 @@ def isolate_client_ages(dataframes, yim_providers, log_message=None):
     for df_name, df in dataframes.items():
         if "age" in df.columns and "franchise" in df.columns:
             is_yim_provider = df["franchise"].isin(yim_providers)
-            # TODO remove people who are 0
-            keep_rows = (is_yim_provider & (df["age"] < 26)) | (
-                ~is_yim_provider & (df["age"] < 19)
-            )
+            keep_rows = ((is_yim_provider & (df["age"] > 0) & (df["age"] < 26)) | 
+             (~is_yim_provider & (df["age"] > 0) & (df["age"] < 19)))
+
             if "global_id" in df.columns:
                 removal_ids.update(df[~keep_rows]["global_id"].unique())
 
@@ -160,9 +159,9 @@ def isolate_client_ages(dataframes, yim_providers, log_message=None):
 
 
 def clean_mib(dataframes, log_message=None):
-    print(f"Isolating only correct MIB services")
+    print("Isolating only correct MIB services")
 
-    # Define allowed service types
+    # Define allowed service types for Mind in Bradford
     allowed_service_types = [
         "Know Your Mind",
         "Know Your Mind Plus",
@@ -170,36 +169,50 @@ def clean_mib(dataframes, log_message=None):
         "Hospital Buddies AGH",
     ]
 
-    # Container for global_id to remove
-    global_id_to_remove = set()
+    # Container for global_id to keep for Mind in Bradford services
+    global_id_to_keep = set()
 
-    # First pass: Identify global_id to remove
+    # First pass: Identify global_id to keep for Mind in Bradford
     for df_name, df in dataframes.items():
-        if "franchise" in df.columns and "service_type" in df.columns:
-            # Filter for Mind In Bradford franchise
-            mib_df = df[df["franchise"] == "Mind In Bradford"]
-            # Identify disallowed service types
-            disallowed_rows = mib_df[
-                ~mib_df["service_type"].isin(allowed_service_types)
+        if "franchise" in df.columns and "contact_service_type" in df.columns:
+            print(df_name)
+            # Filter for Mind in Bradford franchise and allowed service types
+            allowed_rows = df[
+                (df["franchise"] == "Mind in Bradford") & 
+                df["contact_service_type"].isin(allowed_service_types)
             ]
-            # Update set of global_id to remove
-            global_id_to_remove.update(disallowed_rows["global_id"].unique())
+            # Update set of global_id to keep
+            global_id_to_keep.update(allowed_rows["global_id"].unique())
             if log_message:
-                log_message(f"Identified global_id to remove in {df_name}.")
+                log_message(f"Identified global_id to keep in {df_name}.")
             else:
-                print(f"Identified global_id to remove in {df_name}.")
+                print(f"Identified global_id to keep in {df_name}.")
 
-    # Second pass: Remove rows with identified global_id in all DataFrames
+    # Second pass: Apply filtering only to Mind in Bradford franchises
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
-        cleaned_df = df[~df["global_id"].isin(global_id_to_remove)]
+        if "franchise" in df.columns:
+            # Apply the global_id filter only to Mind in Bradford franchises
+            if (df_name != "CYPMH_Plans_And_Goals_All")&(df_name != "CYPMH_File_Closures_All")&(df_name != "CYPMH_Two_Contacts"):
+                
+                cleaned_df = df[
+                    (df["franchise"] != "Mind in Bradford") | 
+                    ((df["franchise"] == "Mind in Bradford") & (df["global_id"].isin(global_id_to_keep)))
+                ]
+            else:
+                cleaned_df = df
+        else:
+            # If franchise information is not available, leave the DataFrame unaltered
+            cleaned_df = df
+
         cleaned_dataframes[df_name] = cleaned_df
         if log_message:
-            log_message(f"Cleaned {df_name}, removed {len(df) - len(cleaned_df)} rows.")
+            log_message(f"Processed {df_name}.")
         else:
-            print(f"Cleaned {df_name}, removed {len(df) - len(cleaned_df)} rows.")
+            print(f"Processed {df_name}.")
 
     return cleaned_dataframes
+
 
 
 # def filter_post_codes_add_craven(dataframes, log_message=None):
@@ -306,8 +319,38 @@ def filter_post_codes_add_craven(dataframes, log_message=None):
 
 
 def add_rejected_referral_col_to_referral(dataframes, log_message=None):
-    if log_message:
-        log_message("Adding referral_rejected column to CYMPH_Referrals...")
+    # if log_message:
+    #     log_message("Adding referral_rejected column to CYMPH_Referrals...")
+
+    # # Check if the key for rejected referrals exists
+    # if "CYPMH_File_Closures_All" in dataframes:
+    #     # Define a list of file closure reasons to filter on
+    #     file_closure_reasons_to_check = ["Organisation rejects referral - Threshold too high", "Organisation rejects referral - Referral not suitable pre-assessment/post-assessment"]  # Add your desired reasons
+
+    #     # Filter global IDs based on file closure reasons
+    #     filtered_global_ids = set(
+    #         dataframes["CYPMH_File_Closures_All"][
+    #             dataframes["CYPMH_File_Closures_All"]["file_closure_reason"].isin(file_closure_reasons_to_check)
+    #         ]["global_id"]
+    #     )
+
+    #     # Check if the key for referrals exists
+    #     if "CYPMH_Referrals" in dataframes:
+    #         # Add referral_rejected column based on whether global_id is in filtered_global_ids
+    #         dataframes["CYPMH_Referrals"]["referral_rejected"] = dataframes[
+    #             "CYPMH_Referrals"
+    #         ]["global_id"].isin(filtered_global_ids)
+
+    #         if log_message:
+    #             log_message("referral_rejected column added successfully.")
+    #     else:
+    #         if log_message:
+    #             log_message("CYPMH_Referrals not found in dataframes.")
+    # else:
+    #     if log_message:
+    #         log_message("CYPMH_File_Closures_All not found in dataframes.")
+
+    # return dataframes
 
     # Check if the key for rejected referrals exists
     if "CYPMH_Referral_Rejections_All" in dataframes:
@@ -320,6 +363,10 @@ def add_rejected_referral_col_to_referral(dataframes, log_message=None):
         if "CYPMH_Referrals" in dataframes:
             # Add referral_rejected column based on whether global_id is in rejected_global_id
             dataframes["CYPMH_Referrals"]["referral_rejected"] = dataframes[
+                "CYPMH_Referrals"
+            ]["global_id"].isin(rejected_global_id)
+            
+            dataframes["CYPMH_File_Closures_All"]["referral_rejected"] = dataframes[
                 "CYPMH_Referrals"
             ]["global_id"].isin(rejected_global_id)
 
@@ -443,34 +490,45 @@ def validate_data_files(dataframes, file_info, log_message=None):
     return dataframes
 
 
-def filter_mib_services(dataframes, log_message=None):
+def filter_mib_services(dataframes, yim_providers, log_message=None):
     """
-    Filters dataframes based on the following criteria:
-    - If a dataframe's name starts with 'mib', it filters rows where 'service_type' matches the YIM providers.
-    - If a dataframe's name does not start with 'mib', it includes:
-        - All rows that are not franchise 'Inspiring neighborhoods'.
-        - Rows of franchise 'Inspiring neighborhoods' with 'service_type' 'CYP'.
-
+    Filters dataframes based on specified criteria and removes rows with 'global_id' found in any excluded rows
+    across all dataframes.
+    
     :param dataframes: A dictionary of pandas DataFrames to filter.
     :param yim_providers: A list of YIM provider service types.
+    :param log_message: Optional; log message for additional information.
     :return: A dictionary of filtered pandas DataFrames.
     """
     print("Filtering MIB services...")
+    excluded_global_ids = set()
     filtered_dataframes = {}
 
+    # First pass: filter based on criteria and collect excluded 'global_id's
     for df_name, df in dataframes.items():
-        if df_name.lower().startswith("mib"):
-            filtered_df = df
+        if 'global_id' in df.columns:
+            initial_count = len(df)
+            if df_name.lower().startswith("mib"):
+                # Assuming you need to include a condition for excluding based on 'service_type'
+                if 'contact_service_type' in df.columns:
+                    excluded_df = df[~df["contact_service_type"].isin(yim_providers)]
+                    excluded_global_ids.update(excluded_df["global_id"])
+                    filtered_df = df[df["contact_service_type"].isin(yim_providers)]
+                else:
+                    filtered_df = df
+            else:
+                # Add conditions for other dataframes if needed
+                filtered_df = df  # Placeholder for actual filtering logic
+                
             filtered_dataframes[df_name] = filtered_df
-            # Process dataframes whose names start with 'mib'
-            # if 'contact_service_type' in df.columns and df_name in yim_providers:
-            #     filtered_dataframes[df_name] = df[df["contact_service_type"].isin(yim_providers)]
-            # else:
-            #     filtered_dataframes[df_name] = df
-        else:
-            #     # If the required columns are not present, keep the dataframe as is
-            filtered_df = df
-            filtered_dataframes[df_name] = filtered_df
+            if log_message and (len(df) - len(filtered_df) > 0):
+                print(f"{log_message}: Excluded {initial_count - len(filtered_df)} rows from {df_name}")
+
+    # Second pass: remove rows with 'global_id's that were excluded from any dataframe
+    for df_name, df in filtered_dataframes.items():
+        if 'global_id' in df.columns:
+            df = df[~df["global_id"].isin(excluded_global_ids)]
+            filtered_dataframes[df_name] = df
 
     return filtered_dataframes
 

@@ -82,12 +82,9 @@ def isolate_date_range(df, date_column, date_range=None):
     # If a date range is provided, convert start_date and end_date from "YYYY-MM-DD" to datetime for comparison
     if date_range:
         start_date, end_date = date_range
-        # Convert start_date and end_date strings to datetime
-        # start_date = pd.to_datetime(start_date, format="%Y-%m-%d")
-        # end_date = pd.to_datetime(end_date, format="%Y-%m-%d")
-
         start_date = pd.to_datetime(start_date)
         end_date = pd.to_datetime(end_date)
+        
         # Filter the DataFrame based on the date range
         mask = (df[date_column] >= start_date) & (df[date_column] <= end_date)
         filtered_df = df.loc[mask]

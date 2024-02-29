@@ -17,25 +17,21 @@ def CIC_FILTER(df, df_name="empty"):
 
 
 def SEN_FILTER(df, df_name="empty"):
-    # Filter DataFrame where 'special_education_needs' column is 'YES'
     filtered_df = df.loc[df["special_education_needs"] == "YES"]
     return filtered_df
 
 
 def EHCP_FILTER(df, df_name="empty"):
-    # Filter DataFrame where 'EHCP' column is 'YES'
     filtered_df = df.loc[df["ehcp"] == "YES"]
     return filtered_df
 
 
 def CRAVEN_FILTER(df, df_name="empty"):
-    # Filter DataFrame where 'EHCP' column is 'YES'
     filtered_df = df.loc[df["craven"] == True]
     return filtered_df
 
 
 def BRADFORD_FILTER(df, df_name="empty"):
-    # Filter DataFrame where 'EHCP' column is 'YES'
     filtered_df = df.loc[df["craven"] == False]
 
     return filtered_df
@@ -56,18 +52,18 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
             df = isolate_date_range(df, "referral_date", date_range)
 
             # unique count
-            filtered_df = df.drop_duplicates(subset=["client_id"])
+            filtered_df = df.drop_duplicates(subset=["global_id"])
             # Filter the DataFrame to keep only non-rejected referrals
             return filtered_df
         elif row == "Referrals accepted":
             df = isolate_date_range(df, "referral_date", date_range)
 
-            # unique count
-            unique_client_id_df = df.drop_duplicates(subset=["client_id"])
+            unique_client_id_df = df
             # Filter the DataFrame to keep only non-rejected referrals
             filtered_df = unique_client_id_df[
                 unique_client_id_df["referral_rejected"] == False
             ]
+     
             return filtered_df
         elif row == "Referrals refused":
             df = isolate_date_range(df, "referral_date", date_range)
@@ -76,14 +72,13 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
             filtered_df = df[df["referral_rejected"] == True]
             return filtered_df
         elif row == "Number open cases":
-            # CANNOT DO
             return "PLACEHOLDER"
         elif row == "Number closed cases":
             df = isolate_date_range(df, "file_closure", date_range)
-            unique_client_id_df = df.drop_duplicates(subset=["client_id"])
-
             # closed cases - file closure dd all file closures that are not innapropriate UNIQUE
-            return unique_client_id_df
+            filtered_df = df[df["referral_rejected"] == False]
+            # unique_client_id_df = df.drop_duplicates(subset=["client_id"])
+            return filtered_df
 
         return "row not caught"
     except Exception as e:
@@ -205,6 +200,8 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
             "Any other White background",
             "Unknown Ethnicity",
         ]
+        
+        df =  df.drop_duplicates(subset=["global_id"])
 
         # Determine the category of 'row' and filter accordingly
         if row in age_categories:
@@ -250,44 +247,53 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
 
         elif row in ethnicity_categories:
             ethnic_map = {
-                "White - British": "White British",
-                "White - Irish": "Irish",
+                "White British": "White - British",
+                "Irish": "White - Irish",
                 "Central and Eastern European": "Central and Eastern European",
-                "White - Any other White background": "Any other White background",
+                "Any other White background": "White - Any other White background",
                 "Gypsy/Roma/Traveller": "Gypsy/Roma/Traveller",
-                "Mixed -White and Black Caribbean": "White and Black Caribbean",
-                "Mixed -White and Black African": "White and Black African",
-                "Mixed -White and Asian": "White and Asian",
-                "Mixed -Any other mixed background": "Any other Mixed background",
-                "Asian or Asian British - Indian": "Indian",
-                "Asian or Asian British - Pakistani": "Pakistani",
-                "Asian or Asian British - Bangladeshi": "Bangladeshi",
-                "Asian or Asian British - Any other Asian background": "Any other Asian background",
-                "Black or Black British - Caribbean": "Caribbean",
-                "Black or Black British - African": "African",
-                "Black or Black British - Any other Black background": "Any other Black background",
-                "Other Ethnic Group - Chinese": "Chinese",
-                "Other Ethnic Group - Any other ethnic group": "Any other Ethnic group",
-                "Not stated": "Unknown",
-                "Not known": "Unknown",
+                "White and Black Caribbean": "Mixed -White and Black Caribbean",
+                "White and Black African": "Mixed -White and Black African",
+                "White and Asian": "Mixed -White and Asian",
+                "Any other Mixed background": "Mixed -Any other mixed background",
+                "Indian": "Asian or Asian British - Indian",
+                "Pakistani": "Asian or Asian British - Pakistani",
+                "Bangladeshi": "Asian or Asian British - Bangladeshi",
+                "Any other Asian background": "Asian or Asian British - Any other Asian background",
+                "Caribbean": "Black or Black British - Caribbean",
+                "African": "Black or Black British - African",
+                "Any other Black background": "Black or Black British - Any other Black background",
+                "Chinese": "Other Ethnic Group - Chinese",
+                "Any other Ethnic group": "Other Ethnic Group - Any other ethnic group",
+                "Unknown Ethnicity": ["Not known", "Not stated", " "],
                 "Arab": "Arab",
                 "Latin America": "Latin America",
-                "Blanks": "Unknown",
             }
 
-            mapped_value = ethnic_map.get(
-                row, "Unknown Ethnicity"
-            )  # Default to "Unknown Ethnicity" if not found
-            if mapped_value == "Blank":
-                # Filter for rows where 'client_ethnicity' is NaN
-                filtered_df = df[pd.isna(df["ethnicity_name"])]
+            mapped_value = ethnic_map.get(row, ["Unknown Ethnicity"])
+
+            if row == "Unknown Ethnicity":
+                # Handle "Unknown" with special conditions for NaN and empty strings
+                conditions = (
+                    df["ethnicity_name"].isin(mapped_value) | 
+                    pd.isna(df["ethnicity_name"]) | 
+                    (df["ethnicity_name"] == "")
+                )
+                filtered_df = df[conditions]
+            elif isinstance(mapped_value, list):
+                # If mapped_value is a list, filter rows matching any value in the list
+                filtered_df = df[df["ethnicity_name"].isin(mapped_value)]
             else:
+                # For single string values, proceed with the direct comparison
                 filtered_df = df[df["ethnicity_name"] == mapped_value]
 
             return filtered_df
         else:
             return "Row category not recognized"
-
+        
+        # filtered_df = filtered_df[(filtered_df["client_state"] != 'Closed') & 
+        #                   (filtered_df["client_state"].notna()) & 
+        #                   (filtered_df["client_state"] != '')]
         return filtered_df  # Return the filtered dataframe
     except Exception as e:
         print(
@@ -416,9 +422,12 @@ def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
     
 
     try:
+        if row == "Unknown":
+                return df[pd.isna(df["referral_source"])]
+            
         # Find all keys in referral_mapping that have a value matching 'row'
         matching_keys = [key for key, value in referral_mapping.items() if value == row]
-
+  
         # Check if there are matching keys to filter on
         if not matching_keys:
             print(
@@ -482,13 +491,12 @@ def Source_of_Referrals___BRADFORD_DISTRICT_filter(
 
 # two attended contacts sheet
 
-
 def No__of_CYP_receiving_a_second_attended_contact_with_mental_health_services_filter(
     df, row, dfname="empty", date_range=None
 ):
 
     df = isolate_date_range(df, "second_contact_/_indirect_date", date_range)
-
+    
     try:
         if row == "All":
             return df
@@ -524,8 +532,10 @@ def DNAs_and_cancellations_filter(df, row, dfname="empty", date_range=None):
         "Face to Face",
         "Telephone",
         "Type talk",
+        "Talk type for a person unable to speak",
         "Video consultation",
         "Instant Messaging (Synchronous)",
+        "Other (not listed)"
     ]
     df = df[df["contact_approach"].isin(allowed_contact_types)]
     # only dna in attendace col
@@ -546,14 +556,15 @@ def DNAs_and_cancellations_filter(df, row, dfname="empty", date_range=None):
     try:
         if "DNA Appointments" in row:
             filtered_df = df[df["attendance"] == "Did not Attend"]
+            
         elif "Cancelled by patient" in row:
             filtered_df = df[
-                df["attendance"] == "Cancelled by Patient"
+                df["attendance"] == "Cancelled By Client"
             ]  # Placeholder, replace with actual value
         elif "Cancelled by Provider" in row:
             filtered_df = df[
-                df["attendance"] == "Cancelled by Provider"
-            ]  # Placeholder, replace with actual value
+                df["attendance"] == "Cancelled By Professional"
+            ]  
         else:
             # Return the df as is if the row doesn't match the expected patterns
             # This might need adjustment based on your specific needs
@@ -603,11 +614,10 @@ def Goals_Based_Outcomes_filter(df, row, dfname="empty", date_range=None):
 
         # Now, filter based on the specific goal outcome type
         if "Initials completed" in row:
-            # Assuming there's a way to determine if initials are completed (placeholder condition)
             filtered_df = df[df["initial_or_follow_up"] == "Initial"]
+            
         elif "Follow ups completed" in row:
-            # Assuming there's a way to determine if follow-ups are completed (placeholder condition)
-            filtered_df = df[df["initial_or_follow_up"] == "Follow  up"]
+            filtered_df = df[(df["initial_or_follow_up"] == "Follow  up")|(df["initial_or_follow_up"] == "Final")|(df["initial_or_follow_up"] == "Initial or Follow up")]
 
         elif "Initial score" in row:
             filtered_df = df[df["initial_or_follow_up"] == "Initial"]
@@ -615,7 +625,7 @@ def Goals_Based_Outcomes_filter(df, row, dfname="empty", date_range=None):
             return (df_with_average, "average_score")
 
         elif "Follow up score" in row:
-            filtered_df = df[df["initial_or_follow_up"] == "Follow  up"]
+            filtered_df = df[(df["initial_or_follow_up"] == "Follow  up")|(df["initial_or_follow_up"] == "Final")|(df["initial_or_follow_up"] == "Initial or Follow up")]
             df_with_average = calculate_average_scores(filtered_df)
             return (df_with_average, "average_score")
 
@@ -744,11 +754,6 @@ def Overall_Discharges_filter(df, row, dfname="empty", date_range=None):
         "Referred to another YIM provider": "Number signposted to another CCG provider",
         "Not disclosed": "Not Disclosed",
         "Blanks": "Unknown",
-        # "Referred back to School": "Doesn't map",
-        # "Client declined a service prior to or during assessment": "Doesn't map",
-        # "Client rejects referral": "Doesn't map",
-        # "Client deceased": "Doesn't map",
-        # "Moved out of the area": "Doesn't map"
     }
 
     try:
@@ -767,7 +772,7 @@ def Overall_Discharges_filter(df, row, dfname="empty", date_range=None):
         elif row == "Not Disclosed":
             # Assuming "Not Disclosed" means missing or unspecified closure reasons
             df_filtered = df[
-                pd.isnull(df["file_closure_reason"])
+                pd.isna(df["file_closure_reason"])  # This is equivalent to pd.isnull()
                 | (df["file_closure_reason"] == "Not Disclosed")
             ]
 
@@ -817,13 +822,11 @@ def Discharges_BRADFORD_DISTRICT_filter(df, row, dfname="empty", date_range=None
 
 def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=None):
     # remove any referral_date after date range.
-
     start_date, end_date = date_range
     end_date = pd.to_datetime(end_date)
     # Filter the DataFrame based on the date range
-    mask = df["referral_date"] <= end_date
+    mask = df["referral_date"] >= end_date
     df = df.loc[mask]
-    # df = isolate_date_range(df, "referral_date", date_range)
 
     try:
 
@@ -846,8 +849,8 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=No
         elif row == "BRADFORD DISTRICT":
             df = BRADFORD_FILTER(df, dfname)
 
-        unique_client_id_df = df.drop_duplicates(subset=["client_id"])
-        return unique_client_id_df
+        # unique_client_id_df = df.drop_duplicates(subset=["client_id"])
+        return df
 
     except Exception as e:
         print(
