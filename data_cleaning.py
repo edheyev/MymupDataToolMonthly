@@ -28,25 +28,51 @@ def clean_column_names(dataframes, log_message=None):
     return cleaned_dataframes
 
 
+# def remove_duplicates(dataframes, log_message=None):
+#     print("removing duplicates")
+#     if log_message:
+#         log_message("Removing duplicates...")
+#     else:
+#         print("Removing duplicates...")
+#     cleaned_dataframes = {}
+#     for df_name, df in dataframes.items():
+#         original_row_count = df.shape[0]
+#         cleaned_df = df.drop_duplicates()
+#         cleaned_dataframes[df_name] = cleaned_df
+#         duplicates_removed = original_row_count - cleaned_df.shape[0]
+#         if log_message:
+#             print(f"Removed {duplicates_removed} duplicates from {df_name}.")
+#             log_message(f"Removed {duplicates_removed} duplicates from {df_name}.")
+#         else:
+#             print(f"Removed {duplicates_removed} duplicates from {df_name}.")
+#     return cleaned_dataframes
+
 def remove_duplicates(dataframes, log_message=None):
-    print("removing duplicates")
+    columns_to_ignore = ["file_closure", "referral_closure"]
+    print("Removing duplicates...")
     if log_message:
         log_message("Removing duplicates...")
-    else:
-        print("Removing duplicates...")
+
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
         original_row_count = df.shape[0]
-        cleaned_df = df.drop_duplicates()
+
+        # Create a list of columns to consider for duplicate removal
+        columns_to_consider = [
+            col for col in df.columns if col not in columns_to_ignore
+        ]
+
+        # Use the `subset` parameter to ignore specified columns
+        cleaned_df = df.drop_duplicates(subset=columns_to_consider)
+
         cleaned_dataframes[df_name] = cleaned_df
         duplicates_removed = original_row_count - cleaned_df.shape[0]
         if log_message:
-            print(f"Removed {duplicates_removed} duplicates from {df_name}.")
             log_message(f"Removed {duplicates_removed} duplicates from {df_name}.")
         else:
             print(f"Removed {duplicates_removed} duplicates from {df_name}.")
-    return cleaned_dataframes
 
+    return cleaned_dataframes
 
 def isolate_reporting_period(dataframes, start_date, end_date, log_message=None):
     print("Isolating data within the reporting period...")
@@ -100,32 +126,7 @@ def remove_invalid_rows(dataframes, log_message=None):
     return dataframes
 
 
-def remove_duplicates(dataframes, log_message=None):
-    columns_to_ignore = ["file_closure", "referral_closure"]
-    print("Removing duplicates...")
-    if log_message:
-        log_message("Removing duplicates...")
 
-    cleaned_dataframes = {}
-    for df_name, df in dataframes.items():
-        original_row_count = df.shape[0]
-
-        # Create a list of columns to consider for duplicate removal
-        columns_to_consider = [
-            col for col in df.columns if col not in columns_to_ignore
-        ]
-
-        # Use the `subset` parameter to ignore specified columns
-        cleaned_df = df.drop_duplicates(subset=columns_to_consider)
-
-        cleaned_dataframes[df_name] = cleaned_df
-        duplicates_removed = original_row_count - cleaned_df.shape[0]
-        if log_message:
-            log_message(f"Removed {duplicates_removed} duplicates from {df_name}.")
-        else:
-            print(f"Removed {duplicates_removed} duplicates from {df_name}.")
-
-    return cleaned_dataframes
 
 
 def isolate_client_ages(dataframes, yim_providers, log_message=None):
@@ -192,15 +193,34 @@ def clean_mib(dataframes, log_message=None):
     cleaned_dataframes = {}
     for df_name, df in dataframes.items():
         if "franchise" in df.columns:
+            
+            # where the datadump has the service type column do the filtering
+            
+            
             # Apply the global_id filter only to Mind in Bradford franchises
-            if (df_name != "CYPMH_Plans_And_Goals_All")&(df_name != "CYPMH_File_Closures_All")&(df_name != "CYPMH_Two_Contacts"):
+            if (df_name == "CYPMH_Contacts_All"):
                 
                 cleaned_df = df[
                     (df["franchise"] != "Mind in Bradford") | 
                     ((df["franchise"] == "Mind in Bradford") & (df["global_id"].isin(global_id_to_keep)))
                 ]
+            elif (df_name == "CYPMH_Two_Contacts"):
+                not_mind_in_bradford_rows = df[df["franchise"] != "Mind in Bradford"]
+
+                # Filter 'Mind in Bradford' rows that also meet the allowed service types criteria
+                mind_in_bradford_allowed_rows = df[
+                    (df["franchise"] == "Mind in Bradford") &
+                    ((df["servicetype"].isin(allowed_service_types)) | 
+                    (df["servicetype.1"].isin(allowed_service_types)))
+                ]
+
+                # Concatenate the two subsets to get the final DataFrame
+                cleaned_df = pd.concat([not_mind_in_bradford_rows, mind_in_bradford_allowed_rows], ignore_index=True)
+
             else:
                 cleaned_df = df
+                
+        
         else:
             # If franchise information is not available, leave the DataFrame unaltered
             cleaned_df = df
@@ -405,6 +425,7 @@ def bradford_postcode_filter_function(dataframes, log_message=None):
         "BD21",
         "BD22",
         "BD23",
+        "BD24",
         "BD3",
         "BD4",
         "BD5",
@@ -627,40 +648,67 @@ def add_reason_to_file_closures(dataframes, log_message=None):
             log_message(f"An error occurred: {e}")
         return None
 
+from dateutil.parser import parse
+
+import re
 
 def clean_date_column(df, column_name):
     """
     Cleans and standardizes the date column in the dataframe.
-    Attempts to parse various date formats into standardized datetime objects.
+    This includes handling cells with single or multiple date entries,
+    and ensuring that dates with a year of '0000' or other parsing errors are properly handled.
     """
-    # Repgs, 'nan', and None with np.nan to clean the data
+    # Replace '', 'nan', and None with np.nan to clean the data
     df[column_name] = df[column_name].replace({"": np.nan, "nan": np.nan, None: np.nan})
 
-    # First attempt a vectorized conversion for the most common format
-    df[column_name] = pd.to_datetime(df[column_name], errors="coerce", dayfirst=True)
+    def is_valid_date(date_str):
+        # Check for the specific invalid format '0000-00-00' or similar
+        if date_str.startswith("0000"):
+            return False
+        return True
+
+    def parse_dates(cell):
+        if pd.isna(cell) or not cell.strip():
+            return np.nan
+        
+        # Split the cell on comma in case of multiple dates and filter out invalid dates
+        date_strings = filter(is_valid_date, cell.split(","))
+        latest_date = None
+
+        for date_str in date_strings:
+            try:
+                current_date = parse(date_str.strip(), dayfirst=True).date()
+                if latest_date is None or current_date > latest_date:
+                    latest_date = current_date
+            except (ValueError, OverflowError):
+                # Skip any dates that cause parsing errors, including out-of-range errors
+                continue
+
+        return latest_date
+
+    # Apply the parsing function to each cell in the column
+    df[column_name] = df[column_name].apply(parse_dates)
+    # Convert the date back into datetime format for consistency
+    df[column_name] = pd.to_datetime(df[column_name], errors="coerce")
 
     return df
+
+
 
 
 def clean_dates(dataframes, log_message=None):
     """
     Iterates over each dataframe and cleans specified date columns.
-
-    Parameters:
-    - dataframes: Dictionary of pandas dataframes to clean.
-    - date_cols: List of column names containing dates to be standardized.
-    - log_message: Optional logging function for messages.
-
-    Returns:
-    - A dictionary of cleaned dataframes.
     """
     date_cols = [
         "referral_date",
         "first_contact_/_indirect_date",
         "second_contact_/_indirect_date",
         "file_closure",
+        "file_closures",  # This column can have multiple dates
         "contact_date",
         "goal_date",
+        "referral_rejections"
     ]
 
     cleaned_dataframes = {}

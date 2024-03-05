@@ -2,11 +2,11 @@
 
 
 a = Analysis(
-    ['data_flow_qr.py'],
+    ['data_flow_mr.py'],
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['data_config', 'data_cleaning','data_utils','QR_filters'],
+    hiddenimports=['data_config', 'data_cleaning','data_utils','MR_filters'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

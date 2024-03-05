@@ -76,9 +76,9 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
         elif row == "Number closed cases":
             df = isolate_date_range(df, "file_closure", date_range)
             # closed cases - file closure dd all file closures that are not innapropriate UNIQUE
-            filtered_df = df[df["referral_rejected"] == False]
+            # filtered_df = df[df["referral_rejected"] == False]
             # unique_client_id_df = df.drop_duplicates(subset=["client_id"])
-            return filtered_df
+            return df
 
         return "row not caught"
     except Exception as e:
@@ -191,7 +191,7 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
             "Pakistani",
             "White and Asian",
             "White and Black African",
-            "White and Black Carribean",
+            "White and Black Caribbean",
             "White British",
             "Any other Asian background",
             "Any other Black background",
@@ -252,10 +252,10 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
                 "Central and Eastern European": "Central and Eastern European",
                 "Any other White background": "White - Any other White background",
                 "Gypsy/Roma/Traveller": "Gypsy/Roma/Traveller",
-                "White and Black Caribbean": "Mixed -White and Black Caribbean",
-                "White and Black African": "Mixed -White and Black African",
-                "White and Asian": "Mixed -White and Asian",
-                "Any other Mixed background": "Mixed -Any other mixed background",
+                "White and Black Caribbean": "Mixed - White and Black Caribbean",
+                "White and Black African": "Mixed - White and Black African",
+                "White and Asian": "Mixed - White and Asian",
+                "Any other Mixed background": "Mixed - Any other mixed background",
                 "Indian": "Asian or Asian British - Indian",
                 "Pakistani": "Asian or Asian British - Pakistani",
                 "Bangladeshi": "Asian or Asian British - Bangladeshi",
@@ -263,8 +263,8 @@ def All_Referrals_by_demographics_filter(df, row, dfname="empty", date_range=Non
                 "Caribbean": "Black or Black British - Caribbean",
                 "African": "Black or Black British - African",
                 "Any other Black background": "Black or Black British - Any other Black background",
-                "Chinese": "Other Ethnic Group - Chinese",
-                "Any other Ethnic group": "Other Ethnic Group - Any other ethnic group",
+                "Chinese": "Other Ethnic Groups - Chinese",
+                "Any other Ethnic group": "Other Ethnic Groups - Any other ethnic group",
                 "Unknown Ethnicity": ["Not known", "Not stated", " "],
                 "Arab": "Arab",
                 "Latin America": "Latin America",
@@ -358,7 +358,7 @@ def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
 
     referral_mapping = {
         "Accident and Emergency Department": "Accident And Emergency Department",
-        "CAMHS - Crisis Team (Hospital Urgent)": "CAMHS Crisis",
+        "CAMHS - Crisis Team (Hospital Urgents)": "CAMHS Crisis",
         "CAMHS - Core/Step Down": "CAMHS Core/Step down",
         "CAMHS - Waiting List": "CAMHS Waiting List",
         "Child Health: Community-based Paediatrics": "Community-based Paediatrics",
@@ -384,12 +384,12 @@ def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
         "Justice System: Youth Offending Team": "Youth Offending Service",
         "Justice System: Court Liaison and Diversion Service": "Youth Offending Service",
         "Local Authority and Other Public Services: Education Service / Educational Establishment": "Education Service",
-        "Local Authority and Other Public Services: Housing": "Housing Service",
+        "Local Authority and Other Public Services: Housing Service": "Housing Service",
         "Local Authority and Other Public Services: Social Services": "Social Services",
         "Mental Health Drop In Service": "Other service or agency",
         "Other: Asylum Services": "Other service or agency",
-        "Other: Drug Action Team  / Drug Misuse Agency": "Drug Action Team / Drug Misuse Agency",
-        "Other Independent Sector Mental Health services": "Other service or agency",
+        "Other: Drug Action Team / Drug Misuse Agency": "Drug Action Team / Drug Misuse Agency",
+        "Other Independent Sector Mental Health Services": "Other service or agency",
         "Other: Jobcentre Plus": "Other service or agency",
         "Other: Out of Area Agency": "Out of Area Agency",
         "Other Primary Health Care": "Other Primary Health Care",
@@ -403,8 +403,8 @@ def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
         "Primary Health Care: General Medical Practitioner Practice": "GP services",
         "Primary Health Care: Health Visitor": "Other Primary Health Care",
         "Primary Health Care: Maternity Service": "Other Primary Health Care",
-        "Self Referral: Self": "Self",
-        "Self Referral: Carer/Relative": "Carer",
+        "Self-Referral: Self": "Self",
+        "Self-Referral: Carer/Relative": "Carer",
         "Temporary transfer from another Mental Health NHS Trust": "Other service or agency",
         "Transfer by graduation from Child and Adolescent Mental Health Services to Adult Mental Health Services": "Transfer by graduation from Child Adolescent Mental Health Services to Adult",
         "Voluntary Sector": "Voluntary Sector",
@@ -413,7 +413,7 @@ def Source_of_All_Referrals_filter(df, row, dfname="empty", date_range=None):
         "Housing": "Housing Service",
         "Justice System": "Police",
         "Primary care": "GP services",
-        "Self -referral": "Self",
+        "Self-referral": "Self",
         "Statutory health and social care": "Social Services",
         "Urgent and emergency care": "CAMHS Crisis",
         "VCS": "Voluntary Sector",
@@ -822,22 +822,46 @@ def Discharges_BRADFORD_DISTRICT_filter(df, row, dfname="empty", date_range=None
 
 def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=None):
     # remove any referral_date after date range.
+    
+    
     start_date, end_date = date_range
-    end_date = pd.to_datetime(end_date)
-    # Filter the DataFrame based on the date range
-    mask = df["referral_date"] >= end_date
-    df = df.loc[mask]
+    start_date = pd.to_datetime(start_date).normalize()  # Normalize to remove time
+    end_date = pd.to_datetime(end_date).normalize()  # Normalize to remove time
+
 
     try:
+               
 
-        #  check for blanks in first contact column
-        df = df[
-            pd.isnull(df["first_contact_/_indirect_date"])
-            | (df["first_contact_/_indirect_date"] == "")
+        # Normalize datetime columns
+        df["first_contact_/_indirect_date"] = pd.to_datetime(df["first_contact_/_indirect_date"], errors='coerce').dt.normalize()
+        df["file_closures"] = pd.to_datetime(df["file_closures"], errors='coerce').dt.normalize()
+        df["referral_rejections"] = pd.to_datetime(df["referral_rejections"], errors='coerce').dt.normalize()
+
+        # Define the condition for 'first_contact_/_indirect_date' being empty
+        condition1 = pd.isnull(df["first_contact_/_indirect_date"]) | (df["first_contact_/_indirect_date"] == "")
+
+        # Conditions for 'file_closures' and 'referral_rejections' not having values before end_date
+        condition2_file_closures = pd.isnull(df["file_closures"]) | (df["file_closures"] > end_date)
+        condition2_referral_rejections = pd.isnull(df["referral_rejections"]) | (df["referral_rejections"] > end_date)
+
+        # Conditions to exclude rows where specific columns are not null
+        condition3_is_first_contact_indirect = pd.isnull(df["is_first_contact_/_indirect"])
+        condition4_second_contact_indirect_date = pd.isnull(df["second_contact_/_indirect_date"])
+        condition5_is_second_contact_indirect = pd.isnull(df["is_second_contact_/_indirect"])
+
+        # Combine all conditions
+        df_filtered = df[
+            condition1 & 
+            condition2_file_closures & 
+            condition2_referral_rejections & 
+            condition3_is_first_contact_indirect & 
+            condition4_second_contact_indirect_date & 
+            condition5_is_second_contact_indirect
         ]
+        df = df_filtered[df_filtered['referral_date'] <= end_date]
+        
 
-        if row == "All":
-            df = df
+        if row == "All":            df = df
         elif row == "CIC/CLA":
             df = CIC_FILTER(df, dfname)
         elif row == "SEN":
@@ -865,15 +889,12 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=No
 
 
 def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
+    start_date, end_date = date_range
+    start_date = pd.to_datetime(start_date).normalize()  # Normalize to remove time
+    end_date = pd.to_datetime(end_date).normalize()  # Normalize to remove time
 
     try:
-        # remove any referral_date after date range.
-        start_date, end_date = date_range
-        end_date = pd.to_datetime(end_date)
-        # Filter the DataFrame based on the date range
-        mask = df["referral_date"] <= end_date
-        df = df.loc[mask]
-
+        df = df[df['referral_date'] <= end_date]
         # Create a copy of the DataFrame to avoid SettingWithCopyWarning
         df = df.copy()
 
@@ -885,7 +906,7 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
         ]
 
         for col in date_cols:
-            df.loc[:, col] = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce")
+            df.loc[:, col] = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce").dt.normalize()
 
         # Calculate differences in weeks as before
         df.loc[:, "first_contact_referral_diff"] = (
@@ -900,8 +921,7 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
         ) / pd.Timedelta(weeks=1)
 
         # Drop rows where 'second_contact_/_indirect_date' is NaT if those rows are not relevant for some calculations
-        df_filtered = df.dropna(subset=["second_contact_/_indirect_date"])
-
+        df_filtered = df
         # Filtering logic based on the 'row' parameter
         if row == "Average Weeks from referral to 1st attended contact/indirect":
             df_filtered = isolate_date_range(
@@ -910,6 +930,7 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
             return (df_filtered, "first_contact_referral_diff")
 
         elif row == "Average Weeks from referral to 2nd attended contact/indirect":
+            df_filtered = df.dropna(subset=["second_contact_/_indirect_date"])
             df_filtered = isolate_date_range(
                 df_filtered, "second_contact_/_indirect_date", date_range
             )

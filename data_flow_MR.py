@@ -11,6 +11,8 @@ from tkinter import ttk  # Import ttk module for themed widgets
 from tkinter import scrolledtext
 from tkinter import filedialog
 
+import csv
+
 # Add the directory of your script and modules to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
@@ -40,9 +42,6 @@ from data_utils import (
     calculate_percentage,
     calculate_average,
     calculate_count,
-    calculate_row_average,
-    calculate_row_total,
-    calculate_percentage_row_total,
     is_percentage_row,
     is_average_row,
     load_data_files,
@@ -52,24 +51,45 @@ from data_utils import (
 # Global variables
 log_queue = queue.Queue()
 root = None
+IS_HEADLESS = False  # Set to True for headless mode, False for GUI mode
 # IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
-IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
 
 
 # Global queue for cleaned data
 cleaned_data_queue = queue.Queue()
 
 # GUI stuff
-
-
 def create_logging_window():
     global root
     root = tk.Tk()
-    root.title("MyMup Data Tool: Quarterly Report")
+    root.title("MyMup Data Tool: Monthly Report")
     style = ttk.Style(root)
-    style.theme_use(
-        "clam"
-    )  # 'clam', 'alt', 'default', 'classic' are some common themes
+    style.theme_use("clam")
+
+    # Change the background color of the Button
+    style.configure('TButton', background='#E1E1E1', foreground='black', font=('Helvetica', 10))
+
+    # Change the background and foreground colors of the Label
+    style.configure('TLabel', background='#D3D3D3', foreground='blue', font=('Helvetica', 10))
+
+    # Change the background color of the Frame
+    style.configure('TFrame', background='#C1C1C1')
+
+    # You can also change the style of specific widgets like entry fields, comboboxes, etc.
+    style.configure('TEntry', foreground='black', background='#F0F0F0')
+
+    # Example: Adjusting the Treeview widget
+    style.configure("Treeview",
+                    background="#D3D3D3",
+                    foreground="black",
+                    rowheight=25,
+                    fieldbackground="#D3D3D3")
+    style.map('Treeview', background=[('selected', 'blue')])
+
+    # Example: Adjust Scrollbar
+    style.configure("Vertical.TScrollbar", gripcount=0,
+                    background="gray", darkcolor="gray", lightcolor="gray",
+                    troughcolor="gray", bordercolor="gray", arrowcolor="white")
 
     # Instruction Frame
     instruction_frame = ttk.Frame(root, padding="10 10 10 10")
@@ -77,27 +97,23 @@ def create_logging_window():
 
     # Instruction Text
     instructions = (
-        "Instructions for MyMup Data Tool:\n"
-        "1. Enter correct dates in the format YYYY-MM-DD \n"
-        "2. Select a folder containing all required data files for the quarterly report.\n"
-        "3. Ensure the data files are named correctly as per the following list:\n"
-        "   * Contacts or Indirects Within Reporting Period: 'contacts_or_indirects_within_reporting_period.csv'\n"
-        "   * MIB Contacts or Indirects Within Reporting Period: 'mib_contacts_or_indirects_within_reporting_period.csv'\n"
-        "   * File Closures And Goals Within Reporting Period: 'file_closures_and_goals_within_reporting_period.csv'\n"
-        "   * MIB File Closures And Goals Within Reporting Period: 'mib_file_closures_and_goals_within_reporting_period.csv'\n"
-        "   * File Closures Within Reporting Period: 'file_closures_within_reporting_period.csv'\n"
-        "   * Initial Goals Within Reporting Period: 'initial_goals_within_reporting_period.csv'\n"
-        "   * Referrals Within Reporting Period: 'referrals_within_reporting_period.csv'\n"
-        "   * MIB Referrals Within Reporting Period: 'mib_referrals_within_reporting_period.csv'\n"
-        "   * Referrals Before End Reporting Period: 'referrals_before_end_reporting_period.csv'\n"
-        "   * MIB Referrals Before End Reporting Period: 'mib_referrals_before_end_of_reporting_period.csv'\n"
-        "   * Contacts Within Seven Days: 'contacts_within_seven_days.csv'\n"
-        "   * MIB Contacts Within Seven Days: 'mib_contacts_within_seven_days.csv'\n"
-        "   * Contacts Within Twenty One Days: 'contacts_within_twenty_one_days.csv'\n"
-        "   * MIB Contacts Within Twenty One Days: 'mib_contacts_within_twenty_one_days.csv'\n"
-        "Ensure the files match the specified column structure as detailed in the documentation. \n"
-        "Press start when files are loaded and cleaned. \n"
+        "Instructions for MyMup Data Tool Monthly reporter:\n"
+        "1. Enter correct dates in the format YYYY-MM-DD.\n"
+        "2. Select a folder containing all required data files for the monthly report.\n"
+        "3. Ensure the data files are named correctly as per the following list (numbers can be different):\n"
+        "note that there maybe multiple of the same file type (2 or 3 if a MIB file is included.\n"
+        "   * CYPMH Clients All: 'cypmh_clients_all_00000000.csv'\n"
+        "   * CYPMH Contacts All: 'cypmh_contacts_all_00000000.csv'\n"
+        "   * CYPMH File Closures All: 'cypmh_file_closures_all_00000000.csv'\n"
+        "   * CYPMH Goal Themes All: 'cypmh_goal_themes_all_00000000.csv'\n"
+        "   * CYPMH Plans And Goals All: 'cypmh_plans_and_goals_all_00000000.csv'\n"
+        "   * CYPMH Referral Rejections All: 'cypmh_referral_rejections_all_00000000.csv'\n"
+        "   * CYPMH Referrals: 'cypmh_referrals_00000000.csv'\n"
+        "   * CYPMH Two Contacts: 'cypmh_two_contacts_00000000.csv'\n"
+        "Ensure the files match the specified column structure as detailed in the documentation.\n"
+        "Press start when files are loaded and cleaned.\n"
     )
+
     instruction_text = tk.Text(instruction_frame, height=10, wrap=tk.WORD)
     instruction_text.insert(tk.END, instructions)
     instruction_text.config(state=tk.DISABLED)  # Make text read-only
@@ -109,7 +125,7 @@ def create_logging_window():
 
     ttk.Label(input_frame, text="Start Date (YYYY-MM-DD):").pack(side=tk.LEFT)
     start_date_entry = ttk.Entry(input_frame)
-    start_date_entry.insert(0, "2020-10-01")
+    start_date_entry.insert(0, "2024-01-01")
     start_date_entry.pack(side=tk.LEFT, padx="10 10")
 
     ttk.Label(input_frame, text="End Date (YYYY-MM-DD):").pack(side=tk.LEFT)
@@ -236,8 +252,8 @@ def run_main_gui(start_date_entry, end_date_entry, text_widget):
 
         # Generate filenames based on the current date
         date_str = datetime.datetime.now().strftime("%d-%m-%Y")
-        file_string_1 = f"output_csv_QR_{date_str}_franchise_group_1.csv"
-        file_string_2 = f"output_csv_QR_{date_str}_franchise_group_2.csv"
+        file_string_1 = f"output_csv_MR_{date_str}_YIM.csv"
+        file_string_2 = f"output_csv_MR_{date_str}_OTHER.csv"
 
         date_range = start_date_entry.get(), end_date_entry.get()
         # Generate CSV files for each franchise list
@@ -330,9 +346,9 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
             cleaned_dataframes, log_message
         )
 
-        # cleaned_dataframes = remove_duplicates(
-        #     cleaned_dataframes, log_message=log_message
-        # )
+        cleaned_dataframes = remove_duplicates(
+            cleaned_dataframes, log_message=log_message
+        )
 
         cleaned_dataframes = clean_dates(cleaned_dataframes, log_message=log_message)
 
@@ -341,9 +357,9 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
         )
 
         cleaned_dataframes = clean_mib(cleaned_dataframes, log_message)
-        # cleaned_dataframes = isolate_reporting_period(
-        #     cleaned_dataframes, start_date, end_date, log_message=log_message
-        # )
+        cleaned_dataframes = isolate_reporting_period(
+            cleaned_dataframes, start_date, end_date, log_message=log_message
+        )
         cleaned_dataframes = add_referred_this_reporting_period(
             cleaned_dataframes, date_range, log_message
         )
@@ -356,6 +372,7 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
         raise  # Re-raise the exception after logging it
 
     return cleaned_dataframes
+
 
 
 def produce_tables(dataframes, file_string, franchise_list, date_range):
@@ -467,8 +484,8 @@ if __name__ == "__main__":
         # Specify the directory and date range for headless mode
         directory_path = "./data"
 
-        start_date = "2023-12-01"
-        end_date = "2024-01-01"
+        start_date = "2024-01-01"
+        end_date = "2024-02-01"
         date_range = (start_date, end_date)
         main_headless(directory_path, start_date, end_date)
     else:

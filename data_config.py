@@ -25,44 +25,113 @@ bradford_filters = [
 file_info = {
     "CYPMH_Clients_All": {
         "filename": "cypmh_clients_all",
-        "columns": [],
+        "columns": [
+            'looked_after_child',
+            'special_education_needs',
+            'ehcp',
+            'age',
+            'gender_name',
+            'ethnicity_name',
+
+            ],
     },
     "CYPMH_Contacts_All": {
         "filename": "cypmh_contacts_all",
-        "columns": [],
+        "columns": [
+            'looked_after_child',
+            'special_education_needs',
+            'ehcp',
+            'contact_date',
+            'contact_approach',
+            'attendance'
+        ],
     },
     "CYPMH_File_Closures_All": {
         "filename": "cypmh_file_closures_all",
-        "columns": [],
+        "columns": [
+            'looked_after_child',
+            'special_education_needs',
+            'ehcp',
+            'file_closure',
+            'file_closure_reason'
+        ],
     },
     "CYPMH_Goal_Themes_All": {
         "filename": "cypmh_goal_themes_all",
-        "columns": [],
+        "columns": [
+            'looked_after_child',
+            'special_education_needs',
+            'ehcp',
+            'goal_date',
+            'goal_theme'
+        ],
     },
     "CYPMH_Plans_And_Goals_All": {
         "filename": "cypmh_plans_and_goals_all",
-        "columns": [],
+        "columns": [
+            'looked_after_child',
+            'special_education_needs',
+            'ehcp',
+            'goal_date',
+            'score_1',
+            'score_2',
+            'score_3',
+            'initial_or_follow_up'
+            
+        ],
     },
     "CYPMH_Referral_Rejections_All": {
         "filename": "cypmh_referral_rejections_all",
-        "columns": [],
+        "columns": [
+            'looked_after_child',
+            'special_education_needs',
+            'ehcp',
+        ],
     },
     "CYPMH_Referrals": {
         "filename": "cypmh_referrals",
-        "columns": [],
+        "columns": [ 
+        'looked_after_child',
+            'special_education_needs',
+            'ehcp',
+            'referral_date',
+            'global_id',
+            'referral_source'
+            
+        ],
     },
-    "CYPMH_Referrals_MIB": {
-        "filename": "cypmh_referrals_mib",
-        "columns": [],
-    },
+    # "CYPMH_Referrals_MIB": {
+    #     "filename": "cypmh_referrals_mib",
+    #     "columns": [
+    #         'looked_after_child',
+    #         'special_education_needs',
+    #         'ehcp',
+    #     ],
+    # },
     "CYPMH_Two_Contacts": {
         "filename": "cypmh_two_contacts",
-        "columns": [],
+        "columns": [
+            'looked_after_child',
+            'special_education_needs',
+            'ehcp',
+            'first_contact_/_indirect_date',
+            'second_contact_/_indirect_date',
+            'file_closures',
+            'referral_rejections'
+            # 'is_first_contact_/_indirect',
+            # 'second_contact_/_indirect_date',
+            # 'is_second_contact_/_indirect',
+            # 'referral_date'
+        ],
     },
-    "CYPMH_Two_Contacts_MIB": {
-        "filename": "cypmh_two_contacts_mib",
-        "columns": [],
-    },
+    # "CYPMH_Two_Contacts_MIB": {
+    #     "filename": "cypmh_two_contacts_mib",
+    #     "columns": [
+    #         'looked_after_child',
+    #         'special_education_needs',
+    #         'ehcp',
+    #     ],
+    # },
 }
 
 Overall_caseload_and_referrals = {
@@ -226,7 +295,7 @@ All_Referrals_by_demographics = {
         "Pakistani",
         "White and Asian",
         "White and Black African",
-        "White and Black Carribean",
+        "White and Black Caribbean",
         "White British",
         "Any other Asian background",
         "Any other Black background",
@@ -287,7 +356,7 @@ All_CIC_CLA_Referrals_by_demographics = {
         "Pakistani",
         "White and Asian",
         "White and Black African",
-        "White and Black Carribean",
+        "White and Black Caribbean",
         "White British",
         "Any other Asian background",
         "Any other Black background",
@@ -347,7 +416,7 @@ All_SEN_Referrals_by_demographics = {
         "Pakistani",
         "White and Asian",
         "White and Black African",
-        "White and Black Carribean",
+        "White and Black Caribbean",
         "White British",
         "Any other Asian background",
         "Any other Black background",
@@ -407,7 +476,7 @@ All_EHCP_Referrals_by_demographics = {
         "Pakistani",
         "White and Asian",
         "White and Black African",
-        "White and Black Carribean",
+        "White and Black Caribbean",
         "White British",
         "Any other Asian background",
         "Any other Black background",
@@ -467,7 +536,7 @@ All_CRAVEN_Referrals_by_demographics = {
         "Pakistani",
         "White and Asian",
         "White and Black African",
-        "White and Black Carribean",
+        "White and Black Caribbean",
         "White British",
         "Any other Asian background",
         "Any other Black background",
@@ -527,7 +596,7 @@ BRADFORD_DISTRICT_Referrals_by_demographics = {
         "Pakistani",
         "White and Asian",
         "White and Black African",
-        "White and Black Carribean",
+        "White and Black Caribbean",
         "White British",
         "Any other Asian background",
         "Any other Black background",
@@ -662,7 +731,7 @@ DNAs_and_cancellations = {
         "BRADFORD DISTRICT Cancelled by Provider",
     ],
     "placeholder_text": {},
-    "mib_row_db_default": "CYPMH_Clients_All",
+    "mib_row_db_default": "CYPMH_Contacts_All",
     "row_db_default": "CYPMH_Contacts_All",
 }
 
