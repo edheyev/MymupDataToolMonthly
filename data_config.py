@@ -16,6 +16,7 @@ other_vcse = [
     "Roshnighar",
     "STEP2 Young People&#039;s Health",  # check this one
     "The Cellar Trust",
+    "Invictus"
 ]
 
 bradford_filters = [

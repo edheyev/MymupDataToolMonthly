@@ -12,9 +12,10 @@ from data_cleaning import (
     isolate_client_ages,
     filter_post_codes_add_craven,
     filter_post_codes_add_craven,
+    clean_date_column
 )
 from data_flow_MR import log_message
-from data_utils import load_data_files, isolate_date_range
+from data_utils import calculate_date_differences, load_data_files, isolate_date_range
 
 
 class TestDataCleaningFunctions(unittest.TestCase):
@@ -234,37 +235,150 @@ class TestBradfordPostcodeFilterFunction(unittest.TestCase):
         # Check if the dataframe is unchanged
         pd.testing.assert_frame_equal(result_empty["test_empty"], expected_df_empty)
 
+import pandas as pd
+import numpy as np
 
-# class TestCravenPostcodesFiltering(unittest.TestCase):
-#     def test_filter_post_codes_add_craven(self):
-#         # Mock data simulating your DataFrame structure
-#         data = {
-#             "client_id": [1, 2, 3, 4, 5, 6],
-#             "post_code": [
-#                 "BD20 8NJ",
-#                 "LS2 97 UI",
-#                 "BD1 2AB",
-#                 "LS27 KT",
-#                 "UNKNOWN",
-#                 " ",
-#             ],
-#         }
-#         df = pd.DataFrame(data)
-#         dataframes = {"test_df": df}
+class Testdatecleaning(unittest.TestCase):
+    def setUp(self):
+        # Setup mock dataframes for testing
+        self.data = {
+            "dates": [
+                "2023-03-25", "25-03-2023", "03/25/2023",  # Standard formats
+                "20230325", "25 March 2023",  # Uncommon but valid formats
+                "0000-00-00", "2024-02-30", "not a date"  # Invalid formats
+            ]
+        }
+        self.df = pd.DataFrame(self.data)
+    def test_date_parsing(self):
+        # Expected dataframe after cleaning
+        expected_data = {
+            "dates": pd.to_datetime([
+                "2023-03-25", "2023-03-25", "2023-03-25",
+                "2023-03-25", "2023-03-25",
+                np.nan, np.nan, np.nan  # Expect invalid dates to be NaN
+            ])
+        }
+        expected_df = pd.DataFrame(expected_data)
 
-#         # Expected results after applying the function
-#         expected_craven_marks = [True, True, False, True, False, False]
+        # Clean the dates
+        cleaned_df = clean_date_column(self.df.copy(), 'dates')
 
-#         # Apply the filtering function
-#         filtered_dataframes = filter_post_codes_add_craven(dataframes)
+        # Check if the dates are parsed and cleaned correctly
+        pd.testing.assert_frame_equal(cleaned_df.reset_index(drop=True), expected_df)
+        
+    def test_edge_cases(self):
+        # DataFrame including edge cases
+        edge_case_data = {
+            "dates": ["0000-00-00", "9999-12-31", ""]
+        }
+        edge_case_df = pd.DataFrame(edge_case_data)
+        
+        # Expected dataframe after cleaning, expecting NaN for invalid dates
+        expected_data_edge_cases = {
+            "dates": [np.nan, np.nan, np.nan]  # Using NaN for invalid dates
+        }
+        expected_edge_cases_df = pd.DataFrame(expected_data_edge_cases)
 
-#         # Assert that Craven postcodes are correctly identified
-#         self.assertTrue(
-#             (
-#                 filtered_dataframes["test_df"]["craven"].values == expected_craven_marks
-#             ).all()
-#         )
+        # Making sure 'dates' column in expected DataFrame is of datetime type for consistent comparison
+        expected_edge_cases_df['dates'] = pd.to_datetime(expected_edge_cases_df['dates'])
+
+        # Clean the dates
+        cleaned_edge_cases_df = clean_date_column(edge_case_df.copy(), 'dates')
+
+        # Check if edge cases are handled correctly by resetting index and ignoring the dtype
+        pd.testing.assert_frame_equal(cleaned_edge_cases_df.reset_index(drop=True), expected_edge_cases_df.reset_index(drop=True), check_dtype=False)
+
+    def test_various_date_formats(self):
+        # DataFrame including various date formats and invalid entries
+        date_format_data = {
+            "dates": [
+                "2023-01-01",              # Standard date format
+                "2023-01-01 12:30:45",     # Date with time
+                " ",                       # Space (invalid)
+                "",
+                "1/2/19 10:12",
+                "not a date"               # Non-date string
+            ]
+        }
+        date_format_df = pd.DataFrame(date_format_data)
+        
+        # Expected dataframe after cleaning
+        # Valid dates are parsed correctly, and invalid entries are converted to NaN
+        expected_data_formats = {
+            "dates": [
+                pd.Timestamp("2023-01-01"),    # Parsed standard date
+                pd.Timestamp("2023-01-01"),  # Parsed date with time
+                np.nan,                        # Space converted to NaN
+                np.nan,
+                pd.Timestamp("2019-01-02"),
+                # Empty string converted to NaN
+                np.nan                         # Non-date string converted to NaN
+            ]
+        }
+        expected_formats_df = pd.DataFrame(expected_data_formats)
+        
+        # Clean the dates
+        cleaned_format_df = clean_date_column(date_format_df.copy(), 'dates')
+        
+        # Check if various date formats and invalid entries are handled correctly
+        pd.testing.assert_frame_equal(cleaned_format_df.reset_index(drop=True), expected_formats_df)
 
 
+class TestDateDifferencesCalculation(unittest.TestCase):
+    def test_calculate_date_differences(self):
+        # Setup a DataFrame with test data
+        test_data = {
+            "first_contact_/_indirect_date": [pd.Timestamp("2023-01-15")],
+            "referral_date": [pd.Timestamp("2023-01-01")],
+            "second_contact_/_indirect_date": [pd.Timestamp("2023-01-29")],
+        }
+        df = pd.DataFrame(test_data)
+
+        # Expected results
+        expected_diffs = {
+            "first_contact_referral_diff": [2.0],  # 2 weeks difference
+            "second_contact_referral_diff": [4.0],  # 4 weeks difference
+            "second_first_contact_diff": [2.0],  # 2 weeks difference
+        }
+
+        # Calculate differences
+        calculated_df = calculate_date_differences(df)
+
+        # Verify the calculated differences
+        for col, expected_values in expected_diffs.items():
+            with self.subTest(col=col):
+                self.assertTrue(all(calculated_df[col] == expected_values))
+                
+                
+                
+class TestDateCleaning2(unittest.TestCase):
+    def setUp(self):
+        self.dates_with_times = [
+            "2/13/19 0:00", "2/7/19 13:25", "9/18/19 15:30", 
+            "3/7/19 13:25", "4/30/21 8:30", "10/10/18 0:00", 
+            "10/7/20 13:00", "1/8/19 16:30", "1/17/19 16:00", 
+            "8/3/20 14:30", "3/13/19 9:45", "2/27/19", 
+            "4/5/19 0:00"
+        ]
+
+        self.expected_dates = [
+            pd.Timestamp("2019-02-13"), pd.Timestamp("2019-02-07"), pd.Timestamp("2019-09-18"),
+            pd.Timestamp("2019-03-07"), pd.Timestamp("2021-04-30"), pd.Timestamp("2018-10-10"),
+            pd.Timestamp("2020-10-07"), pd.Timestamp("2019-01-08"), pd.Timestamp("2019-01-17"),
+            pd.Timestamp("2020-08-03"), pd.Timestamp("2019-03-13"), pd.Timestamp("2019-02-27"),
+            pd.Timestamp("2019-04-05")
+        ]
+
+    def test_date_cleaning_with_times(self):
+        df = pd.DataFrame({'dates': self.dates_with_times})
+        cleaned_df = clean_date_column(df, 'dates')  # Ensure your function is defined to remove time
+        
+        # Convert expected_dates to a Series for comparison
+        expected_series = pd.Series(self.expected_dates, name='dates')
+        
+        # Check if the dates are cleaned correctly, ignoring the time component
+        pd.testing.assert_series_equal(cleaned_df['dates'].dt.normalize(), expected_series)
+      
+                
 if __name__ == "__main__":
     unittest.main()

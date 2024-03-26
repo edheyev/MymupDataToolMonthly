@@ -648,53 +648,92 @@ def add_reason_to_file_closures(dataframes, log_message=None):
             log_message(f"An error occurred: {e}")
         return None
 
-from dateutil.parser import parse
+# from dateutil.parser import parse
 
-import re
+# import re
+
+# def clean_date_column(df, column_name, df_name):
+#     """
+#     Cleans and standardizes the date column in the dataframe.
+#     This includes handling cells with single or multiple date entries,
+#     and ensuring that dates with a year of '0000' or other parsing errors are properly handled.
+#     """
+#     # Replace '', 'nan', and None with np.nan to clean the data
+#     df[column_name] = df[column_name].replace({"": np.nan, "nan": np.nan, None: np.nan})
+
+#     def is_valid_date(date_str):
+#         # Check for the specific invalid format '0000-00-00' or similar
+#         if date_str.startswith("0000"):
+#             return False
+#         return True
+    
+#     if column_name == "referral_date" and df_name == "CYPMH_Referrals":
+#     # Replace '', 'nan', and None with np.nan to clean the data
+#         df[column_name] = df[column_name].replace({"": np.nan, "nan": np.nan, None: np.nan})
+        
+#         # Directly convert dates to datetime format assuming "YYYY-MM-DD"
+#         df[column_name] = pd.to_datetime(df[column_name], format="%Y-%m-%d", errors="coerce")
+
+#         return df
+
+#     def parse_dates(cell):
+#         if pd.isna(cell) or not cell.strip():
+#             return np.nan
+        
+#         # Split the cell on comma in case of multiple dates and filter out invalid dates
+#         date_strings = filter(is_valid_date, cell.split(","))
+#         latest_date = None
+
+#         for date_str in date_strings:
+#             try:
+#                 current_date = parse(date_str.strip(), dayfirst=True).date()
+#                 if latest_date is None or current_date > latest_date:
+#                     latest_date = current_date
+#             except (ValueError, OverflowError):
+#                 # Skip any dates that cause parsing errors, including out-of-range errors
+#                 continue
+
+#         return latest_date
+
+#     # Apply the parsing function to each cell in the column
+#     df[column_name] = df[column_name].apply(parse_dates)
+#     # Convert the date back into datetime format for consistency
+#     df[column_name] = pd.to_datetime(df[column_name], errors="coerce")
+
+#     return df
+
+
+import pandas as pd
+import numpy as np
 
 def clean_date_column(df, column_name):
     """
     Cleans and standardizes the date column in the dataframe.
     This includes handling cells with single or multiple date entries,
-    and ensuring that dates with a year of '0000' or other parsing errors are properly handled.
+    and ensuring that dates with parsing errors or out of valid range are properly handled and converted to NaT.
     """
     # Replace '', 'nan', and None with np.nan to clean the data
     df[column_name] = df[column_name].replace({"": np.nan, "nan": np.nan, None: np.nan})
 
-    def is_valid_date(date_str):
-        # Check for the specific invalid format '0000-00-00' or similar
-        if date_str.startswith("0000"):
-            return False
-        return True
-
     def parse_dates(cell):
         if pd.isna(cell) or not cell.strip():
             return np.nan
-        
-        # Split the cell on comma in case of multiple dates and filter out invalid dates
-        date_strings = filter(is_valid_date, cell.split(","))
-        latest_date = None
 
-        for date_str in date_strings:
-            try:
-                current_date = parse(date_str.strip(), dayfirst=True).date()
-                if latest_date is None or current_date > latest_date:
-                    latest_date = current_date
-            except (ValueError, OverflowError):
-                # Skip any dates that cause parsing errors, including out-of-range errors
-                continue
-
-        return latest_date
+        try:
+            parsed_date = pd.to_datetime(cell, errors='coerce')
+            if parsed_date is not pd.NaT:
+                return parsed_date.normalize()  # This removes the time component
+            return np.nan
+            # Return the parsed date or NaT if parsing failed
+            return parsed_date if parsed_date is not pd.NaT else np.nan
+        except (ValueError, OverflowError, pd.errors.OutOfBoundsDatetime):
+            # Handle specific parsing errors including OutOfBoundsDatetime by returning NaT
+            return np.nan
 
     # Apply the parsing function to each cell in the column
     df[column_name] = df[column_name].apply(parse_dates)
-    # Convert the date back into datetime format for consistency
-    df[column_name] = pd.to_datetime(df[column_name], errors="coerce")
 
     return df
-
-
-
 
 def clean_dates(dataframes, log_message=None):
     """

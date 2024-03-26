@@ -4,6 +4,7 @@ import threading
 import queue
 import datetime
 import re
+import json
 
 import pandas as pd
 import tkinter as tk
@@ -18,7 +19,9 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_dir)
 
 # Now import your local modules
-from data_config import file_info, table_configs, yim_providers, other_vcse
+from data_config import file_info, table_configs
+from data_config import yim_providers as default_yim_providers, other_vcse as default_other_vcse
+
 from data_cleaning import (
     add_referred_this_reporting_period,
     clean_column_names,
@@ -47,12 +50,13 @@ from data_utils import (
     load_data_files,
 )
 
+CONFIG_FILE_PATH = "app_config.json"
 
 # Global variables
 log_queue = queue.Queue()
 root = None
-IS_HEADLESS = False  # Set to True for headless mode, False for GUI mode
-# IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
+# IS_HEADLESS = False  # Set to True for headless mode, False for GUI mode
+IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
 
 
 # Global queue for cleaned data
@@ -171,7 +175,35 @@ def log_message(message):
     """Log a message to the Tkinter text widget."""
     # print("l ", message)
     log_queue.put(message)
+    
 
+def load_config(directory_path, config_file_path="config.json"):
+    # Check if the config file exists
+    config_file_path = directory_path + '/'+ config_file_path
+    if not os.path.exists(config_file_path):
+        # If the file doesn't exist, create it with the default values
+        initial_config = {
+            "yim_providers": default_yim_providers,
+            "other_vcse": default_other_vcse
+        }
+        with open(config_file_path, "w") as config_file:
+            json.dump(initial_config, config_file, indent=4)
+        print(f"Config file created at {config_file_path} with default settings.")
+        
+    # Proceed to load the config file
+    try:
+        with open(config_file_path, "r") as config_file:
+            config = json.load(config_file)
+        yim_providers = config.get("yim_providers", default_yim_providers)
+        other_vcse = config.get("other_vcse", default_other_vcse)
+        return yim_providers, other_vcse
+    except json.JSONDecodeError:
+        print("Error decoding JSON config. Using default configuration.")
+    except Exception as e:
+        print(f"Error loading configuration: {e}. Using default configuration.")
+    
+    # Return defaults if an error occurred during loading
+    return default_yim_providers, default_other_vcse
 
 def update_text_widget(log_queue, text_widget):
     """Update the text widget with log messages."""
@@ -243,6 +275,9 @@ def main_gui():
 
 def run_main_gui(start_date_entry, end_date_entry, text_widget):
     try:
+        
+        yim_providers, other_vcse = load_config(directory)
+               
         # Wait and get cleaned data from the queue
         cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
         # Proceed with validated data and other processing
@@ -282,7 +317,9 @@ def main_headless(directory, start_date, end_date):
     print("Begin Processing files in directory:", directory)
     log_message("Begin Processing files")
     date_range = (start_date, end_date)
-
+    global yim_providers
+    
+    yim_providers, other_vcse = load_config(directory)
     try:
         raw_data = load_data_files(directory, file_info)
         cleaned_data = clean_data(raw_data, start_date, end_date, log_message)
@@ -484,8 +521,8 @@ if __name__ == "__main__":
         # Specify the directory and date range for headless mode
         directory_path = "./data"
 
-        start_date = "2024-01-01"
-        end_date = "2024-02-01"
+        start_date = "2024-02-01"
+        end_date = "2024-02-29"
         date_range = (start_date, end_date)
         main_headless(directory_path, start_date, end_date)
     else:

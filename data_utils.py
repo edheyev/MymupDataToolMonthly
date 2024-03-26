@@ -231,3 +231,29 @@ def is_percentage_row(row_name):
 
 def is_average_row(row_name):
     return row_name.startswith("average") or row_name.startswith("Average")
+
+
+def calculate_date_differences(df):
+    """
+    Calculate the differences in weeks between specified date columns.
+    
+    Parameters:
+    df (pandas.DataFrame): The DataFrame to calculate differences on.
+    
+    Returns:
+    pandas.DataFrame: DataFrame with new columns for each calculated difference.
+    """
+    # Calculate differences in weeks
+    df["first_contact_referral_diff"] = (
+        df["first_contact_/_indirect_date"] - df["referral_date"]
+    ) / pd.Timedelta(weeks=1)
+    
+    df["second_contact_referral_diff"] = (
+        df["second_contact_/_indirect_date"] - df["referral_date"]
+    ) / pd.Timedelta(weeks=1)
+    
+    df["second_first_contact_diff"] = (
+        df["second_contact_/_indirect_date"] - df["first_contact_/_indirect_date"]
+    ) / pd.Timedelta(weeks=1)
+    
+    return df

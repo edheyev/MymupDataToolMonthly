@@ -7,7 +7,7 @@ Created on Tues Feb 06 15:58:58 2023
 import pandas as pd
 import numpy as np
 
-from data_utils import isolate_date_range, get_previous_month_date_range
+from data_utils import calculate_date_differences, isolate_date_range, get_previous_month_date_range
 
 
 def CIC_FILTER(df, df_name="empty"):
@@ -738,8 +738,10 @@ def Overall_Discharges_filter(df, row, dfname="empty", date_range=None):
         "Organisation rejects referral - Threshold too high": "Number inappropriate referrals",
         "Organisation cannot contact Client prior to assessment": "Number who could not be contacted",
         "Client disengages": "Number disengaged",
+        "Client rejects referral": "Number disengaged",
         "Client did not attend": "Number disengaged",
         "Client requested discharge": "Number disengaged",
+        "Client declined a service prior to or during assessment": "Number disengaged",
         "Refused to be seen": "Number disengaged",
         "Client not available for pre-arranged appointments": "Number disengaged",
         "Client not available for assessment - failure to keep pre-arranged appointments": "Number disengaged",
@@ -894,7 +896,7 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     end_date = pd.to_datetime(end_date).normalize()  # Normalize to remove time
 
     try:
-        df = df[df['referral_date'] <= end_date]
+
         # Create a copy of the DataFrame to avoid SettingWithCopyWarning
         df = df.copy()
 
@@ -906,22 +908,27 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
         ]
 
         for col in date_cols:
-            df.loc[:, col] = pd.to_datetime(df[col], format="%d/%m/%Y", errors="coerce").dt.normalize()
+            df.loc[:, col] = pd.to_datetime(df[col], format="%Y-%m-%d", errors="coerce").dt.normalize()
 
-        # Calculate differences in weeks as before
-        df.loc[:, "first_contact_referral_diff"] = (
-            df.loc[:, "first_contact_/_indirect_date"] - df.loc[:, "referral_date"]
-        ) / pd.Timedelta(weeks=1)
-        df.loc[:, "second_contact_referral_diff"] = (
-            df.loc[:, "second_contact_/_indirect_date"] - df.loc[:, "referral_date"]
-        ) / pd.Timedelta(weeks=1)
-        df.loc[:, "second_first_contact_diff"] = (
-            df.loc[:, "second_contact_/_indirect_date"]
-            - df.loc[:, "first_contact_/_indirect_date"]
-        ) / pd.Timedelta(weeks=1)
-
-        # Drop rows where 'second_contact_/_indirect_date' is NaT if those rows are not relevant for some calculations
-        df_filtered = df
+        # # Calculate differences in weeks as before
+        # df.loc[:, "first_contact_referral_diff"] = (
+        #     df.loc[:, "first_contact_/_indirect_date"] - df.loc[:, "referral_date"]
+        # ) / pd.Timedelta(weeks=1)
+        # df.loc[:, "second_contact_referral_diff"] = (
+        #     df.loc[:, "second_contact_/_indirect_date"] - df.loc[:, "referral_date"]
+        # ) / pd.Timedelta(weeks=1)
+        # df.loc[:, "second_first_contact_diff"] = (
+        #     df.loc[:, "second_contact_/_indirect_date"]
+        #     - df.loc[:, "first_contact_/_indirect_date"]
+        # ) / pd.Timedelta(weeks=1)
+        
+        # # Drop rows where 'second_contact_/_indirect_date' is NaT if those rows are not relevant for some calculations
+        # df_filtered = df
+        
+        # Now call the new function to calculate the differences
+        df = calculate_date_differences(df)
+        
+        df_filtered = df[df['referral_date'] <= end_date]
         # Filtering logic based on the 'row' parameter
         if row == "Average Weeks from referral to 1st attended contact/indirect":
             df_filtered = isolate_date_range(
