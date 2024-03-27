@@ -74,6 +74,11 @@ def remove_duplicates(dataframes, log_message=None):
 
     return cleaned_dataframes
 
+# def_combine_rejected_referrals_and_file_closure_dfs(rejected_referrals, file_closures):
+
+
+
+
 def isolate_reporting_period(dataframes, start_date, end_date, log_message=None):
     print("Isolating data within the reporting period...")
     log_message("Isolating data within the reporting period...")

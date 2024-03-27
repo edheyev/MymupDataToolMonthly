@@ -66,10 +66,14 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
      
             return filtered_df
         elif row == "Referrals refused":
-            df = isolate_date_range(df, "referral_date", date_range)
+            df = isolate_date_range(df, "file_closure", date_range)
+            innapropriate_map = ["Organisation rejects referral - Referral not suitable pre-assessment/post-assessment", "Organisation rejects referral - Threshold too high"]
+            # innapropriate refs
+            filtered_df = df[df["file_closure_reason"].isin(innapropriate_map)]
+
 
             # referrals refused count from file clusures data dump of innaproitare referrals
-            filtered_df = df[df["referral_rejected"] == True]
+            # filtered_df = df[df["referral_rejected"] == True]
             return filtered_df
         elif row == "Number open cases":
             return "PLACEHOLDER"
@@ -832,7 +836,7 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=No
 
 
     try:
-               
+        df = df.copy()
 
         # Normalize datetime columns
         df["first_contact_/_indirect_date"] = pd.to_datetime(df["first_contact_/_indirect_date"], errors='coerce').dt.normalize()
@@ -888,12 +892,15 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=No
 
 
 # wait times sheet
+import pytz  # Only needed if you're setting timezones
 
 
 def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     start_date, end_date = date_range
-    start_date = pd.to_datetime(start_date).normalize()  # Normalize to remove time
-    end_date = pd.to_datetime(end_date).normalize()  # Normalize to remove time
+    # start_date = pd.to_datetime(start_date).normalize()  # Normalize to remove time
+    # end_date = pd.to_datetime(end_date).normalize()  # Normalize to remove time
+    start_date, end_date = pd.to_datetime([start_date, end_date]).normalize()
+
 
     try:
 
@@ -909,38 +916,54 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
 
         for col in date_cols:
             df.loc[:, col] = pd.to_datetime(df[col], format="%Y-%m-%d", errors="coerce").dt.normalize()
-
-        # # Calculate differences in weeks as before
-        # df.loc[:, "first_contact_referral_diff"] = (
-        #     df.loc[:, "first_contact_/_indirect_date"] - df.loc[:, "referral_date"]
-        # ) / pd.Timedelta(weeks=1)
-        # df.loc[:, "second_contact_referral_diff"] = (
-        #     df.loc[:, "second_contact_/_indirect_date"] - df.loc[:, "referral_date"]
-        # ) / pd.Timedelta(weeks=1)
-        # df.loc[:, "second_first_contact_diff"] = (
-        #     df.loc[:, "second_contact_/_indirect_date"]
-        #     - df.loc[:, "first_contact_/_indirect_date"]
-        # ) / pd.Timedelta(weeks=1)
-        
-        # # Drop rows where 'second_contact_/_indirect_date' is NaT if those rows are not relevant for some calculations
-        # df_filtered = df
         
         # Now call the new function to calculate the differences
         df = calculate_date_differences(df)
         
         df_filtered = df[df['referral_date'] <= end_date]
-        # Filtering logic based on the 'row' parameter
+
+        
+
+        # file_closure and referral_rejections must be within the date range OR blank. 
+        # Assuming your DataFrame's datetime columns should be timezone-naive
+        # df_filtered['file_closures'] = pd.to_datetime(df_filtered['file_closures'], errors='coerce').dt.tz_localize(None)
+        # df_filtered['referral_rejections'] = pd.to_datetime(df_filtered['referral_rejections'], errors='coerce').dt.tz_localize(None)
+        if pd.api.types.is_datetime64_any_dtype(df_filtered['file_closures']):
+            # Safe to use .dt accessor
+            df_filtered['file_closures'] = df_filtered['file_closures'].dt.normalize()
+            
+        if pd.api.types.is_datetime64_any_dtype(df_filtered['referral_rejections']):
+            # Safe to use .dt accessor
+            df_filtered['referral_rejections'] = df_filtered['referral_rejections'].dt.normalize()
+                
         if row == "Average Weeks from referral to 1st attended contact/indirect":
             df_filtered = isolate_date_range(
                 df_filtered, "first_contact_/_indirect_date", date_range
             )
+            # start_date, end_date = pd.to_datetime(date_range)
+            mask_file_closures_within_range_or_na = (df_filtered['file_closures'].isna()) | ((df_filtered['file_closures'] >= start_date) & (df_filtered['file_closures'] <= end_date))
+            mask_referral_rejections_within_range_or_na = (df_filtered['referral_rejections'].isna()) | ((df_filtered['referral_rejections'] >= start_date) & (df_filtered['referral_rejections'] <= end_date))
+            combined_mask = mask_file_closures_within_range_or_na & mask_referral_rejections_within_range_or_na
+            df_filtered = df_filtered.loc[combined_mask]
+            
             return (df_filtered, "first_contact_referral_diff")
 
         elif row == "Average Weeks from referral to 2nd attended contact/indirect":
-            df_filtered = df.dropna(subset=["second_contact_/_indirect_date"])
+            df_filtered = df_filtered.dropna(subset=["second_contact_/_indirect_date"])
             df_filtered = isolate_date_range(
                 df_filtered, "second_contact_/_indirect_date", date_range
             )
+            # start_date, end_date = pd.to_datetime(date_range)
+            df_filtered['file_closures'] = pd.to_datetime(df_filtered['file_closures'], errors='coerce')
+            df_filtered['referral_rejections'] = pd.to_datetime(df_filtered['referral_rejections'], errors='coerce')
+
+            mask_file_closures_within_range_or_na = (df_filtered['file_closures'].isna()) | ((df_filtered['file_closures'] >= start_date) & (df_filtered['file_closures'] <= end_date))
+            mask_referral_rejections_within_range_or_na = (df_filtered['referral_rejections'].isna()) | ((df_filtered['referral_rejections'] >= start_date) & (df_filtered['referral_rejections'] <= end_date))
+            combined_mask = mask_file_closures_within_range_or_na & mask_referral_rejections_within_range_or_na
+            df_filtered = df_filtered.loc[combined_mask]
+
+            
+            
             return (df_filtered, "second_contact_referral_diff")
 
         elif (
@@ -950,6 +973,13 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
             df_filtered = isolate_date_range(
                 df_filtered, "second_contact_/_indirect_date", date_range
             )
+            df_filtered['file_closures'] = pd.to_datetime(df_filtered['file_closures'], errors='coerce')
+            df_filtered['referral_rejections'] = pd.to_datetime(df_filtered['referral_rejections'], errors='coerce')
+
+            mask_file_closures_within_range_or_na = (df_filtered['file_closures'].isna()) | ((df_filtered['file_closures'] >= start_date) & (df_filtered['file_closures'] <= end_date))
+            mask_referral_rejections_within_range_or_na = (df_filtered['referral_rejections'].isna()) | ((df_filtered['referral_rejections'] >= start_date) & (df_filtered['referral_rejections'] <= end_date))
+            combined_mask = mask_file_closures_within_range_or_na & mask_referral_rejections_within_range_or_na
+            df_filtered = df_filtered.loc[combined_mask]
             return (df_filtered, "second_first_contact_diff")
 
     except Exception as e:

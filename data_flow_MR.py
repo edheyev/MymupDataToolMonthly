@@ -332,15 +332,16 @@ def main_headless(directory, start_date, end_date):
         file_string_2 = "output_csv_QR_franchise_other_VCSE.csv"
 
         # Generate CSV files for each franchise list
+        output_df_2 = produce_tables(
+            validated_data, file_string_2, other_vcse, date_range
+        )
+        log_message("CSV saved. File name: " + file_string_2)
+        
         output_df_1 = produce_tables(
             validated_data, file_string_1, yim_providers, date_range
         )
         log_message("CSV saved. File name: " + file_string_1)
 
-        output_df_2 = produce_tables(
-            validated_data, file_string_2, other_vcse, date_range
-        )
-        log_message("CSV saved. File name: " + file_string_2)
 
         # Return both DataFrames if needed, or adjust return statement as required
         return output_df_1, output_df_2
@@ -468,6 +469,9 @@ def filter_service_information(dataframes, config, franchise_list, date_range):
     if not filter_func:
         raise ValueError(f"No filter function found for table {config['table_name']}")
 
+    #check in file_closures column to make sure that dates are within date range OR blank. 
+    #do
+    
     for row in row_names:
         try:
             if row in placeholder_rows:

@@ -149,6 +149,7 @@ Overall_caseload_and_referrals = {
     "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
+        "Referrals refused":"CYPMH_File_Closures_All"
     },
     "mib_row_db_default": "CYPMH_Referrals",
     "row_db_default": "CYPMH_Referrals",
@@ -168,6 +169,7 @@ CIC_CLA_caseload_and_referrals = {
     "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
+        "Referrals refused":"CYPMH_File_Closures_All"
     },
     "mib_row_db_default": "CYPMH_Referrals",
     "row_db_default": "CYPMH_Referrals",
@@ -187,6 +189,7 @@ SEN_caseload_and_referrals = {
     "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
+        "Referrals refused":"CYPMH_File_Closures_All"
     },
     "mib_row_db_default": "CYPMH_Referrals",
     "row_db_default": "CYPMH_Referrals",
@@ -206,6 +209,7 @@ EHCP_caseload_and_referrals = {
     "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
+        "Referrals refused":"CYPMH_File_Closures_All"
     },
     "mib_row_db_default": "CYPMH_Referrals",
     "row_db_default": "CYPMH_Referrals",
@@ -225,6 +229,7 @@ CRAVEN_caseload_and_referrals = {
     "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
+        "Referrals refused":"CYPMH_File_Closures_All"
     },
     "mib_row_db_default": "CYPMH_Referrals",
     "row_db_default": "CYPMH_Referrals",
@@ -244,6 +249,7 @@ BRADFORD_DISTRICT_caseload_and_referrals = {
     "placeholder_text": {"Number open cases": "PLACEHOLDER"},
     "row_db_logic": {
         "Number closed cases": "CYPMH_File_Closures_All",
+        "Referrals refused":"CYPMH_File_Closures_All"
     },
     "mib_row_db_default": "CYPMH_Referrals",
     "row_db_default": "CYPMH_Referrals",
