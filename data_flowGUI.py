@@ -1,21 +1,19 @@
-import sys
-import os
 import threading
-import queue
-import datetime
-import re
-import json
-
-import pandas as pd
 import tkinter as tk
 from tkinter import ttk  # Import ttk module for themed widgets
 from tkinter import scrolledtext
 from tkinter import filedialog
-
-# from data_flow_MRR import log_message, start_processing, load_and_clean_data
 import pandas as pd
 
+gui_table_1 = []
+gui_table_2 = []
+
+
+# from data_flow_MRR import log_message, start_processing, load_and_clean_data
+
 def create_logging_window( start_processing):
+    global gui_table_1  # Ensure this is accessible
+
     from data_flow_MRR import log_queue
     global root
     root = tk.Tk()
@@ -105,10 +103,18 @@ def create_logging_window( start_processing):
     start_button = ttk.Button(
         button_frame,
         text="Start Processing",
-        command=lambda: start_processing(start_date_entry, end_date_entry, text_widget),
+        command=lambda: start_processing(start_date_entry, end_date_entry, text_widget, directory),
     )
     start_button.pack(side=tk.LEFT)
-
+    
+    # After setting up other GUI elements in create_logging_window:
+    display_button = ttk.Button(
+        button_frame,
+        text="Display Table Data",
+        command=lambda: display_table_data(gui_table_1, root)  # Use lambda to pass arguments
+    )
+    display_button.pack(side=tk.LEFT, padx="10 10")
+    
     # Log Frame
     log_frame = ttk.Frame(root, padding="10 10 10 10")
     log_frame.pack(fill=tk.BOTH, expand=True)
@@ -123,12 +129,15 @@ def create_logging_window( start_processing):
 
     return root, file_button, start_date_entry, end_date_entry
 
-
+def update_table_data(table_1_data, table_2_data):
+    global gui_table_1, gui_table_2
+    gui_table_1 = table_1_data
+    gui_table_2 = table_2_data
 
 def select_folder(start_date_entry, end_date_entry, root):
     
-    from data_flow_MRR import (load_and_clean_data,log_message)
-    
+    from data_flow_MRR import (load_and_clean_data, log_message, simple_test)
+    threading.Thread(target=simple_test, daemon=True).start()
     global directory
     # Create a root window, but keep it hidden
     root.withdraw()  # Hide the main window
@@ -136,8 +145,10 @@ def select_folder(start_date_entry, end_date_entry, root):
     root.deiconify()  # Show the main window again
 
     directory = folder_path  # Set the global variable
+    print("holso")
 
     if folder_path:
+        print("holo")
         try:
             start_date = start_date_entry.get()
             end_date = end_date_entry.get()
@@ -167,6 +178,42 @@ def update_text_widget(log_queue, text_widget):
             text_widget.insert(tk.END, message + "\n")
             text_widget.configure(state='disabled')
             text_widget.yview(tk.END)
-        text_widget.after(100, poll_log_queue)  # Schedule this function to run again after 100ms
+        text_widget.after(50, poll_log_queue)  # Schedule this function to run again after 100ms
     
     poll_log_queue()
+    
+    
+import tkinter as tk
+from tkinter import ttk
+
+def display_table_data(table_data, parent_root):
+    frame = tk.Toplevel(parent_root)
+    frame.title("Table Data Display")
+    # Adjust the new window size if needed
+    frame.geometry("600x400")
+
+    # # Create a frame for the Treeview and Scrollbar
+    # frame = tk.Frame(root)
+    # frame.pack(expand=True, fill='both')
+
+    # Treeview
+    tree = ttk.Treeview(frame, columns=("Table", "Row", "Count"), show="headings")
+    
+    # Configure column headings
+    for col in tree["columns"]:
+        tree.heading(col, text=col)
+        tree.column(col, width=200, anchor=tk.CENTER)  # Adjust column width and alignment
+
+    # Inserting items
+    for item in table_data:
+        values = (item.get("filter_name", ""), item.get("Row Name", ""), item.get("Q1_Totals", ""))
+        tree.insert('', 'end', values=values)
+
+    # Add a vertical scrollbar
+    vsb = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
+    vsb.pack(side='right', fill='y')
+    tree.configure(yscrollcommand=vsb.set)
+
+    tree.pack(expand=True, fill='both')
+
+    root.mainloop()

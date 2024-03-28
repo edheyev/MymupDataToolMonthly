@@ -3,13 +3,10 @@ import os
 import threading
 import queue
 import datetime
-import re
 import json
 
 import pandas as pd
 import tkinter as tk
-
-import csv
 
 # Add the directory of your script and modules to the Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,7 +35,9 @@ from data_utils import (
 
 from data_flowGUI import (
     create_logging_window,
-    gui_log_message, 
+    display_table_data,
+    gui_log_message,
+    update_table_data, 
 )
 
 CONFIG_FILE_PATH = "app_config.json"
@@ -49,13 +48,9 @@ root = None
 IS_HEADLESS = False  # Set to True for headless mode, False for GUI mode
 # IS_HEADLESS = True  # Set to True for headless mode, False for GUI mode
 
-
 # Global queue for cleaned data
 cleaned_data_queue = queue.Queue()
-
-# GUI stuff
-
-
+queue_lock = threading.Lock()
 
 def load_config(directory_path, config_file_path="config.json"):
     # Check if the config file exists
@@ -70,8 +65,8 @@ def load_config(directory_path, config_file_path="config.json"):
             json.dump(initial_config, config_file, indent=4)
         print(f"Config file created at {config_file_path} with default settings.")
         
-    # Proceed to load the config file
     try:
+    # Proceed to load the config file
         with open(config_file_path, "r") as config_file:
             config = json.load(config_file)
         yim_providers = config.get("yim_providers", default_yim_providers)
@@ -85,25 +80,32 @@ def load_config(directory_path, config_file_path="config.json"):
     # Return defaults if an error occurred during loading
     return default_yim_providers, default_other_vcse
 
-
+def simple_test():
+    print("Simple test function is running.")
 
 def load_and_clean_data(folder_path, start_date, end_date):
+    print("load start")
     try:
         raw_data = load_data_files(folder_path, file_info, log_message=log_message)
         cleaned_data = clean_data(raw_data, start_date, end_date, log_message)
         # Put cleaned data into the queue
         cleaned_data_queue.put(cleaned_data)
-        log_message("Data loaded and cleaned.")
+        print("Cleaned data put in queue.")
+        with queue_lock:
+            log_message("Data loaded and cleaned.")
+        
+
     except Exception as e:
         log_message(f"Error in data processing: {e}")
+    print("Data loaded and cleaned.")  # Moved outside the try block
 
-def start_processing(start_date_entry, end_date_entry, text_widget):
+
+def start_processing(start_date_entry, end_date_entry, text_widget, directory):
     """Function to start the main processing."""
-    # You can now use the global variable `directory` to access the selected directory
-    global directory
+    print("start")
     threading.Thread(
         target=run_main_gui,
-        args=(start_date_entry, end_date_entry, text_widget),
+        args=(start_date_entry, end_date_entry, text_widget, directory, update_table_data),
         daemon=True,
     ).start()
 
@@ -120,36 +122,56 @@ def main_gui():
 def log_message(message):
     """Log a message to the Tkinter text widget."""    
     gui_log_message(message, log_queue)
-    
 
-def run_main_gui(start_date_entry, end_date_entry, text_widget):
+def run_main_gui(start_date_entry, end_date_entry, text_widget, directory, callback):
     try:
         
+        gui_table_1 = []
+        gui_table_2 = []
+        print("main")
         yim_providers, other_vcse = load_config(directory)
-               
+        print("main2")
+        date_range = start_date_entry.get(), end_date_entry.get()
+        
+        start_date, end_date = date_range
+        
+        
+        raw_data = load_data_files(directory, file_info, log_message=log_message)
+        cleaned_data = clean_data(raw_data, start_date, end_date, log_message)
+        # Put cleaned data into the queue
+        cleaned_data_queue.put(cleaned_data)
+        
         # Wait and get cleaned data from the queue
-        cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
+        with queue_lock:
+            print("locked")
+            cleaned_data = cleaned_data_queue.get(timeout=30)  # Wait for 30 seconds
         # Proceed with validated data and other processing
+        print("hi2")
         validated_data = validate_data_files(
             cleaned_data, file_info, log_message=log_message
         )
-
+        print("hasdi")
+        
+        
         # Generate filenames based on the current date
         date_str = datetime.datetime.now().strftime("%d-%m-%Y")
         file_string_1 = f"output_csv_MR_{date_str}_YIM.csv"
         file_string_2 = f"output_csv_MR_{date_str}_OTHER.csv"
 
-        date_range = start_date_entry.get(), end_date_entry.get()
+        
         # Generate CSV files for each franchise list
-        produce_tables(validated_data, file_string_1, yim_providers, date_range)
+        gui_table_1 = produce_tables(validated_data, file_string_1, yim_providers, date_range)
         log_message("CSV saved. File name: " + file_string_1)
 
-        produce_tables(validated_data, file_string_2, other_vcse, date_range)
+        gui_table_2 = produce_tables(validated_data, file_string_2, other_vcse, date_range)
         log_message("CSV saved. File name: " + file_string_2)
 
         # Optionally update the GUI with completion status
         text_widget.insert(tk.END, "CSV files have been successfully generated.\n")
-
+        
+        # display_table_data(gui_table_1)
+        callback(gui_table_1, gui_table_2)
+        
     except queue.Empty:
         log_message("Error: No cleaned data received within the timeout period.")
         text_widget.insert(
@@ -159,7 +181,6 @@ def run_main_gui(start_date_entry, end_date_entry, text_widget):
         log_message(f"Unexpected error: {e}")
         # text_widget.insert(tk.END, f"Unexpected error: {e}\n")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
-
 
 def main_headless(directory, start_date, end_date):
     print("Running in headless mode...")
@@ -199,12 +220,13 @@ def main_headless(directory, start_date, end_date):
         log_message(f"Unexpected error: {e}")
         sys.exit(1)  # Exit the program with a non-zero exit code to indicate an error
 
-
-
 def produce_tables(dataframes, file_string, franchise_list, date_range):
     print("Producing output tables...")
     log_message("Producing output tables...")
-
+    
+    
+    gui_table_data = []  # A list to hold data for GUI display
+    
     last_sheet_name = None  # Initialize variable to track the last processed sheet name
 
     with open(file_string, "w", newline="") as f:
@@ -228,6 +250,9 @@ def produce_tables(dataframes, file_string, franchise_list, date_range):
                 if not this_table.empty:
                     # Iterate over DataFrame rows and columns to write the entire table
                     for index, row in this_table.iterrows():
+                        row_dict = row.to_dict()
+                        row_dict["filter_name"] = name  # Include filter name for reference
+                        gui_table_data.append(row_dict)
                         row_str = ",".join(str(value) for value in row)
                         f.write(f"{row_str}\n")
                 else:
@@ -236,11 +261,12 @@ def produce_tables(dataframes, file_string, franchise_list, date_range):
 
                 # Add a newline after the table has been added for separation
                 f.write("\n")
-
+        
+            
             except Exception as e:
                 log_message(f"Error processing filter for {name}: {e}")
                 continue  # Skip to the next iteration if there's an error
-
+    return gui_table_data
 
 def filter_service_information(dataframes, config, franchise_list, date_range):
     print("Generating table...", config["table_name"])

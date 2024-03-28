@@ -47,7 +47,7 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
             cleaned_dataframes, log_message=log_message
         )
 
-        cleaned_dataframes = clean_dates(cleaned_dataframes, log_message=log_message)
+        # cleaned_dataframes = clean_dates(cleaned_dataframes, log_message=log_message)
 
         cleaned_dataframes = add_rejected_referral_col_to_referral(
             cleaned_dataframes, log_message=log_message
