@@ -5,6 +5,75 @@ from data_config import craven_postcodes, yim_providers, other_vcse
 from data_utils import isolate_date_range
 
 
+def clean_data(dataframes, start_date, end_date, log_message=None):
+    from data_flow_MRR import log_message
+    print(f"log_message is callable: {callable(log_message)}")
+
+    date_range = start_date, end_date
+
+    if log_message and not callable(log_message):
+        print("here")
+        raise ValueError("log_message should be a callable function")
+
+    try:
+        print("Cleaning dataframes...")
+
+        if log_message:
+            log_message("Cleaning dataframes...")
+
+        cleaned_dataframes = remove_invalid_rows(dataframes, log_message=log_message)
+
+        cleaned_dataframes = clean_column_names(
+            cleaned_dataframes, log_message=log_message
+        )
+        
+        cleaned_dataframes = combine_rejected_referrals_and_file_closure_dfs(
+            cleaned_dataframes
+        )
+
+        cleaned_dataframes = isolate_client_ages(
+            cleaned_dataframes, yim_providers, log_message=log_message
+        )
+
+        cleaned_dataframes = bradford_postcode_filter_function(
+            cleaned_dataframes, log_message
+        )
+
+        cleaned_dataframes = filter_post_codes_add_craven(
+            cleaned_dataframes, log_message
+        )
+
+        cleaned_dataframes = remove_duplicates(
+            cleaned_dataframes, log_message=log_message
+        )
+
+        cleaned_dataframes = clean_dates(cleaned_dataframes, log_message=log_message)
+
+        cleaned_dataframes = add_rejected_referral_col_to_referral(
+            cleaned_dataframes, log_message=log_message
+        )
+
+        cleaned_dataframes = clean_mib(cleaned_dataframes, log_message)
+        cleaned_dataframes = isolate_reporting_period(
+            cleaned_dataframes, start_date, end_date, log_message=log_message
+        )
+        cleaned_dataframes = add_referred_this_reporting_period(
+            cleaned_dataframes, date_range, log_message
+        )
+
+    except Exception as e:
+        error_message = f"An error occurred while cleaning dataframes: {e}"
+        print(error_message)
+        if log_message:
+            log_message(error_message)
+        raise  # Re-raise the exception after logging it
+
+    return cleaned_dataframes
+
+
+
+
+
 def clean_column_names(dataframes, log_message=None):
     print("Standardizing column names...")
     log_message("Standardizing column names...")
