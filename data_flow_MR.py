@@ -25,6 +25,7 @@ from data_config import yim_providers as default_yim_providers, other_vcse as de
 from data_cleaning import (
     add_referred_this_reporting_period,
     clean_column_names,
+    combine_rejected_referrals_and_file_closure_dfs,
     remove_duplicates,
     remove_trailing_spaces_from_values,
     isolate_reporting_period,
@@ -370,6 +371,10 @@ def clean_data(dataframes, start_date, end_date, log_message=None):
 
         cleaned_dataframes = clean_column_names(
             cleaned_dataframes, log_message=log_message
+        )
+        
+        cleaned_dataframes = combine_rejected_referrals_and_file_closure_dfs(
+            cleaned_dataframes
         )
 
         cleaned_dataframes = isolate_client_ages(

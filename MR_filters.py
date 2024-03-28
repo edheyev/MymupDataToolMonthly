@@ -67,7 +67,9 @@ def OCR_filter(df, row, dfname="empty", date_range=None):
             return filtered_df
         elif row == "Referrals refused":
             df = isolate_date_range(df, "file_closure", date_range)
-            innapropriate_map = ["Organisation rejects referral - Referral not suitable pre-assessment/post-assessment", "Organisation rejects referral - Threshold too high"]
+            innapropriate_map = ["Organisation rejects referral - Referral not suitable pre-assessment/post-assessment", 
+                                 "Organisation rejects referral - Threshold too high",
+                                 "Inappropriate Referral Request"]
             # innapropriate refs
             filtered_df = df[df["file_closure_reason"].isin(innapropriate_map)]
 
@@ -740,6 +742,7 @@ def Overall_Discharges_filter(df, row, dfname="empty", date_range=None):
         "No further treatment required": "Number completed treatment",
         "Organisation rejects referral - Referral not suitable pre-assessment/post-assessment": "Number inappropriate referrals",
         "Organisation rejects referral - Threshold too high": "Number inappropriate referrals",
+        "Inappropriate Referral Request": "Number inappropriate referrals",
         "Organisation cannot contact Client prior to assessment": "Number who could not be contacted",
         "Client disengages": "Number disengaged",
         "Client rejects referral": "Number disengaged",
@@ -892,20 +895,37 @@ def Overall_Number_on_Waiting_list_filter(df, row, dfname="empty", date_range=No
 
 
 # wait times sheet
-import pytz  # Only needed if you're setting timezones
+from dateutil import parser
+import pandas as pd
 
+def find_latest_datetime(column_value):
+    datetime_strings = str(column_value).split(',')
+    latest_datetime = None
+
+    for datetime_str in datetime_strings:
+        try:
+            dt = parser.parse(datetime_str.strip(), dayfirst=False)
+            if latest_datetime is None or dt > latest_datetime:
+                latest_datetime = dt
+        except (ValueError, TypeError):
+            continue
+    
+    if latest_datetime:
+        return latest_datetime.replace(tzinfo=None)
+    else:
+        return pd.NaT
 
 def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
     start_date, end_date = date_range
-    # start_date = pd.to_datetime(start_date).normalize()  # Normalize to remove time
-    # end_date = pd.to_datetime(end_date).normalize()  # Normalize to remove time
     start_date, end_date = pd.to_datetime([start_date, end_date]).normalize()
-
-
     try:
+        
+        df = df.copy()
+        # Apply the custom parser to columns that might contain multiple datetime values
+        df['file_closures'] = df['file_closures'].apply(find_latest_datetime)
+        df['referral_rejections'] = df['referral_rejections'].apply(find_latest_datetime)
 
         # Create a copy of the DataFrame to avoid SettingWithCopyWarning
-        df = df.copy()
 
         # Now proceed with your existing logic
         date_cols = [
@@ -922,24 +942,26 @@ def Overall_Wait_Times_filter(df, row, dfname="empty", date_range=None):
         
         df_filtered = df[df['referral_date'] <= end_date]
 
-        
-
-        # file_closure and referral_rejections must be within the date range OR blank. 
-        # Assuming your DataFrame's datetime columns should be timezone-naive
-        # df_filtered['file_closures'] = pd.to_datetime(df_filtered['file_closures'], errors='coerce').dt.tz_localize(None)
-        # df_filtered['referral_rejections'] = pd.to_datetime(df_filtered['referral_rejections'], errors='coerce').dt.tz_localize(None)
         if pd.api.types.is_datetime64_any_dtype(df_filtered['file_closures']):
             # Safe to use .dt accessor
-            df_filtered['file_closures'] = df_filtered['file_closures'].dt.normalize()
+            # df_filtered['file_closures'] = df_filtered['file_closures'].dt.normalize()
+            df_filtered.loc[:, 'file_closures'] = df_filtered['file_closures'].dt.normalize()
+
             
         if pd.api.types.is_datetime64_any_dtype(df_filtered['referral_rejections']):
             # Safe to use .dt accessor
-            df_filtered['referral_rejections'] = df_filtered['referral_rejections'].dt.normalize()
+            # df_filtered['referral_rejections'] = df_filtered['referral_rejections'].dt.normalize()
+            df_filtered.loc[:, 'referral_rejections'] = df_filtered['referral_rejections'].dt.normalize()
+
                 
         if row == "Average Weeks from referral to 1st attended contact/indirect":
             df_filtered = isolate_date_range(
                 df_filtered, "first_contact_/_indirect_date", date_range
             )
+                        # start_date, end_date = pd.to_datetime(date_range)
+            df_filtered['file_closures'] = pd.to_datetime(df_filtered['file_closures'], errors='coerce')
+            df_filtered['referral_rejections'] = pd.to_datetime(df_filtered['referral_rejections'], errors='coerce')
+            
             # start_date, end_date = pd.to_datetime(date_range)
             mask_file_closures_within_range_or_na = (df_filtered['file_closures'].isna()) | ((df_filtered['file_closures'] >= start_date) & (df_filtered['file_closures'] <= end_date))
             mask_referral_rejections_within_range_or_na = (df_filtered['referral_rejections'].isna()) | ((df_filtered['referral_rejections'] >= start_date) & (df_filtered['referral_rejections'] <= end_date))

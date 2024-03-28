@@ -74,8 +74,34 @@ def remove_duplicates(dataframes, log_message=None):
 
     return cleaned_dataframes
 
-# def_combine_rejected_referrals_and_file_closure_dfs(rejected_referrals, file_closures):
+def combine_rejected_referrals_and_file_closure_dfs(dataframes):
+    
+    rejected_df = dataframes['CYPMH_Referral_Rejections_All']
+    closures_df = dataframes['CYPMH_File_Closures_All']
+    # Rename the columns in rejected_df to match those in closures_df
+    
+    rejected_df['referral_rejection_reason'] = "Inappropriate Referral Request"
+    
+    renamed_rejected_df = rejected_df.rename(columns={
+        'referral_rejection': 'file_closure',
+        'referral_rejection_reason': 'file_closure_reason'
+    })
 
+    # Concatenate the data frames
+    combined_df = pd.concat([closures_df, renamed_rejected_df], ignore_index=True)\
+        
+        
+    # Define the columns to consider for identifying duplicates (all except 'file_closure_reason')
+    columns_to_consider = combined_df.columns.tolist()
+    columns_to_consider.remove('file_closure_reason')
+
+    # Remove duplicates based on the specified columns
+    combined_df_no_duplicates = combined_df.drop_duplicates(subset=columns_to_consider, keep='first', ignore_index=True)
+        
+    dataframes['CYPMH_File_Closures_All']= combined_df_no_duplicates
+    
+    return dataframes
+#1. check referral rejectiosn data dump. 
 
 
 
